@@ -1,3 +1,10 @@
+Dec 12, 1996
+	1. This version fixes a problem with setting/unsetting
+       AutoCommit on the database handle...I need a better
+       test suite :-(
+
+	2. Fixed problem with connect/disconnect/connect cycle
+
 Oct 7, 1996
 
 Added access to the SetStmtOption call, which in conjunction with

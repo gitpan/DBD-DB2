@@ -12,7 +12,7 @@ use ExtUtils::MakeMaker;
 
 $DB2 = $ENV{DB2_HOME} || "/usr/lpp/db2_02_01";
 
-$OCIINCLUDE = $MK{INCLUDE} || "-I $DB2/include";
+$OCIINCLUDE = $MK{INCLUDE} || "-I$DB2/include";
 
 $opts{INC} = "$OCIINCLUDE";
 

@@ -1,4 +1,4 @@
-#   $Id: DB2.pm,v 0.16 1996/12/10 22:11:58 mhm Rel $
+#   $Id: DB2.pm,v 0.21 1997/02/07 18:26:35 mhm Rel $
 #
 #   Copyright (c) 1995,1996 International Business Machines Corp. 
 #
@@ -16,9 +16,9 @@
 				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok
 				 $attrib_blobin $attrib_blobout);
 
-    $VERSION = '0.62';
-	my $revision = substr(q$Revision: 0.16 $, 10);
-	require_version DBI 0.73 ;
+    $VERSION = '0.63';
+	my $revision = substr(q$Revision: 0.21 $, 10);
+	require_version DBI 0.75 ;
 
     bootstrap DBD::DB2;
 
@@ -28,32 +28,32 @@
     $errstr = "";	# holds error string for DBI::errstr
     $drh = undef;	# holds driver handle once initialised
 
-    $attrib_dec = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_dec = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
                     'Stype' => SQL_DECIMAL,
                     'Prec'  => 31,
                     'Scale' => 4,
                   };
-    $attrib_int = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_int = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
                     'Stype' => SQL_INTEGER,
                     'Prec'  => 10,
                     'Scale' => 4,
                   };
-    $attrib_int_nullok = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_int_nullok = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
 					'Snullok' => 1,
                     'Stype' => SQL_INTEGER,
                     'Prec'  => 10,
                     'Scale' => 4,
                   };
-    $attrib_char = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_char = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
                     'Stype' => SQL_CHAR,
                     'Prec'  => 254,
                     'Scale' => 0,
                   };
-    $attrib_char_nullok = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_char_nullok = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
 					'Snullok' => 1,
                     'Stype' => SQL_CHAR,
@@ -61,25 +61,25 @@
                     'Scale' => 0,
                   };
 #	print "<",$attrib_char->{'Ctype'},">\n";
-    $attrib_float = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_float = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
                     'Stype' => SQL_FLOAT,
                     'Prec'  => 15,
                     'Scale' => 6,
                   };
-    $attrib_date = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_date = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
                     'Stype' => SQL_DATE,
                     'Prec'  => 10,
                     'Scale' => 9,
                   };
-    $attrib_ts = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_ts = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
                     'Stype' => SQL_TIMESTAMP,
                     'Prec'  => 26,
                     'Scale' => 11,
                   };
-    $attrib_ts_nullok = { 'ParamT' => SQL_PARAM_INPUT,
+    $attrib_ts_nullok = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,
 					'Snullok' => 1,
                     'Stype' => SQL_TIMESTAMP,

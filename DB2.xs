@@ -1,5 +1,5 @@
 /*
-   	$Id: DB2.xs,v 0.9 1996/10/07 18:00:05 mhm Rel $
+   	$Id: DB2.xs,v 0.10 1997/02/07 18:21:38 mhm Rel $
 
 	Copyright (c) 1995,1996 International Business Machines Corp.
 

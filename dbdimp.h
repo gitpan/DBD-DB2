@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.h,v 0.7 1996/10/07 18:00:05 mhm Rel $
+   $Id: dbdimp.h,v 0.8 1997/02/07 18:21:38 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 */
@@ -77,11 +77,11 @@ struct phs_st {	/* scalar placeholder EXPERIMENTAL	*/
 SQLCHAR sql_state[6];
 
 void	do_error _((SV *h,SQLINTEGER rc, SQLHENV henv, SQLHDBC hconn, 
-					SQLHSTMT hstmt, SQLCHAR *what));
-void	fbh_dump _((imp_fbh_t *fbh, SQLINTEGER i));
+					SQLHSTMT hstmt, char *what));
+void	fbh_dump _((imp_fbh_t *fbh, int i));
 
 void	dbd_init _((dbistate_t *dbistate));
-void	dbd_preparse _((imp_sth_t *imp_sth, SQLCHAR *statement));
-SQLINTEGER	dbd_describe _((SV *h, imp_sth_t *imp_sth));
+void	dbd_preparse _((imp_sth_t *imp_sth, char *statement));
+int	dbd_describe _((SV *h, imp_sth_t *imp_sth));
 
 /* end */

@@ -5,6 +5,7 @@ LICENSE
 HISTORY
 Makefile.PL
 DB2.pm
+DB2.pod
 DB2.xs
 DB2.h
 dbdimp.h

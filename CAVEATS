@@ -1,9 +1,12 @@
-Dec 12, 1996
-	1. This version fixes a problem with setting/unsetting
-       AutoCommit on the database handle...I need a better
-       test suite :-(
+Feb 7, 1997
 
-	2. Fixed problem with connect/disconnect/connect cycle
+   	Created a small pod for DBD::DB2.  Hopefully, this
+   	will lighten the email load.
+
+	Rolled in all the changes needed to make it compile cleanly
+   	on Solaris
+
+	Output Parameters for stored procedures now work.
 
 Caveats:
     DBD::DB2 assumes the following:

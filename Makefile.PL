@@ -37,13 +37,13 @@ $sysliblist ="-L$DB2/lib -ldb2";
 print "DB2 sysliblist: $sysliblist\n";
 
 
-$OCIINCLUDE = $MK{INCLUDE} || "-I $DB2/include";
+$OCIINCLUDE = $MK{INCLUDE} || "-I$DB2/include";
 
 $opts{LIBS} = [ $sysliblist ];
 $opts{INC}  = "$OCIINCLUDE -I$Config{sitearch}/DBI";
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '.$linkwith };
 $opts{OBJECT} = '$(O_FILES)';
-$opts{DEFINE} = ' -qsrcmsg';
+$opts{DEFINE} = ' ';
 # --- Handle special cases ---
 
 
