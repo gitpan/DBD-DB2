@@ -99,7 +99,7 @@ dist:  ci clean
 	rm -f Makefile *~ t/*~
 	cd ..; tar cvFf $(DISTNAME)-$(VERSION).tar \
 		`sed -e "s:^:$(BASEEXT)/:" < $(BASEEXT)/MANIFEST`
-	cd ..; compress $(DISTNAME)-$(VERSION).tar;
+	cd ..; gzip -9 $(DISTNAME)-$(VERSION).tar;
 	@chmod -w ../$(DISTNAME)-$(VERSION).tar.Z
 	mv ../$(DISTNAME)-$(VERSION).tar.Z /u/ftp/pub/perl/db/DBD/DB2/
 	@cp README /u/ftp/pub/perl/db/DBD/DB2/

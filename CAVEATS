@@ -1,13 +1,9 @@
-Oct 7, 1996
+Dec 12, 1996
+	1. This version fixes a problem with setting/unsetting
+       AutoCommit on the database handle...I need a better
+       test suite :-(
 
-Added access to the SetStmtOption call, which in conjunction with
-DB2 v 2.1.1 NLV2 will allow asynchronous database access among other
-things.  SEE the DB2 CLI manual for details.
-
-NOTE:  I don't have any sufficiently large database to tell if
-asynchronous access is working properly.  Other options appear to
-be working.....so I'm assuming that asynchronous access is.
-
+	2. Fixed problem with connect/disconnect/connect cycle
 
 Caveats:
     DBD::DB2 assumes the following:

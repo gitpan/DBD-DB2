@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.c,v 0.12 1996/10/07 18:00:05 mhm Rel $
+   $Id: dbdimp.c,v 0.14 1996/12/12 17:11:37 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -279,6 +279,8 @@ dbd_db_disconnect(dbh)
     ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
     EOI(ret);
 
+	henv = NHENV;  /* null out henv, so that we can open another
+                      database                                  */
     /* We don't free imp_dbh since a reference still exists	*/
     /* The DESTROY method is the only one to 'free' memory.	*/
     /* Note that statement objects may still exists for this dbh!	*/
@@ -313,13 +315,13 @@ dbd_db_STORE(dbh, keysv, valuesv)
 	SQLCHAR  *msg;
 	
     if (kl==10 && strEQ(key, "AutoCommit")) {
-		if ( on  ) {
-			ret = SQLSetConnectOption(imp_dbh->hdbc,SQL_AUTOCOMMIT,
-					(on ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF ));
+		ret = SQLSetConnectOption(imp_dbh->hdbc,SQL_AUTOCOMMIT,
+				(on ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF ));
+		if ( ret ) {
 			msg = (ERRTYPE(ret) ? "Change of AUTOCOMMIT failed" :
 								  "Invaild Handle");
     		ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
-			EOI(ret);
+			cachesv = &sv_undef;
 		} else {
 	    	cachesv = (on) ? &sv_yes : &sv_no;	/* cache new state */
 		}
