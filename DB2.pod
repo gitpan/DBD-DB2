@@ -145,6 +145,8 @@ true or false.
   db2_earlyclose                Boolean
   db2_max_length                Integer
   db2_max_rows                  Integer
+  db2_more_results              Boolean (read only, see the section
+                                  below: Multiple Result Sets)
   db2_noscan                    Boolean
   db2_optimize_for_nrows        Integer
   db2_prefetch                  Boolean
@@ -180,7 +182,9 @@ the DB2 Installation and Configuration Supplement for help with
 configuring client-to-server communications.  For information on
 accessing host databases, see the DB2 Connect User's Guide.
 
-=head1 BINDING PARAMETERS
+DBI->data_sources('DB2') returns a list of all cataloged databases.
+
+=head1 Binding Parameters
 
 DBD::DB2 supports the following methods of binding parameters:
 
@@ -347,9 +351,9 @@ or set it at any time after connecting:
 
   $dbh->{LongReadLen} = 100;
 
-=head1 FETCHING LOB DATA IN PIECES
+=head1 Fetching LOB Data in Pieces
 
-While LOB colums are fully supported by the normal methods of
+While LOB columns are fully supported by the normal methods of
 retrieving data, it can take a lot of memory as the whole LOB
 is retrieved at once (subject to the LongReadLen setting).  An
 alternate method is to use:
@@ -367,3 +371,82 @@ LongReadLen will affect all long fields).
 The $offset parameter is currently ignored by DB2.  Note that
 this function isn't officially documented in DBI yet so it is
 subject to change.
+
+=head1 Multiple Result Sets
+
+Multiple result sets can be processed using the db2_more_results
+statement attribute as follows:
+
+  do
+  {
+    while( @row = $sth->fetchrow_array )
+    {
+      # process row data
+    }
+  } while( $sth->{db2_more_results} );
+
+Accessing this attribute closes the current result set and opens
+the new one.  If there are no more result sets, the attribute
+returns false and sets the state to 02000.
+
+=head1 Getting Table information
+
+Both $dbh->tables and $dbh->table_info are supported.  The table
+names returned by $dbh->tables are qualified, i.e. they are in the
+form <schema>.<table>. If no
+attributes are specified, information for all tables, views,
+aliases etc. is returned. With DBI 1.14 or later, the following
+attributes can be used to narrow down the list:
+
+  TABLE_SCHEM  Schema name pattern, default is all schemas
+  TABLE_NAME   Table name pattern, default is all tables
+  TABLE_TYPE   Table type; one or more of the following,
+               separated by commas, default is all types:
+                 TABLE, VIEW, SYSTEM TABLE, ALIAS, SYNONYM
+
+Each pattern-value argument can contain:
+
+  - The underscore (_) character which stands for any single character.
+  - The percent (%) character which stands for any sequence of zero or
+    more characters. Note that providing a pattern-value containing a
+    single % is equivalent to passing an empty string for that argument.
+  - Characters which stand for themselves. The case of a letter is
+    significant.
+
+To treat the metadata characters (_, %) as themselves, precede the
+character with a backslash (\).  The escape character itself can be
+specified as part of the pattern by including it twice in succession.
+
+For example, to get a list of all tables and views for the schema
+'CHOMSKY':
+
+  @tables = $dbh->tables( { 'TABLE_SCHEM' => 'CHOMSKY',
+                            'TABLE_TYPE'  => 'TABLE,VIEW' } );
+
+=head2 Getting a List of Schemas
+
+To obtain a list of all schemas, the following special
+semantics can be used:
+
+  @schemas = $dbh->tables( { 'TABLE_SCHEM' => '%',
+                             'TABLE_TYPE'  => '' } );
+
+or
+
+  $sth = $dbh->table_info( { 'TABLE_SCHEM' => '%',
+                             'TABLE_TYPE'  => '' } );
+
+The result contains all the valid schemas in the data source.
+DBI 1.14 or later is required.
+
+=head2 Getting a List of Table Types
+
+To obtain a list of supported table types, the following special
+semantics can be used:
+
+  $sth = $dbh->table_info( { 'TABLE_TYPE'  => '%',
+                             'TABLE_SCHEM' => '',
+                             'TABLE_NAME'  => '' } );
+
+The result contains all the valid table types for the data source.
+DBI 1.14 or later is required.

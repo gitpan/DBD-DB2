@@ -1,7 +1,7 @@
 #
-#   engn/perldb2/Makefile.PL, engn_perldb2, db2_v81, 1.7 01/03/29 17:07:56
+#   %W%, %I% %E% %U%
 #
-#   Copyright (c) 1995,1996,1997,1998,1999,2000 International Business Machines Corp.
+#   Copyright (c) 1995,1996,1997,1998,1999,2000,2001 International Business Machines Corp.
 #
 #!/usr/local/bin/perl -sw
 
@@ -60,7 +60,7 @@ if( not $DB2 )
         -f "$path/../include/sqlcli.h" )
     {
       $DB2 = substr( $path, 0, -4 );
-      break;
+      last;
     }
   }
 }
@@ -80,7 +80,7 @@ $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 # libraries required to build DBD::DB2 driver
 if( $os eq 'MSWin32' || $os eq 'MSWin64' || $os eq 'os2' )
 {
-  $sysliblist = qq(-L"$DB2/lib" db2cli);
+  $sysliblist = qq(-L"$DB2/lib" db2cli db2api);
   my @libpaths = split /;/, $ENV{'LIB'};
   my $libpath;
   while( @libpaths )

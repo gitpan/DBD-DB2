@@ -1,3 +1,36 @@
+October 1, 2001
+
+DBD::DB2 0.76
+
+  Remove cached statement attributes for multiple result sets
+
+  Add support for AS/400
+
+  Replace 'split' function in Constants/Makefile.PL due to apparent
+  bug in Perl 5.6.1 on AIX.  Get error: "Bizarre copy of ARRAY in
+  aassign at ../Carp/Heavy.pm line 79."
+
+  Add support for DBI->data_sources.
+
+  Add support for multiple result sets
+
+  Fix memory overwrite problem with parameter binding when new parameter
+  value is one byte larger than largest value used so far.
+
+  Fix small memory leek in $dbh->do, $dbh->ping, $dbh->tables and
+  $sth->blob_read.
+
+  Fix $sth->bind_param($p_num, $bind_value, $bind_type) &
+  $sth->bind_param_inout($p_num, \$bind_value, $max_len, $bind_type).
+  $bind_type was ignored.
+
+  Fixed $dbh->tables to work with MVS, VM and AS/400 databases.
+
+  Changed $dbh->tables to return tables for all schemas.  The table
+  names returned are now qualified with the schema.
+
+  Add support for attributes in $dbh->tables and $dbh->table_info.
+
 March 29, 2001
 
 DBD::DB2 0.75

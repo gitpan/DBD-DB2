@@ -1,5 +1,5 @@
 #
-#   engn/perldb2/Constants/Makefile.PL, engn_perldb2, db2_v81, 1.5 01/03/29 17:08:22
+#   %W%, %I% %E% %U%
 #
 #   Copyright (c) 1995,1996,1998,1999 International Business Machines Corp.
 #
@@ -20,6 +20,7 @@ my $os = $^O;
 
 my $envvar = 'DB2_HOME';
 my $DB2 = $ENV{$envvar};
+
 if( not $DB2 )
 {
   $envvar = 'DB2PATH';
@@ -27,7 +28,7 @@ if( not $DB2 )
 }
 if( not $DB2 )
 {
-  my ($pathsep, $path, @pathlist);
+  my ($pathsep, $path, @pathlist, $apath);
 
   $pathsep = $Config{'path_sep'};
   $pathsep = ':' unless $pathsep;
@@ -35,14 +36,26 @@ if( not $DB2 )
   $path = $ENV{'PATH'};
   $path =~ s:\\:/:g if $pathsep eq ';';
 
-  @pathlist = split /$pathsep/, $path;
+  @pathlist=();
+  while ($path =~ /(.)/g)
+  {
+    if ("$1" eq "$pathsep")
+    {
+      push(@pathlist, $apath);
+      $apath="";
+    } else {
+      $apath .= $1;
+    }
+  }
+  push(@pathlist, $apath);
+
   foreach $path (@pathlist)
   {
     if( lc( substr( $path, -4 ) ) eq '/bin' &&
         -f "$path/../include/sqlcli.h" )
     {
       $DB2 = substr( $path, 0, -4 );
-      break;
+      last;
     }
   }
 }

@@ -1,7 +1,7 @@
 #
-#   engn/perldb2/DB2.pm, engn_perldb2, db2_v81, 1.7 01/03/29 17:06:45
+#   %W%, %I% %E% %U%
 #
-#   Copyright (c) 1995,1996,1997,1998,1999,2000  International Business Machines Corp.
+#   Copyright (c) 1995,1996,1997,1998,1999,2000,2001  International Business Machines Corp.
 #
 
 {
@@ -23,16 +23,17 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '0.75';
+    $VERSION = '0.76';
         require_version DBI 0.93;
 
     bootstrap DBD::DB2;
 
     use DBD::DB2::Constants;
 
-    $err = 0;           # holds error code   for DBI::err
-    $errstr = "";       # holds error string for DBI::errstr
-    $drh = undef;       # holds driver handle once initialised
+    $err = 0;             # holds error code   for DBI::err
+    $errstr = "";         # holds error string for DBI::errstr
+    $state = "";          # holds SQL state for    DBI::state
+    $drh = undef;         # holds driver handle once initialised
 
     $warn_success = $ENV{'WARNING_OK'};
 
@@ -113,6 +114,7 @@
             'Version' => $VERSION,
             'Err'    => \$DBD::DB2::err,
             'Errstr' => \$DBD::DB2::errstr,
+            'State'  => \$DBD::DB2::state,
             'Attribution' => 'DB2 DBD by IBM',
             });
 
@@ -125,10 +127,6 @@
 
 {   package DBD::DB2::dr; # ====== DRIVER ======
     use strict;
-
-    sub errstr {
-        DBD::DB2::errstr(@_);
-    }
 
     sub connect {
         my($drh, $dbname, $user, $auth, $attr)= @_;
@@ -146,6 +144,16 @@
         $this;
     }
 
+    sub data_sources {
+        my ($drh, $attr) = @_;
+        my $dsref = DBD::DB2::dr::_data_sources( $drh, $attr );
+        if( defined( $dsref ) &&
+            ref( $dsref ) eq "ARRAY" )
+        {
+          return @$dsref;
+        }
+        return ();  # Return empty array
+    }
 }
 
 
@@ -176,10 +184,6 @@
         return $rows
     }
 
-    sub errstr {
-        DBD::DB2::errstr(@_);
-    }
-
     sub prepare {
         my($dbh, $statement)= @_;
 
@@ -200,22 +204,10 @@
         DBD::DB2::db::_ping( $dbh );
     }
 
-    sub tables {
-        my ($dbh) = @_;
-        my $tablesref = DBD::DB2::db::_tables( $dbh );
-        if( defined( $tablesref ) &&
-            ref( $tablesref ) eq "ARRAY" )
-        {
-          return @$tablesref;
-        }
-        undef;
-    }
-
     sub table_info {
-        my ($dbh) = @_;
+        my( $dbh, $attr ) = @_;
         my $sth = DBI::_new_sth($dbh, {});
-
-        DBD::DB2::st::_table_info( $sth )
+        DBD::DB2::st::_table_info( $sth, $attr )
            or return undef;
 
         $sth;
@@ -225,10 +217,6 @@
 
 {   package DBD::DB2::st; # ====== STATEMENT ======
     use strict;
-
-    sub errstr {
-        DBD::DB2::errstr(@_);
-    }
 
 }
 

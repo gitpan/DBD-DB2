@@ -75,10 +75,7 @@ Unsupported Features
 1.  Fetching any type of LOB directly to a file.
 2.  $dbh->type_info
 3.  $dbh->type_info_all
-4.  Multiple result sets returned from stored procedures.  Only
-    the first one is available to the application.
-5.  The child process of a fork cannot use the DB2 Perl driver
+4.  The child process of a fork cannot use the DB2 Perl driver
     whatsoever.  In addition the child process must turn on the
     InactiveDestroy flag for any DBI handles inherited.
-6.  Local row caching: $dbh->{RowCacheSize} and $sth->{RowsInCache}
-7.  DBI->data_sources
+5.  Local row caching: $dbh->{RowCacheSize} and $sth->{RowsInCache}

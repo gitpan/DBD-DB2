@@ -14,8 +14,10 @@ extern "C" {
 #endif
 
 #include <sqlcli.h>
+#ifndef AS400
 #include <sqlcli1.h>
 #include <sqlext.h>
+#endif
 
 static int
 not_here(s)

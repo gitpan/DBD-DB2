@@ -1,5 +1,5 @@
 /*
-   engn/perldb2/dbdimp.h, engn_perldb2, db2_v81, 1.7 01/03/29 17:06:49
+   %W%, %I% %E% %U%
 
    Copyright (c) 1995,1996,1997,1998,1999,2000 International Business Machines Corp.
 */
@@ -15,6 +15,7 @@ struct imp_drh_st {
   dbih_drc_t com;                     /* MUST be first element in structure   */
   SQLHENV henv;
   int     connects;
+  SV     *svNUM_OF_FIELDS;
 };
 
 /* Define dbh implementor data structure */
@@ -41,11 +42,16 @@ struct imp_sth_st {
   SQLINTEGER  done_desc;              /* have we described this sth yet ?     */
   imp_fbh_t   *fbh;                   /* array of imp_fbh_t structs           */
   SQLCHAR     *fbh_cbuf;              /* memory for all field names           */
+  int         numFieldsAllocated;     /* number of fields allocated, could be */
+                                      /* more than current number of fields   */
+                                      /* in the case of multiple result sets  */
   SQLINTEGER  RowCount;               /* Rows affected by insert, update,     */
                                       /* delete (unreliable for SELECT)       */
   int         bHasInput;              /* Has at least one input parameter     */
                                       /* (by reference)                       */
   int         bHasOutput;             /* Has at least one output parameter    */
+  int         bMoreResults;           /* Definitely has more results          */
+                                      /*   1=more results, 0=unknown          */
 };
 #define IMP_STH_EXECUTING       0x0001
 
@@ -89,6 +95,9 @@ struct phs_st { /* scalar placeholder */
 SQLCHAR sql_state[6];
 
 #define dbd_init            db2_init
+#ifndef AS400
+#define dbd_data_sources    db2_data_sources
+#endif
 #define dbd_db_login        db2_db_login
 #define dbd_db_do           db2_db_do
 #define dbd_db_ping         db2_db_ping
@@ -98,7 +107,6 @@ SQLCHAR sql_state[6];
 #define dbd_db_destroy      db2_db_destroy
 #define dbd_db_STORE_attrib db2_db_STORE_attrib
 #define dbd_db_FETCH_attrib db2_db_FETCH_attrib
-#define dbd_db_tables       db2_db_tables
 #define dbd_st_table_info   db2_st_table_info
 #define dbd_st_prepare      db2_st_prepare
 #define dbd_st_rows         db2_st_rows

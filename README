@@ -62,19 +62,16 @@
 
     The DBI mailing lists located at
 
-        dbi-announce@fugue.com          for announcements
-        dbi-dev@fugue.com               for developer/maintainer discussions
-        dbi-users@fugue.com             for end user level discussion and help
+        dbi-announce@perl.org          for announcements
+        dbi-dev@perl.org               for developer/maintainer discussions
+        dbi-users@perl.org             for end user level discussion and help
 
-    To subscribe or unsubscribe to each individual list you may use the
-    WWW at
+    To subscribe or unsubscribe to each individual list please see
 
-        http://www.fugue.com/dbi
+        http://lists.perl.org/
 
-    or email at the following addresses
+    or send an empty email to the following addresses
 
-        dbi-announce-request@fugue.com
-        dbi-dev-request@fugue.com
-        dbi-users-request@fugue.com
-
-    with your request in the body of the message.
+        dbi-announce-subscribe@perl.org
+        dbi-dev-subscribe@perl.org
+        dbi-users-subscribe@perl.org
