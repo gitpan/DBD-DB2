@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl -sw
 
-use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose %att);
+use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose );
 use Getopt::Std;
 use Config;
 require 'flush.pl';

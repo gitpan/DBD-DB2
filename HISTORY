@@ -1,3 +1,49 @@
+
+June 21, 1996
+
+Fixed the following:
+
+    1. Fixed a package naming problem with the Constants package.
+
+	   Screwed up the package name change which caused the tests
+       to fail on a clean build system.  Unfortunately, on my test
+       systems I was picking up an old copy.... 
+
+NOTE:  **********************************************************
+
+      Any reference to               DB2::Constants, 
+      MUST now be               DBD::DB2::Constants
+
+*****************************************************************
+
+Caveats:
+    DBD::DB2 assumes the following:
+        1.  That the DBD::DB2 is built against
+            DB2 v2.1.0 or higher (AIX/UNIX, OS/2 versions)
+
+        2.  DB2 is installed in /usr/lpp/db2_02_01
+            or DB2_HOME points to the installed location
+
+        3.  That the following have been exported in the current
+            environment:
+
+            export DBI_DRIVER=DB2
+            export DBI_NAME="instance"  where "instance" is the DB2
+                                        instance name
+
+    Immediately prior to calling $sth->execute() you must call
+    $sth->bind_param(index, name, type_hash_ref).   Note, that a
+    minimal set of type_hash_refs are provided by DB2.pm and they
+    may be used to create new type_hash_refs
+        $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+
+    Fetching of CLOB and DLOBS is not currently supported.
+
+    Fetching any type of blob directly to a file is not implemented.
+
+    All requested columns are returned.  So if you don't want the
+    column, don't ask for it.
+
 June 12, 1996
 
 Fixed the following:

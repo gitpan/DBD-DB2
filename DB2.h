@@ -1,5 +1,5 @@
 /*
-   $Id: DB2.h,v 0.4 1996/06/07 03:01:38 mhm Rel $
+   $Id: DB2.h,v 0.5 1996/08/16 19:44:58 mhm Rel $
 
    Copyright (c) 1995  Mike Moran
 
@@ -9,7 +9,7 @@
 
 */
 
-#define NEED_DBIXS_VERSION 5
+#define NEED_DBIXS_VERSION 7
 
 #include <DBIXS.h>		/* installed by the DBI module	*/
 

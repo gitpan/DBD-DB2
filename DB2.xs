@@ -1,5 +1,5 @@
 /*
-   	$Id: DB2.xs,v 0.6 1996/06/07 03:01:38 mhm Rel $
+   	$Id: DB2.xs,v 0.8 1996/08/16 20:33:09 mhm Rel $
 
 	Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -15,6 +15,8 @@ DBISTATE_DECLARE;
 
 
 MODULE = DBD::DB2	PACKAGE = DBD::DB2
+
+PROTOTYPES: DISABLE
 
 BOOT:
     items = 0;	/* avoid 'unused variable' warning */
@@ -125,9 +127,9 @@ disconnect(dbh)
     /* Check for disconnect() being called whilst refs to cursors	*/
     /* still exists. This needs some more thought.			*/
     /* XXX We need to track DBIc_ACTIVE children not just all children	*/
-    if (DBIc_KIDS(imp_dbh) && DBIc_WARN(imp_dbh) && !dirty) {
+    if (DBIc_ACTIVE_KIDS(imp_dbh) && DBIc_WARN(imp_dbh) && !dirty) {
 	warn("disconnect(%s) invalidates %d associated cursor(s)",
-	    SvPV(dbh,na), (int)DBIc_KIDS(imp_dbh));
+	    SvPV(dbh,na), (int)DBIc_ACTIVE_KIDS(imp_dbh));
     }
     ST(0) = dbd_db_disconnect(dbh) ? &sv_yes : &sv_no;
 

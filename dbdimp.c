@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.c,v 0.10 1996/06/12 17:33:39 mhm Rel $
+   $Id: dbdimp.c,v 0.11 1996/08/16 19:44:58 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -561,7 +561,95 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
     return 1;
 }
 
+#ifdef Harvey
+int
+dbd_bind_bl_file(sth, ph_namesv, fname,attrib)
+    SV *sth;
+    SV *ph_namesv;
+    char *fname;
+{
+    D_imp_sth(sth);
+	D_imp_dbh_from_sth;
+    SV **svp;
+    STRLEN name_len;
+    char *name;
+    phs_t *phs;
 
+    STRLEN value_len;
+    void  *value_ptr;
+	int ret;
+	char *msg;
+	short stype = SQL_BLOB;
+	int nullok = SQL_NTS;
+
+    if (SvNIOK(ph_namesv) ) {	/* passed as a number	*/
+		char buf[90];
+		name = buf;
+		sprintf(name, ":p%d", (int)SvIV(ph_namesv));
+		name_len = strlen(name);
+    } else {
+		name = SvPV(ph_namesv, name_len);
+    }
+
+    if (dbis->debug >= 2)
+		fprintf(DBILOGFP, "bind %s <== '%s' (attribs: %s)\n",
+			name, SvPV(newvalue,na), SvPV(attribs,na) );
+
+    svp = hv_fetch(imp_sth->bind_names, name, name_len, 0);
+    if (svp == NULL)
+		croak("dbd_bind_ph placeholder '%s' unknown", name);
+    phs = (phs_t*)((void*)SvPVX(*svp));		/* placeholder struct	*/
+
+    if (phs->sv == &sv_undef) {	 /* first bind for this placeholder	*/
+		phs->sv = newSV(0);
+		phs->ftype = 1;
+    }
+
+    if (attribs) {
+		/* Setup / Clear attributes as defined by attribs.		*/
+		/* If attribs is EMPTY then reset attribs to default.		*/
+		;	/* XXX */
+		if ( (svp =hv_fetch((HV*)SvRV(attribs), "Stype",5, 0)) != NULL) 
+	    	stype = phs->ftype = SvIV(*svp);
+		if ( (svp =hv_fetch((HV*)SvRV(attribs), "Fname",5, 0)) != NULL) 
+	    	fname = phs->ftype = SvIV(*svp);
+        if ( (svp=hv_fetch((HV*)SvRV(attribs), "Fsize",5, 0)) != NULL) 
+			fsize = SvIV(*svp);
+        if ( (svp=hv_fetch((HV*)SvRV(attribs), "Fopts",5, 0)) != NULL) 
+			fopts= SvIV(*svp);
+
+    }	/* else if NULL / UNDEF then don't alter attributes.	*/
+	/* This approach allows maximum performance when	*/
+	/* rebinding parameters often (for multiple executes).	*/
+
+    /* At the moment we always do sv_setsv() and rebind.	*/
+    /* Later we may optimise this so that more often we can	*/
+    /* just copy the value & length over and not rebind.	*/
+
+    if (SvOK(newvalue)) {
+		sv_setsv(phs->sv, newvalue);
+		value_ptr = SvPV(phs->sv, value_len);
+        phs->indp = 0;
+    } else {
+        sv_setsv(phs->sv,0); 
+		value_ptr = "";
+		value_len = 0;
+        phs->indp = SQL_NULL_DATA;
+    }
+
+    if (!nullok && !SvOK(phs->sv)) {
+		fprintf(stderr,"phs->sv is not OK\n");
+	}	
+	ret = SQLBindParameter(imp_sth->phstmt,(int)SvIV(ph_namesv),
+            param,ctype,stype,prec,scale,SvPVX(phs->sv),0,(phs->indp != 0 && nullok)?&phs->indp:NULL);
+	msg = ( ERRTYPE(ret) ? "Bind failed" : "Invalid Handle");
+	ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+	EOI(ret);
+
+    return 1;
+}
+
+#endif
 int
 dbd_describe(h, imp_sth)
     SV *h;
@@ -785,7 +873,7 @@ dbd_st_finish(sth)
     SV *sth;
 {
     D_imp_sth(sth);
-	D_imp_dbh_from_sth;
+	D_imp_dbh_from_sth; 
 	int ret;
 	char *msg;
 

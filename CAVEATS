@@ -1,13 +1,11 @@
-June 21, 1996
+Aug 16, 1996
 
 Fixed the following:
 
-    1. Fixed a package naming problem with the Constants package.
+    1. Prototype warnings from xsub.
 
-	   Screwed up the package name change which caused the tests
-       to fail on a clean build system.  Unfortunately, on my test
-       systems I was picking up an old copy.... 
-
+    2. Invalidated cursor messages when exiting after finishing the
+       cursors.
 
 Caveats:
     DBD::DB2 assumes the following:
@@ -33,6 +31,8 @@ Caveats:
     Fetching of CLOB and DLOBS is not currently supported.
 
     Fetching any type of blob directly to a file is not implemented.
+   
+    Writing of blobs is currently unsupported ( It doesn't work...yet).
 
     All requested columns are returned.  So if you don't want the
     column, don't ask for it.

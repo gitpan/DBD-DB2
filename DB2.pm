@@ -1,4 +1,4 @@
-#   $Id: DB2.pm,v 0.11 1996/06/21 12:41:50 mhm Rel $
+#   $Id: DB2.pm,v 0.13 1996/08/16 20:33:09 mhm Rel $
 #
 #   Copyright (c) 1995,1996 International Business Machines Corp. 
 #
@@ -13,11 +13,12 @@
 	
 	@EXPORT_OK = qw($attrib_int $attrib_char $attrib_float 
 				 $attrib_date $attrib_ts $attrib_dec
-				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok);
+				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok
+				 $attrib_blobin $attrib_blobout);
 
-    $VERSION = '0.59';
-	my $revision = substr(q$Revision: 0.11 $, 10);
-	require_version DBI 0.70 ;
+    $VERSION = '0.60';
+	my $revision = substr(q$Revision: 0.13 $, 10);
+	require_version DBI 0.71 ;
 
     bootstrap DBD::DB2;
 
@@ -84,6 +85,11 @@
                     'Stype' => SQL_TIMESTAMP,
                     'Prec'  => 26,
                     'Scale' => 11,
+					};
+	$attrib_blobin = { 'FNlen'	=> NULL,
+					'FOpts' => SQL_FILE_READ,
+					'Maxfn'	=> 255,
+					'Stype' => SQL_BLOB,
 					};
  
     sub driver{
