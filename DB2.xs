@@ -1,5 +1,5 @@
 /*
-    DB2.xs, engn_perldb2, db2_v71, 1.3 00/04/14 15:33:20
+    engn/perldb2/DB2.xs, engn_perldb2, db2_v81, 1.5 00/09/06 15:58:07
 
     Copyright (c) 1995,1996,1997,1998,1999,2000 International Business Machines Corp.
 */
@@ -54,8 +54,19 @@ disconnect_all(drh)
     XST_mIV(0, 1);
 
 
-
 MODULE = DBD::DB2    PACKAGE = DBD::DB2::db
+
+void
+_do( dbh, stmt )
+    SV *        dbh
+    SV *        stmt
+    CODE:
+    {
+    STRLEN lna;
+    char *pstmt = SvOK(stmt) ? SvPV(stmt,lna) : "";
+    ST(0) = newSViv( (IV)dbd_db_do( dbh, pstmt ) );
+    }
+
 
 void
 _login(dbh, dbname, username, password, attribs=Nullsv)
@@ -70,24 +81,8 @@ _login(dbh, dbname, username, password, attribs=Nullsv)
     D_imp_dbh(dbh);
     char *u = (SvOK(username)) ? SvPV(username,lna) : "";
     char *p = (SvOK(password)) ? SvPV(password,lna) : "";
-    ST(0) = dbd_db_login(dbh, imp_dbh, dbname, u, p, attribs) ? &sv_yes : &sv_no;
+    ST(0) = dbd_db_login2(dbh, imp_dbh, dbname, u, p, attribs) ? &sv_yes : &sv_no;
     }
-
-
-void
-db_do(dbh, statement)
-    SV *        dbh
-    char *      statement
-    CODE:
-    I32 rows;
-    /* XXX currently implemented as execute(prepare()) in DBI.pm        */
-    rows = dbd_db_do(dbh, statement);
-    if (rows == 0)              /* ok with no rows affected     */
-        XST_mPV(0,"0E0");       /* (true but zero)              */
-    else if (rows < -1)         /* -1 = unknown number of rows  */
-        XST_mUNDEF(0);          /* <= -2 means error            */
-    else
-        XST_mIV(0,rows);        /* typically 1, row count or -1 */
 
 
 void
@@ -115,8 +110,9 @@ STORE(dbh, keysv, valuesv)
     SV *        keysv
     SV *        valuesv
     CODE:
+    D_imp_dbh(dbh);
     ST(0) = &sv_yes;
-    if (!dbd_db_STORE(dbh, keysv, valuesv))
+    if (!dbd_db_STORE_attrib( dbh, imp_dbh, keysv, valuesv ))
         if (!DBIS->set_attr(dbh, keysv, valuesv))
             ST(0) = &sv_no;
 
@@ -125,10 +121,11 @@ FETCH(dbh, keysv)
     SV *        dbh
     SV *        keysv
     CODE:
-    SV *valuesv = dbd_db_FETCH(dbh, keysv);
+    D_imp_dbh(dbh);
+    SV *valuesv = dbd_db_FETCH_attrib( dbh, imp_dbh, keysv );
     if (!valuesv)
         valuesv = DBIS->get_attr(dbh, keysv);
-    ST(0) = valuesv;    /* dbd_db_FETCH did sv_2mortal  */
+    ST(0) = valuesv;    /* dbd_db_FETCH_attrib did sv_2mortal  */
 
 
 void
@@ -188,7 +185,7 @@ DESTROY(dbh)
                 dbd_db_rollback(dbh, imp_dbh);
             dbd_db_disconnect(dbh,imp_dbh);
         }
-        dbd_db_destroy(dbh);
+        dbd_db_destroy( dbh, imp_dbh );
     }
 
 
@@ -196,18 +193,19 @@ void
 _tables(dbh)
     SV *        dbh
     CODE:
-    AV *tables = dbd_db_tables( dbh );
+    D_imp_dbh(dbh);
+    AV *tables = dbd_db_tables( dbh, imp_dbh );
     ST(0) = newRV_noinc( (SV*)tables );
-
-void
-_table_info(dbh, sth)
-    SV *        dbh
-    SV *        sth
-    CODE:
-    ST(0) = dbd_db_table_info( dbh, sth ) ? &sv_yes : &sv_no;
 
 
 MODULE = DBD::DB2    PACKAGE = DBD::DB2::st
+
+void
+_table_info(sth)
+    SV *        sth
+    CODE:
+    D_imp_sth(sth);
+    ST(0) = dbd_st_table_info( sth, imp_sth ) ? &sv_yes : &sv_no;
 
 void
 _prepare(sth, statement, attribs=Nullsv)
@@ -215,8 +213,11 @@ _prepare(sth, statement, attribs=Nullsv)
     char *      statement
     SV *        attribs
     CODE:
+    {
+    D_imp_sth(sth);
     DBD_ATTRIBS_CHECK("_prepare", sth, attribs);
-    ST(0) = dbd_st_prepare(sth, statement, attribs) ? &sv_yes : &sv_no;
+    ST(0) = dbd_st_prepare(sth, imp_sth, statement, attribs) ? &sv_yes : &sv_no;
+    }
 
 
 void
@@ -293,22 +294,6 @@ bind_param_inout(sth, param, value_ref, maxlen, attribs=Nullsv)
 
 
 void
-set_conn_options(sth, opt, value)
-        SV *    sth
-        IV              opt
-        IV              value
-        CODE:
-        ST(0) = dbd_conn_opt(sth, opt, value) ? &sv_yes : &sv_no;
-
-void
-set_st_options(sth, opt, value)
-        SV *    sth
-        IV              opt
-        IV              value
-        CODE:
-        ST(0) = dbd_st_opts(sth, opt, value) ? &sv_yes : &sv_no;
-
-void
 execute(sth, ...)
     SV *        sth
     CODE:
@@ -333,7 +318,7 @@ execute(sth, ...)
             XSRETURN_UNDEF;     /* dbd_bind_ph already registered error */
         }
     }
-    retval = dbd_st_execute(sth);
+    retval = dbd_st_execute( sth, imp_sth );
     if (retval == 0)            /* ok with no rows affected     */
         XST_mPV(0,"0E0");       /* (true but zero)              */
     else if (retval < -1)       /* -1 = unknown number of rows  */
@@ -346,7 +331,8 @@ void
 fetch(sth)
     SV *        sth
     CODE:
-    AV *    av = dbd_st_fetch(sth);
+    D_imp_sth(sth);
+    AV *    av = dbd_st_fetch( sth, imp_sth );
     ST(0) = (av) ? sv_2mortal(newRV((SV *)av)) : &sv_undef;
 
 void
@@ -360,7 +346,7 @@ fetchrow(sth)
         /* performance of the oraperl emulation layer (Oraperl.pm)      */
         XSRETURN_IV(DBIc_NUM_FIELDS(imp_sth));
     }
-    av = dbd_st_fetch(sth);
+    av = dbd_st_fetch( sth, imp_sth );
     if (av) {
         int num_fields = AvFILL(av)+1;
         int i;
@@ -380,12 +366,15 @@ blob_read(sth, field, offset, len, destrv=Nullsv, destoffset=0)
     SV *        destrv
     long        destoffset
     CODE:
-    if (!destrv)
+    {
+    D_imp_sth(sth);
+    if( !destrv )
         destrv = sv_2mortal(newRV(newSV(0)));
-    if (dbd_st_lob_read(sth, field, offset, len, destrv, destoffset))
+    if( dbd_st_blob_read( sth, imp_sth, field, offset, len, destrv, destoffset ) )
         ST(0) = SvRV(destrv);
     else
         ST(0) = &sv_undef;
+    }
 
 
 void
@@ -394,9 +383,10 @@ STORE(sth, keysv, valuesv)
     SV *        keysv
     SV *        valuesv
     CODE:
+    D_imp_sth(sth);
     ST(0) = &sv_yes;
-    if (!dbd_st_STORE(sth, keysv, valuesv))
-        if (!DBIS->set_attr(sth, keysv, valuesv))
+    if( !dbd_st_STORE_attrib( sth, imp_sth, keysv, valuesv ) )
+        if( !DBIS->set_attr( sth, keysv, valuesv ) )
             ST(0) = &sv_no;
 
 
@@ -405,8 +395,9 @@ FETCH(sth, keysv)
     SV *        sth
     SV *        keysv
     CODE:
-    SV *valuesv = dbd_st_FETCH(sth, keysv);
-    if (!valuesv)
+    D_imp_sth(sth);
+    SV *valuesv = dbd_st_FETCH_attrib( sth, imp_sth, keysv );
+    if( !valuesv )
         valuesv = DBIS->get_attr(sth, keysv);
     ST(0) = valuesv;    /* dbd_st_FETCH did sv_2mortal  */
 
@@ -446,7 +437,7 @@ DESTROY(sth)
         }
         if (DBIc_ACTIVE(imp_sth))
             dbd_st_finish(sth,imp_sth);
-        dbd_st_destroy(sth);
+        dbd_st_destroy( sth, imp_sth );
     }
 
 

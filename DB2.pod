@@ -32,8 +32,10 @@ See L<DBI> for more information.
 
   # an extraneous example of the syntax for creating a new
   # attribute type
-  $attrib_dec = { %$attrib_int, 'Stype' => SQL_DECIMAL, 'Scale' => 2,
-                                                        'Prec' => 31 };
+  $attrib_dec = { %$attrib_int,
+                 'db2_type'  => SQL_DECIMAL,
+                 'SCALE'     => 2,
+                 'PRECISION' => 31 };
 
   #$DBI::dbi_debug=9; # increase the debug output
 
@@ -86,6 +88,60 @@ See L<DBI> for more information.
   $sth->finish();
   $dbh->disconnect();
 
+=head1 Connection Attributes
+
+The following DB2 connection attributes are supported.  (For
+information on setting and querying connection attributes see the
+DBI guide.)  Supported values are also shown: boolean refers to Perl
+true or false, tokens listed in uppercase are DB2 constants (be sure
+to include 'use DBD::DB2::Constants').
+
+  db2_access_mode      SQL_MODE_READ_ONLY or SQL_MODE_READ_WRITE
+  db2_async_enable     Boolean
+  db2_auto_ipd         Boolean (read only)
+  db2_clischema        Character string
+  db2_close_behavior   SQL_CC_NO_RELEASE or SQL_CC_RELEASE
+  db2_connect_node     Integer (must be set in DBI->connect method;
+                       it cannot be modified afterwards)
+  db2_current_schema   Character string
+  db2_db2estimate      Integer
+  db2_db2explain       One of:
+                         SQL_DB2EXPLAIN_OFF
+                         SQL_DB2EXPLAIN_SNAPSHOT_ON
+                         SQL_DB2EXPLAIN_MODE_ON
+                         SQL_DB2EXPLAIN_SNAPSHOT_MODE_ON
+  db2_info_acctstr     Character string
+  db2_info_applname    Character string
+  db2_info_userid      Character string
+  db2_info_wrkstnname  Character string
+  db2_longdata_compat  Boolean
+  db2_quiet_mode       Integer
+  db2_sqlerrp          Character string (read only)
+  db2_txn_isolation    One of the following:
+                         SQL_TXN_READ_UNCOMMITTED
+                         SQL_TXN_READ_COMMITTED
+                         SQL_TXN_REPEATABLE_READ
+                         SQL_TXN_SERIALIZABLE
+                         SQL_TXN_NOCOMMIT
+
+Not all the attributes are available in older versions of DB2.  For
+further information on these attributes, refer to the DB2 Call Level
+Interface Guide and Reference, Chapter 5.  CLI Functions,
+SQLSetConnectAttr.  The attribute names listed above are similar to
+the CLI attributes documented (e.g.  db2_access_mode is equivalent to
+SQL_ATTR_ACCESS_MODE).
+
+=head1 Data Source Names (DSNs)
+
+The database name you specify in the DBI->connect() method is the
+locally cataloged DB2 database alias.  You do not include a host name
+or port number as this information is already in the catalog.  To
+access a remote database, catalog the remote node, the DCS database
+(for AS/400, MVS and VM/VSE databases) and the database alias.  See
+the DB2 Installation and Configuration Supplement for help with
+configuring client-to-server communications.  For information on
+accessing host databases, see the DB2 Connect User's Guide.
+
 =head1 BINDING PARAMETERS
 
 DBD::DB2 supports the following methods of binding parameters:
@@ -110,25 +166,38 @@ at run time.
 
 The following attributes are supported by DBD::DB2:
 
-  ParamT        SQL_PARAM_INPUT, SQL_PARAM_OUTPUT etc.
-  Ctype         SQL_C_CHAR or SQL_C_BINARY
-  Type          SQL_CHAR, SQL_BINARY, SQL_INTEGER etc.
-  Stype         Synonym for Type
-  Prec          Size of column
-  Scale         Decimal digits
+  TYPE            SQL_CHAR, SQL_BINARY, SQL_INTEGER etc.
+  PRECISION       Size of column
+  SCALE           Decimal digits
+  db2_param_type  SQL_PARAM_INPUT, SQL_PARAM_OUTPUT etc.
+  db2_c_type      SQL_C_CHAR or SQL_C_BINARY
+  db2_type        synonym for TYPE: SQL_CHAR, SQL_BINARY, SQL_INTEGER etc.
+  db2_file        Boolean value, see below
+
+For backward compatibility, the following old attribute names are
+still supported.  Note that these may not be supported in future
+releases of DBD::DB2 so it's a good idea to start using the new
+attribute names:
+
+  Stype   Same as db2_type
+  Prec    Same as PRECISION
+  Scale   Same as SCALE
+  ParamT  Same as db2_param_type
+  Ctype   Same as db2_c_type
+  File    Same as db2_file
 
 The easiest method of creating a new attribute hash is to
 change an existing hash:
 
-  $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+  $new_type = { %$existing_type, 'db2_type' => SQL_"NewTYPE" };
 
 or you can create a complete new type:
 
-  $attrib_char = { 'ParamT' => SQL_PARAM_INPUT,
-                   'Ctype'  => SQL_C_CHAR,
-                   'Stype'  => SQL_CHAR,
-                   'Prec'   => 254,
-                   'Scale'  => 0,
+  $attrib_char = { 'db2_param_type' => SQL_PARAM_INPUT,
+                   'db2_c_type'     => SQL_C_CHAR,
+                   'db2_type'       => SQL_CHAR,
+                   'PRECISION'      => 254,
+                   'SCALE'          => 0,
                  };
 
 Attributes are not generally required as the statement will be
@@ -147,22 +216,22 @@ following conditions:
 
 Even though attributes are not always required, providing them can
 improve performance as it may make the "describe" step unnecessary.
-Specifically, 'Stype' and 'Scale' must either
+Specifically, 'db2_type' and 'SCALE' must either
 be provided in the attributes or must be obtained automatically
 via SQLDescribeParam.
 
 =head2 Parameter Type (Input, Ouput and Input/Output)
 
 bind_param() can only be used for input-only parameters and therefore
-the ParamT attribute is ignored.  bind_param_inout() assumes
+the db2_param_type attribute is ignored.  bind_param_inout() assumes
 input/output but a parameter can be designated as input-only or
-output-only via ParamT in the attribute hash:
+output-only via db2_param_type in the attribute hash:
 
-  ParamT => SQL_PARAM_INPUT
+  db2_param_type => SQL_PARAM_INPUT
 
 or
 
-  ParamT => SQL_PARAM_OUTPUT
+  db2_param_type => SQL_PARAM_OUTPUT
 
 Note that
 the 'maxlen' value provided to bind_param_inout() must be large
@@ -189,7 +258,7 @@ efficient as follows:
   $sth->bind_param_inout( 1,
                           \$input,
                           20, # 20 bytes is enough for any integer
-                          { ParamT => SQL_PARAM_INPUT } );
+                          { db2_param_type => SQL_PARAM_INPUT } );
   for(...)
   {
     $input = ...     # set a new value
@@ -206,7 +275,7 @@ all expected input values.
 A file can be bound directly to a LOB parameter by specifying the
 attribute:
 
-  File => 1
+  db2_file => 1
 
 In this case the value passed to bind_param() is the file name.
 

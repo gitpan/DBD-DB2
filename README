@@ -1,6 +1,6 @@
 *** *BEFORE* BUILDING, TESTING AND INSTALLING this you will need to:
 
-    Build, test and install Perl 5 (IBM officially supports 
+    Build, test and install Perl 5 (IBM officially supports
     version 5.004_04 or later).
     It is very important to TEST it and INSTALL it!
 
@@ -9,8 +9,14 @@
 
     Remember to *read* the DBI README file and this one CAREFULLY!
 
-    Install DB2 Universal Database Version 5.2 or later.  The
-    Developer's Edition is required for the DBD::DB2 build process.
+    Ensure one of the following DB2 products is installed.
+
+        DB2 Software Developer's Kit v5.2
+            Included with the DB2 Application Developer's Kit
+
+        DB2 Application Development Client v6 or later
+            Included with the DB2 Personal Developer's Edition and the
+            DB2 Universal Developer's Edition
 
 
 *** BUILDING:
@@ -34,21 +40,21 @@
     its service agreements for DB2 UDB.  Information on DB2 UDB service
     agreements and support can be found on the Web at
 
-	http://www.software.ibm.com/data/db2/db2tech
+        http://www.software.ibm.com/data/db2/db2tech
 
     For other DBD::DB2 information, please see
 
-	http://www.software.ibm.com/data/db2/perl
+        http://www.software.ibm.com/data/db2/perl
 
     Comments/suggestions/enhancement requests may be sent to
 
-	db2perl@ca.ibm.com
+        db2perl@ca.ibm.com
 
     Please see the following files for more information:
-	CAVEATS - important build/usage information
-	DB2.pod - an example perl script
-	        - an explanation of attribute hashes
-		 
+        CAVEATS - important build/usage information
+        DB2.pod - an example perl script
+                - an explanation of attribute hashes
+
 *** MAILING LISTS
 
     As a user or maintainer of a local copy of DBD::DB2, you need
@@ -56,19 +62,19 @@
 
     The DBI mailing lists located at
 
-        dbi-announce@fugue.com		for announcements
-        dbi-dev@fugue.com		for developer/maintainer discussions
-        dbi-users@fugue.com		for end user level discussion and help
+        dbi-announce@fugue.com          for announcements
+        dbi-dev@fugue.com               for developer/maintainer discussions
+        dbi-users@fugue.com             for end user level discussion and help
 
     To subscribe or unsubscribe to each individual list you may use the
     WWW at
 
-	http://www.fugue.com/dbi
+        http://www.fugue.com/dbi
 
     or email at the following addresses
 
-	dbi-announce-request@fugue.com
-	dbi-dev-request@fugue.com
-	dbi-users-request@fugue.com
+        dbi-announce-request@fugue.com
+        dbi-dev-request@fugue.com
+        dbi-users-request@fugue.com
 
     with your request in the body of the message.

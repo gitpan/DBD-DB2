@@ -1,11 +1,10 @@
 /*
-   dbdimp.h, engn_perldb2, db2_v71, 1.4 00/04/14 15:41:50
+   engn/perldb2/dbdimp.h, engn_perldb2, db2_v81, 1.6 00/09/06 15:58:14
 
    Copyright (c) 1995,1996,1997,1998,1999,2000 International Business Machines Corp.
 */
 
 /* these are (almost) random values ! */
-#define MAX_COLS 99
 #define MAX_COL_NAME_LEN 128
 #define MAX_BIND_VARS   99
 
@@ -41,8 +40,6 @@ struct imp_sth_st {
   SQLINTEGER  done_desc;              /* have we described this sth yet ?     */
   imp_fbh_t   *fbh;                   /* array of imp_fbh_t structs           */
   SQLCHAR     *fbh_cbuf;              /* memory for all field names           */
-  SQLINTEGER  long_buflen;            /* length for long/longraw (if >0)      */
-  SQLCHAR     long_trunc_ok;          /* is truncating a long an error        */
   SQLINTEGER  RowCount;               /* Rows affected by insert, update,     */
                                       /* delete (unreliable for SELECT)       */
   int         bHasInput;              /* Has at least one input parameter     */
@@ -100,26 +97,17 @@ SQLCHAR sql_state[6];
 #define dbd_db_STORE_attrib db2_db_STORE_attrib
 #define dbd_db_FETCH_attrib db2_db_FETCH_attrib
 #define dbd_db_tables       db2_db_tables
-#define dbd_db_table_info   db2_db_table_info
+#define dbd_st_table_info   db2_st_table_info
 #define dbd_st_prepare      db2_st_prepare
 #define dbd_st_rows         db2_st_rows
 #define dbd_st_execute      db2_st_execute
 #define dbd_st_fetch        db2_st_fetch
 #define dbd_st_finish       db2_st_finish
 #define dbd_st_destroy      db2_st_destroy
-#define dbd_st_lob_read     db2_st_lob_read
+#define dbd_st_blob_read    db2_st_blob_read
 #define dbd_st_STORE_attrib db2_st_STORE_attrib
 #define dbd_st_FETCH_attrib db2_st_FETCH_attrib
 #define dbd_describe        db2_describe
 #define dbd_bind_ph         db2_bind_ph
 
-void do_error _((SV *h,SQLINTEGER rc, SQLHENV henv, SQLHDBC hconn,
-                                     SQLHSTMT hstmt, char *what));
-void fbh_dump _((imp_fbh_t *fbh, int i));
-
-void dbd_init _((dbistate_t *dbistate));
-void dbd_preparse _((imp_sth_t *imp_sth, char *statement));
-int  dbd_describe _((SV *h, imp_sth_t *imp_sth));
-AV*  dbd_db_tables _((SV *dbh));
-int  dbd_db_table_info _((SV *dbh, SV *sth));
 /* end */

@@ -1,5 +1,5 @@
 #
-#   engn/perldb2/Makefile.PL, engn_perldb2, db2_v71, 1.4 00/04/14 16:11:51
+#   engn/perldb2/Makefile.PL, engn_perldb2, db2_v81, 1.6 00/09/06 15:58:26
 #
 #   Copyright (c) 1995,1996,1997,1998,1999,2000 International Business Machines Corp.
 #
@@ -13,7 +13,7 @@ require 'flush.pl';
 use DBI;        # The DBI must be installed before we can build a DBD
 
 %opts = (
-    'NAME'    => 'DBD::DB2',
+    'NAME'         => 'DBD::DB2',
     'VERSION_FROM' => 'DB2.pm',
     ($] ge '5.005')
        ? ( 'AUTHOR' => 'DB2 Perl (db2perl@ca.ibm.com)',
@@ -22,6 +22,7 @@ use DBI;        # The DBI must be installed before we can build a DBD
     ( $Config{archname} =~ /-object\b/i )
        ? ( 'CAPI' => 'TRUE', )
        : (),
+    'OBJECT'       => '$(O_FILES)',
 );
 
 # --- Introduction
@@ -30,29 +31,73 @@ print "\nConfiguring DBD::DB2...\n";
 print "Remember to actually read the README and CAVEATS files!\n\n";
 
 # --- Operating system
+
 my $os = $^O;
 
 # --- Where is DB2 installed...
 
-my $DB2 = $ENV{'DB2_HOME'};
-$DB2 =~ s:\\:/:g        if $os eq 'MSWin32';
+my $envvar = 'DB2_HOME';
+my $DB2 = $ENV{$envvar};
+if( not $DB2 )
+{
+  $envvar = 'DB2PATH';
+  $DB2 = $ENV{$envvar};
+}
+if( not $DB2 )
+{
+  my ($pathsep, $path, @pathlist);
+
+  $pathsep = $Config{'path_sep'};
+  $pathsep = ':' unless $pathsep;
+
+  $path = $ENV{'PATH'};
+  $path =~ s:\\:/:g if $pathsep eq ';';
+
+  @pathlist = split /$pathsep/, $path;
+  undef $DB2;
+  while( @pathlist && not $DB2 )
+  {
+    $DB2 = shift( @pathlist );
+    if( lc( substr( $DB2, -4 ) ) eq '/bin' &&
+        -f "$DB2/../include/sqlcli.h" )
+    {
+      substr( $DB2, -4 ) = '';
+    }
+    else
+    {
+      undef $DB2;
+    }
+  }
+}
+$DB2 =~ s:\\:/:g        if $os eq 'MSWin32' || $os eq 'os2';
+$DB2 =~ s/"//g;
 die "DB2_HOME environment variable must be set to installed location of DB2.\n"
     unless $DB2;
-die "DB2_HOME environment variable ($DB2) not valid.\n" unless -d $DB2;
+die "$envvar environment variable ($DB2) not valid.\n" unless -d $DB2;
 
-print "Using DB2 in $DB2\n";
+print qq(Using DB2 in "$DB2"\n);
 
-$DB2INCLUDE = $MK{INCLUDE} || "-I$DB2/include";
+# --- Setup include paths and libraries
 
-$opts{INC}  = "$DB2INCLUDE -I$Config{sitearch}/auto/DBI";
+$opts{INC} .= qq(-I"$DB2/include" -I$Config{sitearch}/auto/DBI);
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
-$opts{OBJECT} = '$(O_FILES)';
-$opts{DEFINE} = '';
 
 # libraries required to build DBD::DB2 driver
-if ($os eq 'MSWin32')
+if( $os eq 'MSWin32' || $os eq 'os2' )
 {
-  $sysliblist = "-L$DB2/lib db2cli";
+  $sysliblist = qq(-L"$DB2/lib" db2cli);
+  my @libpaths = split /;/, $ENV{'LIB'};
+  my $libpath;
+  while( @libpaths )
+  {
+    ( $libpath = shift(@libpaths) ) =~ s/"//g;  # Remove quotes
+    $libpath =~ s:\\:/:g;
+
+    if( $libpath && $sysliblist !~ /-L"$libpath"/i )
+    {
+      $sysliblist .= qq( -L"$libpath");
+    }
+  }
 }
 else
 {
@@ -66,17 +111,13 @@ if ($os eq 'hpux')
   $opts{DEFINE} .= ' +e';
 }
 
-print "DB2 sysliblist: $sysliblist\n";
 $opts{LIBS} = [ $sysliblist ];
 
 # log key platform information to help me help you quickly
-print "System: perl$] @Config{qw(myuname archname dlsrc)}\n";
+print "System: perl$] DBI$DBI::VERSION @Config{qw(myuname archname dlsrc)}\n";
 print "Compiler: @Config{qw(cc optimize ccflags)}\n";
-print "  CC:       $MK{CC}\n"           if $MK{CC};
-print "  CFLAGS:   $MK{CFLAGS}\n"       if $MK{CFLAGS};
-print "  LDFLAGS:  $MK{LDFLAGS}\n"      if $MK{LDFLAGS};
-print "  LDSTRING: $MK{LDSTRING}\n"     if $MK{LDSTRING};
-
+print "Includes: $opts{INC}\n";
+print "Libraries: @{$opts{LIBS}}\n";
 print "\n";
 
 WriteMakefile(%opts);

@@ -11,9 +11,11 @@ Building DBD::DB2
         Windows NT - 9074
     See http://www.software.ibm.com/data/db2/perl for more
     information on supported environments.
-2.  The DB2 UDB Developer's Edition is required.
-3.  The DB2_HOME environment variable must point to the
-    installed location of DB2 UDB.
+2.  The DB2 Software Developer's Kit or DB2 Application
+    Development Client is required.
+3.  The build must be performed in a properly configured
+    DB2 environment or the DB2_HOME environment variable
+    must point to the installed location of DB2.
 
 Special Notes re: Perl Object abstraction/ActivePerl 5.005
 ----------------------------------------------------------

@@ -1,5 +1,5 @@
 #
-#   DB2.pm, engn_perldb2, db2_v71, 1.4 00/04/14 14:55:45
+#   engn/perldb2/DB2.pm, engn_perldb2, db2_v81, 1.6 00/09/06 15:57:59
 #
 #   Copyright (c) 1995,1996,1997,1998,1999,2000  International Business Machines Corp.
 #
@@ -23,7 +23,7 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '0.73';
+    $VERSION = '0.74';
         require_version DBI 0.93;
 
     bootstrap DBD::DB2;
@@ -37,69 +37,67 @@
     $warn_success = $ENV{'WARNING_OK'};
 
     $attrib_dec = {
-                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_DECIMAL,
-                    'Prec'    => 31,
-                    'Scale'   => 4,
+                    'db2_param_type' => SQL_PARAM_INPUT_OUTPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_DECIMAL,
+                    'PRECISION'      => 31,
+                    'SCALE'          => 4,
                   };
     $attrib_int = {
-                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_INTEGER,
-                    'Prec'    => 10,
-                    'Scale'   => 4,
+                    'db2_param_type' => SQL_PARAM_INPUT_OUTPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_INTEGER,
+                    'PRECISION'      => 10,
                   };
     $attrib_char = {
-                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_CHAR,
-                    'Prec'    => 0,
+                    'db2_param_type' => SQL_PARAM_INPUT_OUTPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_CHAR,
+                    'PRECISION'      => 0,
                   };
     $attrib_float = {
-                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_FLOAT,
-                    'Prec'    => 15,
-                    'Scale'   => 6,
+                    'db2_param_type' => SQL_PARAM_INPUT_OUTPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_FLOAT,
+                    'PRECISION'      => 15,
+                    'SCALE'          => 6,
                   };
     $attrib_date = {
-                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_DATE,
-                    'Prec'    => 10,
-                    'Scale'   => 9,
+                    'db2_param_type' => SQL_PARAM_INPUT_OUTPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_DATE,
+                    'PRECISION'      => 10,
                   };
     $attrib_ts = {
-                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_TIMESTAMP,
-                    'Prec'    => 26,
-                    'Scale'   => 11,
+                    'db2_param_type' => SQL_PARAM_INPUT_OUTPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_TIMESTAMP,
+                    'PRECISION'      => 26,
+                    'SCALE'          => 11,
                   };
     $attrib_binary = {
-                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype'   => SQL_C_BINARY,
-                    'Stype'   => SQL_BINARY,
-                    'Prec'    => 0,
+                    'db2_param_type' => SQL_PARAM_INPUT_OUTPUT,
+                    'db2_c_type'     => SQL_C_BINARY,
+                    'db2_type'       => SQL_BINARY,
+                    'PRECISION'      => 0,
                   };
     $attrib_blobfile = {
-                    'ParamT'  => SQL_PARAM_INPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_BLOB,
-                    'File'    => 1,
+                    'db2_param_type' => SQL_PARAM_INPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_BLOB,
+                    'db2_file'       => 1,
                   };
     $attrib_clobfile = {
-                    'ParamT'  => SQL_PARAM_INPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_CLOB,
-                    'File'    => 1,
+                    'db2_param_type' => SQL_PARAM_INPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_CLOB,
+                    'db2_file'       => 1,
                   };
     $attrib_dbclobfile = {
-                    'ParamT'  => SQL_PARAM_INPUT,
-                    'Ctype'   => SQL_C_CHAR,
-                    'Stype'   => SQL_DBCLOB,
-                    'File'    => 1,
+                    'db2_param_type' => SQL_PARAM_INPUT,
+                    'db2_c_type'     => SQL_C_CHAR,
+                    'db2_type'       => SQL_DBCLOB,
+                    'db2_file'       => 1,
                   };
 
     sub driver{
@@ -154,6 +152,30 @@
 {   package DBD::DB2::db; # ====== DATABASE ======
     use strict;
 
+    sub do {
+        my($dbh, $statement, $attr, @params) = @_;
+        my $rows = 0;
+
+        if( -1 == $#params )
+        {
+          # No parameters, use execute immediate
+          $rows = DBD::DB2::db::_do( $dbh, $statement );
+          if( 0 == $rows )
+          {
+            $rows = "0E0";
+          }
+          elsif( $rows < -1 )
+          {
+            undef $rows;
+          }
+        }
+        else
+        {
+          $rows = $dbh->SUPER::do( $statement, $attr, @params );
+        }
+        return $rows
+    }
+
     sub errstr {
         DBD::DB2::errstr(@_);
     }
@@ -175,7 +197,7 @@
 
     sub tables {
         my ($dbh) = @_;
-        my $tablesref = DBD::DB2::db::_tables($dbh);
+        my $tablesref = DBD::DB2::db::_tables( $dbh );
         if( defined( $tablesref ) &&
             ref( $tablesref ) eq "ARRAY" )
         {
@@ -188,7 +210,7 @@
         my ($dbh) = @_;
         my $sth = DBI::_new_sth($dbh, {});
 
-        DBD::DB2::db::_table_info($dbh, $sth)
+        DBD::DB2::st::_table_info( $sth )
            or return undef;
 
         $sth;

@@ -1,3 +1,32 @@
+September 6, 2000
+
+DBD::DB2 0.74
+
+  Use execute immediate for $dbh->do() when statement does not use
+  parameter markers.
+
+  Fix ChopBlanks.
+
+  Fix a problem when fetched data is truncated due to LongReadLen.
+
+  Add support for spaces in DB2 install path name on Windows NT.
+
+  Fixed build problem with ActivePerl on Windows NT when ActivePerl
+  was installed without a compiler environment (i.e. libpth in
+  Config.pm does not include the compiler library paths).
+
+  DB2_HOME is no longer required if the build is performed in a
+  properly configured DB2 environment (i.e. the DB2 'bin' directory
+  is in the PATH environment variable).
+
+  Rename DB2 specific attributes to comply with DBI naming
+  convention (i.e. use lower case and prefix with db2_).  Old
+  attributes still accepted for the time being.
+
+  Add new connection attributes.
+
+  Miscellaneous performance enhancements.
+
 May 12, 2000
 
 DBD::DB2 0.73
