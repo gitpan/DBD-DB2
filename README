@@ -1,49 +1,74 @@
-DBD::DB2 is now available from your local CPAN site.
+*** *BEFORE* BUILDING, TESTING AND INSTALLING this you will need to:
 
-As a user or maintainer of a local copy of DBD::DB2 you need
-to be aware of the following addresses:
+    Build, test and install Perl 5 (IBM officially supports 
+    version 5.004_04 or later).
+    It is very important to TEST it and INSTALL it!
 
-The DBI mailing lists located at
+    Build, test and install the DBI module (at least DBI 0.93).
+    It is very important to TEST it and INSTALL it!
 
-dbi-announce@fugue.com			for announcements
-dbi-dev@fugue.com			for developer/maintainer discussions
-dbi-users@fugue.com			for end user level discussion and help
+    Remember to *read* the DBI README file and this one CAREFULLY!
 
-To subscribe or unsubscribe to each individual list you may use the
-WWW at
+    Install DB2 Universal Database Version 5.2 or later.  The
+    Developer's Edition is required for the DBD::DB2 build process.
+
+
+*** BUILDING:
+
+    perl Makefile.PL            # use a perl that's in your PATH
+    make
+    make test
+    make install (if the tests look okay)
+
+
+*** IF YOU HAVE PROBLEMS:
+
+    Please read the CAVEATS files which includes important
+    information, including tips and workarounds for various
+    platform-specific problems.
+
+
+*** SUPPORT INFORMATION:
+
+    Technical support for the DBD::DB2 driver is provided by IBM through
+    its service agreements for DB2 UDB.  Information on DB2 UDB service
+    agreements and support can be found on the Web at
+
+	http://www.software.ibm.com/data/db2/db2tech
+
+    For other DBD::DB2 information, please see
+
+	http://www.software.ibm.com/data/db2/perl
+
+    Comments/suggestions/enhancement requests may be sent to
+
+	db2perl@ca.ibm.com
+
+    Please see the following files for more information:
+	CAVEATS - important build/usage information
+	DB2.pod - an example perl script
+	        - an explanation of attribute hashes
+		 
+*** MAILING LISTS
+
+    As a user or maintainer of a local copy of DBD::DB2, you need
+    to be aware of the following addresses:
+
+    The DBI mailing lists located at
+
+        dbi-announce@fugue.com		for announcements
+        dbi-dev@fugue.com		for developer/maintainer discussions
+        dbi-users@fugue.com		for end user level discussion and help
+
+    To subscribe or unsubscribe to each individual list you may use the
+    WWW at
 
 	http://www.fugue.com/dbi
 
-or email at the following addresses
+    or email at the following addresses
 
 	dbi-announce-request@fugue.com
 	dbi-dev-request@fugue.com
 	dbi-users-request@fugue.com
 
-with your request in the body of the message.
-
-
-Technical support for the DBD::DB2 driver is provided by IBM through
-its service agreements for DB2 UDB.  Information on DB2 UDB service
-agreements and support can be found on the Web at
-
-	http://www.software.ibm.com/data/db2/db2tech
-
-For other DBD::DB2 information, please see
-
-	http://www.software.ibm.com/data/db2/perl
-
-Comments/suggestions/enhancement requests may be sent to
-
-	db2perl@ca.ibm.com
-
-We would also appreciate if you could send the following information
-to the db2perl userid listed above:
-	- your name or company name
-	- the platform on which the DBD::DB2 driver is being used
-	- the type of application making use of the DBD::DB2 driver
-
-Please see the following files for more information:
-	CAVEATS - important build/usage information
-	DB2.pod - an example perl script
-	        - an explanation of attribute hashes
+    with your request in the body of the message.

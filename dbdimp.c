@@ -1,7 +1,7 @@
 /*
-   engn/perldb2/dbdimp.c, engn_perldb2, db2_v3, 1.3 98/09/24 16:20:14
+   engn/perldb2/dbdimp.c, engn_perldb2, db2_v6, 1.3 99/01/12 14:27:40
 
-   Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
+   Copyright (c) 1995,1996,1997,1998,1999 International Business Machines Corp.
 */
 
 #include <stdio.h>
@@ -164,7 +164,8 @@ dbd_db_connect(dbh,imp_dbh,dbname,uid,pwd)
     char *msg;
     SQLINTEGER ret;
     
-    ret = SQLAllocConnect(imp_drh->henv,&imp_dbh->hdbc);
+    ret = SQLAllocHandle(SQL_HANDLE_DBC, imp_drh->henv, 
+                         &imp_dbh->hdbc);                         
     msg = (ERRTYPE(ret) ? "Connect allocation failed" :
                                 "Invalid Handle");
     ret = check_error(dbh,ret,msg);
@@ -191,8 +192,9 @@ dbd_db_connect(dbh,imp_dbh,dbname,uid,pwd)
         return(ret);            /* Must return SQL codes not perl/DBD/DBI */
     }                             /* otherwise failure is not caught  */
     /* DBI spec requires AutoCommit on */
-    ret = SQLSetConnectOption(imp_dbh->hdbc, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_ON);
-    msg = (ERRTYPE(ret) ? "SetConnectOption Failed" : "Invaild handle");
+    ret = SQLSetConnectAttr(imp_dbh->hdbc, SQL_ATTR_AUTOCOMMIT,   
+                            (void *)SQL_AUTOCOMMIT_ON, 0);        
+    msg = (ERRTYPE(ret) ? "SetConnectAttr Failed" : "Invalid handle");
     ret = check_error(dbh,ret,msg);
     if (ret != SQL_SUCCESS) {
         SQLFreeConnect(imp_dbh->hdbc);
@@ -221,7 +223,8 @@ dbd_db_login(dbh, imp_dbh, dbname, uid, pwd)
     char *msg;
 
     if (! imp_drh->connects) {
-        ret = SQLAllocEnv(&imp_drh->henv);
+        ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE,     
+	                     &imp_drh->henv);                     
         msg = (imp_drh->henv == NHENV ?
                 "Total Environment allocation failure!" :
                 "Environment allocation failed");
@@ -259,7 +262,8 @@ dbd_db_do(dbh, statement) /* error : <=(-2), ok row count : >=0, unknown count :
     char *msg;
     SQLHSTMT stmt;
 
-    ret = SQLAllocStmt(imp_dbh->hdbc, &stmt);
+    ret = SQLAllocHandle(SQL_HANDLE_STMT, imp_dbh->hdbc,          
+                         &stmt);                                  
     msg = "Statement allocation error";
     ret = check_error(dbh, ret, msg);
     if (ret < 0)                                                  
@@ -386,8 +390,10 @@ dbd_db_STORE(dbh, keysv, valuesv)
     char *msg;
     
     if (kl==10 && strEQ(key, "AutoCommit")) {
-        ret = SQLSetConnectOption(imp_dbh->hdbc,SQL_AUTOCOMMIT,
-                (on ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF ));
+	ret = SQLSetConnectAttr(imp_dbh->hdbc,                   
+	                        SQL_ATTR_AUTOCOMMIT,
+              (on ? (void *)SQL_AUTOCOMMIT_ON : (void *)SQL_AUTOCOMMIT_OFF),
+		                0);                              
         if ( ret ) {
             msg = (ERRTYPE(ret) ? "Change of AUTOCOMMIT failed" :
                                   "Invalid Handle");
@@ -447,7 +453,8 @@ dbd_st_prepare(sth, statement, attribs)
 
     imp_sth->done_desc = 0;
 
-    ret = SQLAllocStmt(imp_dbh->hdbc,&imp_sth->phstmt);
+    ret = SQLAllocHandle(SQL_HANDLE_STMT, imp_dbh->hdbc,          
+                         &imp_sth->phstmt);                       
     msg = "Statement allocation error";
     ret = check_error(sth,ret,msg);
 
@@ -458,6 +465,10 @@ dbd_st_prepare(sth, statement, attribs)
     ret = check_error(sth,ret,msg);
 
     EOI(ret);
+
+    if (dbis->debug >= 2)                                        
+        fprintf(DBILOGFP, "    dbd_st_prepare'd sql f%d\n\t%s\n",
+	        imp_sth->phstmt, statement);                     
 
     ret = SQLNumParams(imp_sth->phstmt,&params);
     msg = "Unable to determine number of parameters";
@@ -557,7 +568,7 @@ dbd_preparse(imp_sth, statement)
 int
 dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
     SV *sth;
-    SV *ph_namesv;
+    SV *ph_namesv;		/* index of parameter 1..n */
     SV *newvalue;
     SV *attribs;
 {
@@ -592,7 +603,7 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
 
     svp = hv_fetch(imp_sth->bind_names, (char *)name, name_len, 0);
     if (svp == NULL)
-        croak("dbd_bind_ph placeholder '%s' unknown", name);
+        croak("Can't bind unknown parameter marker '%s'", name);  
     phs = (phs_t*)((void*)SvPVX(*svp));        /* placeholder struct    */
 
     if (phs->sv == &sv_undef) {     /* first bind for this placeholder    */
@@ -617,7 +628,7 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
             nullok = SvIV(*svp);
 
 
-    }    /* else if NULL / UNDEF then don't alter attributes.    */
+    } /* else if NULL / UNDEF then default to values assigned at top */
     /* This approach allows maximum performance when    */
     /* rebinding parameters often (for multiple executes).    */
 
@@ -626,8 +637,6 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
     /* just copy the value & length over and not rebind.    */
 
     if (SvOK(newvalue)) {
-        /* XXX need to consider oraperl null vs space issues?    */
-        /* XXX need to consider taking reference to source var    */
         sv_setsv(phs->sv, newvalue);
         value_ptr = SvPV(phs->sv, value_len);
         phs->indp = 0;
@@ -641,10 +650,18 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
     if (!nullok && !SvOK(phs->sv)) {
         fprintf(stderr,"phs->sv is not OK\n");
     }    
+
+    if (dbis->debug >= 2)                                        
+        fprintf(DBILOGFP,
+	        "  bind %s: ParmType=%d, Ctype=%d, SQLtype=%d, Prec=%d, Scale=%d\n",
+		name, param, ctype, stype, prec, scale);         
+
     ret = SQLBindParameter(imp_sth->phstmt,(SQLINTEGER)SvIV(ph_namesv),
-                           param,ctype,stype,prec,scale,
+                           param,ctype,stype,
+			   (prec > 0 ? prec : value_len), scale,  
                            (phs->indp == 0)?SvPVX(phs->sv):NULL,  
-	                   0, (phs->indp != 0 && nullok)?&phs->indp:NULL);
+			   value_len,                             
+	                   (phs->indp != 0 && nullok)?&phs->indp:NULL);
     msg = ( ERRTYPE(ret) ? "Bind failed" : "Invalid Handle");
     ret = check_error(sth,ret,msg);
     EOI(ret);
@@ -684,8 +701,7 @@ dbd_describe(h, imp_sth)
 
     /* Get number of fields and space needed for field names    */
     for(i=0; i < num_fields; ++i ) {
-        SQLCHAR  cbuf[MAX_COL_NAME_LEN];
-        SQLCHAR  dbtype;
+        SQLCHAR  cbuf[MAX_COL_NAME_LEN+1];                        
         imp_fbh_t *fbh = &imp_sth->fbh[i];
         f_cbufl[i] = sizeof(cbuf);
 
@@ -694,14 +710,16 @@ dbd_describe(h, imp_sth)
         msg    = (ERRTYPE(ret) ? "DescribeCol failed" : "Invalid Handle");
         ret = check_error(h,ret,msg);
         EOI(ret);
-        ret = SQLColAttributes(imp_sth->phstmt,i+1,SQL_COLUMN_LENGTH,
-                NULL, 0, NULL ,&fbh->dbsize);
-        msg    = (ERRTYPE(ret) ? "ColAttributes failed" : "Invalid Handle");
+        ret = SQLColAttribute(imp_sth->phstmt,i+1,                
+	                      SQL_DESC_OCTET_LENGTH,              
+                              NULL, 0, NULL ,&fbh->dbsize);
+        msg    = (ERRTYPE(ret) ? "ColAttribute failed" : "Invalid Handle");
         ret = check_error(h,ret,msg);
         EOI(ret);
-        ret = SQLColAttributes(imp_sth->phstmt,i+1,SQL_COLUMN_DISPLAY_SIZE,
-                NULL, 0, NULL ,&fbh->dsize);
-        msg    = (ERRTYPE(ret) ? "ColAttributes failed" : "Invalid Handle");
+        ret = SQLColAttribute(imp_sth->phstmt,i+1,                
+	                      SQL_DESC_DISPLAY_SIZE,              
+                              NULL, 0, NULL ,&fbh->dsize);
+        msg    = (ERRTYPE(ret) ? "ColAttribute failed" : "Invalid Handle");
         ret = check_error(h,ret,msg);
         EOI(ret);
 

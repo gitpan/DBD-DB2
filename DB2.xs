@@ -1,5 +1,5 @@
 /*
-    engn/perldb2/DB2.xs, engn_perldb2, db2_v3, 1.3 98/09/24 16:45:30
+    engn/perldb2/DB2.xs, engn_perldb2, db2_v6, 1.2 98/10/01 09:41:27
 
     Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
 */

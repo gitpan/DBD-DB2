@@ -1,12 +1,12 @@
 /*
-   engn/perldb2/dbdimp.h, engn_perldb2, db2_v3, 1.3 98/09/24 16:16:43
+   engn/perldb2/dbdimp.h, engn_perldb2, db2_v6, 1.3 99/01/12 13:48:09
 
-   Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
+   Copyright (c) 1995,1996,1997,1998,1999 International Business Machines Corp.
 */
 
 /* these are (almost) random values ! */
 #define MAX_COLS 99
-#define MAX_COL_NAME_LEN 19
+#define MAX_COL_NAME_LEN 128                                      
 #define MAX_BIND_VARS	99
 
 
@@ -55,7 +55,7 @@ struct imp_fbh_st { 	/* field buffer EXPERIMENTAL */
     /* description of the field	*/
     SQLINTEGER  dbsize;
     short  dbtype;
-    SQLCHAR	*cbuf;		/* ptr to name of select-list item */
+    SQLCHAR	*cbuf;		        /* ptr to name of select-list item */
     SQLINTEGER  cbufl;			/* length of select-list item name */
     SQLINTEGER  dsize;			/* max display size if field is a SQLCHAR */
     unsigned long prec;
@@ -66,7 +66,7 @@ struct imp_fbh_st { 	/* field buffer EXPERIMENTAL */
     short ftype;		/* external datatype we wish to get	*/
     short  indp;		/* null/trunc indicator variable	*/
     SQLCHAR	*buf;		/* data buffer (poSQLINTEGERs to sv data)	*/
-    short  bufl;		/* length of data buffer		*/
+    SQLINTEGER bufl;		/* length of data buffer		*/
     SQLINTEGER rlen;		/* length of returned data		*/
     short  rcode;		/* field level error status		*/
 

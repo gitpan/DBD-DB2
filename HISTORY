@@ -1,3 +1,19 @@
+January 12, 1999
+
+DBD::DB2-0.71
+
+  Ported to Windows NT!
+
+  It is now mandatory for the user to set the DB2_HOME environment
+  variable to the installed location of DB2 UDB.  It will no longer
+  default to /usr/lpp/db2_05_00.  This was done to accommodate ports
+  to other platforms which have different default installation paths.
+
+  Calls to deprecated CLI functions replaced by newer ones
+  (i.e. SQLAllocStmt() replaced by SQLAllocHandle(SQL_HANDLE_STMT,...).
+
+  A couple of bugs in dbd_bind_ph() were fixed.
+
 September 25, 1998
 
 DBD::DB2-0.70

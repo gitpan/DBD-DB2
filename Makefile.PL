@@ -1,5 +1,7 @@
 #
-#	Copyright (c) 1995,1996,1998 International Business Machines Corp.
+#   engn/perldb2/Makefile.PL, engn_perldb2, db2_v6, 1.3 99/01/12 13:48:04
+#
+#   Copyright (c) 1995,1996,1998,1999 International Business Machines Corp.
 #
 #!/usr/local/bin/perl -sw
 
@@ -17,31 +19,41 @@ use DBI;	# The DBI must be installed before we can build a DBD
 
 # --- Introduction
 
-print "\nConfiguring DBD::DB2 version $opts{VERSION_FROM}...\n";
-print "Remember to actually read the CAVEATS file!\n\n";
+print "\nConfiguring DBD::DB2...\n";
+print "Remember to actually read the README and CAVEATS files!\n\n";
+
+# --- Operating system
+my $os = $^O;
 
 # --- Where is DB2 installed...
 
-my $DB2 = $ENV{DB2_HOME} || '/usr/lpp/db2_05_00';
+my $DB2 = $ENV{'DB2_HOME'};
+$DB2 =~ s:\\:/:g	if $os eq 'MSWin32';
+die "DB2_HOME environment variable must be set to installed location of DB2.\n" 
+    unless $DB2;
+die "DB2_HOME environment variable ($DB2) not valid.\n" unless -d $DB2;
 
 print "Using DB2 in $DB2\n";
 
-$OCIINCLUDE = $MK{INCLUDE} || "-I$DB2/include";
+$DB2INCLUDE = $MK{INCLUDE} || "-I$DB2/include";
 
-$opts{INC}  = "$OCIINCLUDE -I$Config{sitearch}/auto/DBI";
-#$opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '.$linkwith };
+$opts{INC}  = "$DB2INCLUDE -I$Config{sitearch}/auto/DBI";
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 $opts{OBJECT} = '$(O_FILES)';
 $opts{DEFINE} = '';
 
-# --- Get UNIX name
-chop($uname = `uname`);
-
-# read list of libs that DB2 requires
-$sysliblist ="-L$DB2/lib -ldb2";
+# libraries required to build DBD::DB2 driver
+if ($os eq 'MSWin32')
+{
+  $sysliblist = "-L$DB2/lib db2cli";
+}
+else
+{
+  $sysliblist = "-L$DB2/lib -ldb2";
+}
 
 # --- Handle special cases ---
-if ($uname eq "HP-UX")
+if ($os eq 'hpux')
 {
   $sysliblist .= ' -lcl';
   $opts{DEFINE} .= ' +e';
@@ -70,46 +82,5 @@ sub MY::post_initialize{
 default_target: all
 ';
 }
-
-sub ask {
-    my($prompt, $default) = @_;
-	printflush(STDOUT,"$prompt: ");
-	printflush(STDOUT,"[$default] ") if $default;
-    my $value = <>;
-	chomp $value;
-	return $value or $default;
-}
-
-
-# ---------------------------------------------------------------
-
-
-sub MY::dist {		# new name with 5.001e
-    '
-DISTFILES=RCS/*
-DISTNAME=DBD-DB2
-
-ci:
-	-ci -u $(DISTFILES) 2>&1 | grep -v "no lock set by "
-	-rcs -q -Nv`echo "$(VERSION)" | tr . _`: $(DISTFILES)
-
-rcsdiff:
-	for f in $(DISTFILES); do rcsdiff -r$(V) $$f; done 2>&1 | less
-
-dist:  ci clean
-	rcs -q -sRel $(DISTFILES)
-	co -q -u     $(DISTFILES)
-	rm -f Makefile *~ t/*~
-	cd ..; tar cvFf $(DISTNAME)-$(VERSION).tar \
-		`sed -e "s:^:$(DISTNAME)-$(VERSION)/:" < $(DISTNAME)-$(VERSION)/MANIFEST`
-	cd ..; gzip -9 $(DISTNAME)-$(VERSION).tar;
-	@chmod -w ../$(DISTNAME)-$(VERSION).tar.gz
-	mv ../$(DISTNAME)-$(VERSION).tar.gz /usr/misc/ftp/pub/perl/db/DBD/DB2/
-	@cp README /usr/misc/ftp/pub/perl/db/DBD/DB2/
-	@cd /usr/misc/ftp/pub/perl/db/DBD/DB2; pwd; ls -l *.gz
-';
-}
-
-*{"MY::distclean"} = \&MY::dist;	# remain compatible with 5.001
 
 __END__

@@ -12,7 +12,7 @@ exit 0;
 
 # ----------------------------------------------------------
 
-#  engn/perldb2/t/main.t, engn_perldb2, db2_v3, 1.3 98/09/24 16:25:34
+#  engn/perldb2/t/main.t, engn_perldb2, db2_v6, 1.2 98/10/01 09:41:37
 #
 # Copyright (c) 1994, Tim Bunce
 #

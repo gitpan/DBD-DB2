@@ -6,14 +6,14 @@ Building DBD::DB2
     supported operating system platforms are as follows:
     	AIX - U459852
 	HP V10 - U459854
-	HP V11 - not available as of September 24, 1998
+	HP V11 - U459872
 	Solaris - U459853
+	Windows NT - 9074
     See http://www.software.ibm.com/data/db2/perl for
     more information on supported environments.
 2.  The DB2 UDB Developer's Edition is required.
-3.  DB2 UDB must be installed in /usr/lpp/db2_05_00 or
-    the DB2_HOME environment variable must point to the
-    installed location.
+3.  The DB2_HOME environment variable must point to the
+    installed location of DB2 UDB.
 
 Special Notes re: HP-UX
 -----------------------
@@ -27,6 +27,14 @@ Special Notes re: HP-UX
     option, +DAportable.  This compile option is used
     to generate code that is compatible across both
     PA_RISC 1.1 and 2.0 workstations and servers.
+3.  If an "out of memory" error is returned when compiling
+    the file Constants.c during the DBD::DB2 build process,
+    remove the "+Onolimit" compile option from the file,
+    Makefile.PL, in the Constants subdirectory and restart
+    the build process.  Removing this compile option will
+    result in a warning like "Exceeding compiler resource
+    limits in constants; some optimizations skipped", but
+    this warning can be ignored.
 
 Using DBD::DB2
 --------------
@@ -36,7 +44,7 @@ Using DBD::DB2
 2.  If you are using $sth->bind_param(index, value, type_hash_ref) 
     to bind values to parameter markers, then it must be called
     immediately prior to calling execute().  Note that a minimal
-    set of type_hash_refs are provided by DB2.pm and they may
+    set of type_hash_refs are provided in DB2.pm and they may
     be used to create new type_hash_refs
         $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
 3.  Note that as of DB2 UDB CLI V5.0, deferred prepare is on by

@@ -1,7 +1,7 @@
 #
-#   DB2.pm, engn_perldb2, db2_v3, 1.3 98/09/24 18:13:21
+#   engn/perldb2/DB2.pm, engn_perldb2, db2_v6, 1.3 99/01/12 13:48:03
 #
-#   Copyright (c) 1995,1996,1997,1998  International Business Machines Corp. 
+#   Copyright (c) 1995,1996,1997,1998,1999  International Business Machines Corp. 
 #
 
 {
@@ -15,10 +15,9 @@
 	@EXPORT_OK = qw($attrib_int $attrib_char $attrib_float 
 				 $attrib_date $attrib_ts $attrib_dec
 				 $attrib_ts_nullok $attrib_int_nullok 
-				 $attrib_char_nullok
-				 $attrib_blobin $attrib_blobout);
+				 $attrib_char_nullok $attrib_blobin);
 
-    $VERSION = '0.70';
+    $VERSION = '0.71';
 	require_version DBI 0.93;
 
     bootstrap DBD::DB2;
@@ -100,12 +99,6 @@
 	return $drh if $drh;
 	my($class, $attr) = @_;
 
-	unless ($ENV{'DB2_HOME'}){
-		$ENV{DB2_HOME} = "/usr/lpp/db2_05_00";
-	    my $msg = "set to $ENV{DB2_HOME}"; 
-	    warn "DB2_HOME $msg\n";
-	}
-
 	$class .= "::dr";
 
 	# not a 'my' since we use it above to prevent multiple drivers
@@ -115,7 +108,7 @@
 	    'Version' => $VERSION,
 	    'Err'    => \$DBD::DB2::err,
 	    'Errstr' => \$DBD::DB2::errstr,
-	    'Attribution' => 'DB2 DBD by Mike Moran',
+	    'Attribution' => 'DB2 DBD by IBM',
 	    });
 
 	$drh;
