@@ -1,37 +1,54 @@
-July 5, 1998
+Building DBD::DB2
+-----------------
+1.  The DBD::DB2 driver is supported by DB2 UDB V5.2.
+    For existing DB2 UDB V5.0 customers, FixPak 6
+    is required.  The actual FixPak 6 numbers for the
+    supported operating system platforms are as follows:
+    	AIX - U459852
+	HP V10 - U459854
+	HP V11 - not available as of September 24, 1998
+	Solaris - U459853
+    See http://www.software.ibm.com/data/db2/perl for
+    more information on supported environments.
+2.  The DB2 UDB Developer's Edition is required.
+3.  DB2 UDB must be installed in /usr/lpp/db2_05_00 or
+    the DB2_HOME environment variable must point to the
+    installed location.
 
-DBD::DB2-0.68
+Special Notes re: HP-UX
+-----------------------
+1.  At the present time, HP-UX V11 cannot dynamically load
+    libraries that contain thread local storage.  As such,
+    additional libraries, -lpthread and -lcl, MUST be
+    specified when building perl.  If this is not done,
+    errors will occur during the DBD::DB2 "make test" phase.
+2.  In order to avoid some warnings when building perl,
+    DBI, and DBD::DB2, you may want to add the compile
+    option, +DAportable.  This compile option is used
+    to generate code that is compatible across both
+    PA_RISC 1.1 and 2.0 workstations and servers.
 
-   Found and fixed a couple of bugs relating to the handling of
-      remote data 
-
-
-Caveats:
-    DBD::DB2 assumes the following:
-        1.  That the DBD::DB2 is built against
-            DB2 v2.1.0 or higher (AIX/UNIX, OS/2 versions)
-
-        2.  DB2 is installed in /usr/lpp/db2_05_00
-            or DB2_HOME points to the installed location
-
-        3.  That the following have been exported in the current
-            environment:
-
-            export DBI_DRIVER=DB2
-            export DBI_NAME="instance"  where "instance" is the DB2
-                                        instance name
-
-    Immediately prior to calling $sth->execute() you must call
-    $sth->bind_param(index, name, type_hash_ref).   Note, that a
-    minimal set of type_hash_refs are provided by DB2.pm and they
-    may be used to create new type_hash_refs
+Using DBD::DB2
+--------------
+1.  In order to execute a statement with parameter markers
+    against a host DBMS (i.e. DB2 for OS/390), you must call
+    bind_param() to bind values to the parameter markers.
+2.  If you are using $sth->bind_param(index, value, type_hash_ref) 
+    to bind values to parameter markers, then it must be called
+    immediately prior to calling execute().  Note that a minimal
+    set of type_hash_refs are provided by DB2.pm and they may
+    be used to create new type_hash_refs
         $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+3.  Note that as of DB2 UDB CLI V5.0, deferred prepare is on by
+    default (DBD::DB2 is a CLI application).  To change this 
+    behaviour, the value of the DEFERREDPREPARE keyword in
+    db2cli.ini must be changed.  Support is not yet available  
+    available to change this value at the statement level
+    (via a statement attribute).
 
-    Fetching of CLOB and DLOBS is not currently supported.
-
-    Fetching any type of blob directly to a file is not implemented.
-   
-    Writing of blobs is currently unsupported ( It doesn't work...yet).
-
-    All requested columns are returned.  So if you don't want the
-    column, don't ask for it.
+Unsupported Features (wrt DBI 0.93)
+-----------------------------------
+1.  The following attributes are not yet supported:
+        ChopBlanks, LongReadLen, LongTruncOk
+2.  Fetching any type of LOB directly to a file.
+3.  Writing/inserting of LOBs.

@@ -1,3 +1,6 @@
+#
+#	Copyright (c) 1995,1996,1998 International Business Machines Corp.
+#
 #!/usr/local/bin/perl -sw
 
 use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose );
@@ -23,26 +26,29 @@ my $DB2 = $ENV{DB2_HOME} || '/usr/lpp/db2_05_00';
 
 print "Using DB2 in $DB2\n";
 
-
-# --- What DB2 is installed...
-
-
-# read list of libs that DB2 requires
-$sysliblist ="-L$DB2/lib -ldb2";
-print "DB2 sysliblist: $sysliblist\n";
-
-
 $OCIINCLUDE = $MK{INCLUDE} || "-I$DB2/include";
 
-$opts{LIBS} = [ $sysliblist ];
 $opts{INC}  = "$OCIINCLUDE -I$Config{sitearch}/auto/DBI";
 #$opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '.$linkwith };
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 $opts{OBJECT} = '$(O_FILES)';
 $opts{DEFINE} = '';
+
+# --- Get UNIX name
+chop($uname = `uname`);
+
+# read list of libs that DB2 requires
+$sysliblist ="-L$DB2/lib -ldb2";
+
 # --- Handle special cases ---
+if ($uname eq "HP-UX")
+{
+  $sysliblist .= ' -lcl';
+  $opts{DEFINE} .= ' +e';
+}
 
-
+print "DB2 sysliblist: $sysliblist\n";
+$opts{LIBS} = [ $sysliblist ];
 
 # log key platform information to help me help you quickly
 print "System: perl$] @Config{qw(myuname archname dlsrc)}\n";

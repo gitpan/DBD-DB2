@@ -1,6 +1,6 @@
-#/*
-# *	   Copyright (c) 1995,1996 International Business Machines Corp.
-# */
+#
+#	Copyright (c) 1995,1996,1998 International Business Machines Corp.
+#
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -15,6 +15,15 @@ $DB2 = $ENV{DB2_HOME} || "/usr/lpp/db2_05_00";
 $OCIINCLUDE = $MK{INCLUDE} || "-I$DB2/include";
 
 $opts{INC} = "$OCIINCLUDE";
+
+# --- Get UNIX name
+chop($uname = `uname`);
+
+# --- Handle special cases
+if ($uname eq "HP-UX")
+{
+  $opts{DEFINE} .= ' +Onolimit +e';
+}
 
 WriteMakefile( %opts );
  
@@ -42,6 +51,3 @@ dist:  ci clean
 	@cd /u/ftp/pub/perl/db/DBD/DB2; pwd; ls -l *.Z
 ';
 }
-
-
-

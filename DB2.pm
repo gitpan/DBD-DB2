@@ -1,4 +1,5 @@
-#   $Id: DB2.pm,v 0.29 1998/08/21 12:59:56 mhm Rel $
+#
+#   DB2.pm, engn_perldb2, db2_v3, 1.3 98/09/24 18:13:21
 #
 #   Copyright (c) 1995,1996,1997,1998  International Business Machines Corp. 
 #
@@ -13,12 +14,12 @@
 	
 	@EXPORT_OK = qw($attrib_int $attrib_char $attrib_float 
 				 $attrib_date $attrib_ts $attrib_dec
-				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok
+				 $attrib_ts_nullok $attrib_int_nullok 
+				 $attrib_char_nullok
 				 $attrib_blobin $attrib_blobout);
 
-    $VERSION = '0.69';
-	my $revision = substr(q$Revision: 0.29 $, 10);
-	require_version DBI 1.00;
+    $VERSION = '0.70';
+	require_version DBI 0.93;
 
     bootstrap DBD::DB2;
 

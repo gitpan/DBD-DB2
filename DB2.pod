@@ -1,16 +1,15 @@
 =head1 NAME
 
-DBD::DB2 - DataBase Driver for DB2
+DBD::DB2 - DataBase Driver for DB2 UDB
 
 
 =head1 DESCRIPTION
 
 DBD::DB2 is a Perl5 module which when used in conjunction with DBI
-allows Perl5 to communicate with DB2 Common Server database from
-IBM.
+allows Perl5 to communicate with IBM's DB2 Universal Database.
 
 In the generic sense, most of the functionality provided by any of
-the available DBDs are access indirectly through the DBI.
+the available DBDs is accessed indirectly through the DBI.
 
 =head1 SYNOPSIS
 
@@ -18,42 +17,32 @@ the available DBDs are access indirectly through the DBI.
   use DBD::DB2::Constants;
   use DBD::DB2;
 
-  $dbh = DBI->connect([$database [,$username [,$auth [,$driver [,\%attr]]]]]);
+  $dbh = DBI->connect("dbi:DB2:db_name", $username, $password);
 
-  $sth = $dbh->prepare($statement [,\%attr]) if $dbh;
-
-  $rc = $sth->execute([@bind_values]) if $sth;
-
-  @ary = $sth->fetchrow;  # once per row
-
-  $rc = $sth->finish;
-
-  $rc = $dbh->disconnect;
+See L<DBI> for more information.
 
 =head1 EXAMPLE
 
   #!/usr/local/bin/perl
-  $ENV{"DBI_DRIVER"} = "DB2";  # set driver in the environment
-  $ENV{"DBI_NAME"} = "sample"; # set database name in the environment
   
   use DBI;
   use DBD::DB2::Constants;
   use DBD::DB2 qw($attrib_int $attrib_char $attrib_float
                   $attrib_date $attrib_ts);
   
-  # an extranious example of the syntax for creating a new
-  # sttribute type
+  # an extraneous example of the syntax for creating a new
+  # attribute type
   $attrib_dec = { %$attrib_int, 'Stype' => SQL_DECIMAL, 'Scale' => 2,
   							'Prec' => 31 };
 
   #$DBI::dbi_debug=9; # increase the debug output
   
-  $dbh = DBI->connect('sample');
+  $dbh = DBI->connect("dbi:DB2:sample");
   if (!defined($dbh)) { exit; }
   
-  # Note in the following sequence, that the statment contains
-  # no parameter markers, which makes the execution squence
-  # just prepare and execute
+  # Note in the following sequence, that the statement contains
+  # no parameter markers, which makes the execution sequence
+  # just prepare and execute.
   $stmt = "select empno, photo_format from inv.emp_photo where 
             photo_format ='gif';"; 
   $sth = $dbh->prepare($stmt);
@@ -61,7 +50,7 @@ the available DBDs are access indirectly through the DBI.
   $sth->execute();
   
   # $row[0] is the empno from the database and $row[1] is the
-  # image type.  In this case, the type will always be "gif"
+  # image type.  In this case, the type will always be "gif".
   while ((@row = $sth->fetchrow())) {
     # create an output file named empno.type in the current directory
     open(OUTPUT,">$row[0].$row[1]") || die "Can't open $row[0].$row[1]"; 
@@ -74,7 +63,7 @@ the available DBDs are access indirectly through the DBI.
     # containing the values for the parameters.  Additionally,
     # tell DB2 how to convert a perl value to a DB2 value based
     # on the contents of the $attrib_* hash.  One bind_param
-    # call per parameter per execution 
+    # call per parameter per execution. 
     $pict_sth->bind_param(1,$row[0],$attrib_char);
     $pict_sth->bind_param(2,$row[1],$attrib_char);
     $pict_sth->execute();
@@ -84,8 +73,8 @@ the available DBDs are access indirectly through the DBI.
   
     # read the contents of the blob pointed to by field
     # one of the statement using a zero offset, reading
-    # reading a chunk of 4096 bytes each time.
-    while ($buff = $pict_sth->readblob(1,0,4096)) { 
+    # a chunk of 4096 bytes each time.
+    while ($buff = $pict_sth->blob_read(1,0,4096)) { 
         print OUTPUT $buff;
        $buff = "";
     }
@@ -98,128 +87,32 @@ the available DBDs are access indirectly through the DBI.
   # close selection criteria cursor
   $sth->finish();
 
-=head1  Compatibility with Oracle Reference
-
-DBD::DB2 tries to maintain a function compatibility with
-DBD::Oracle within the constraints of DB2 functionality and
-the author's available spare time to work on enhancements
-and bug fixes.
-
-=head1 CAVEATS
-
-=head2 DBD::DB2 Assumptions
-
-=over 2
-
-=item *  Perl Version
-
-Availability of working perl5.002 or higher.
-
-=item *  DB2 Version
-
-DB2 version 2.1.0 or higher ( AIX/Unix, OS/2 version numbers) 
-
-=item *  DB2 Installation
-
-DB2 is installed in /usr/lpp/db2_02_01 or DB2_HOME points to the installed location
-
-=item *  Environment
-
-That the following have been exported in the current environment:
-
-=over 2
-
-export DBI_DRIVER=DB2
-export DBI_NAME="instance"  where "instance" is the DB2 instance name
-or that the connect call is made with all the arguments.
-
-=back
-
-=head2  Functional Differences
-
-=over 2
-
-=item *  \$sth->execute([@bind_values])
-
-Do to DB2 deficiencies, it is not possible to call execute with
-parameters.  Instead, one must make use of the 
-I<bind_param(index, variable_name, attribute_hash)> call for
-each parameter in the SQL statement.  This must be done immediately
-prior to call \$sth->execute().  See the earlier example code.
-
-=item *  Attribute Hashes
+=head1  Attribute Hashes
 
 The version of DB2 that this driver was originally built on did not
 support SQLDescribeParameter (a function which returns everything
 the database knows about a particular parameter).  Without this 
-function the enduser would have been required to build the @bind_values
+function, the enduser would have been required to build the @bind_values
 array with eight pieces of information pertaining to the internal
 database usage and structure of the parameter in question.
 
 This, of course, was deemed to be too radical a departure from the
-DBD::Oracle reference implimentation.  An attribute hash is simply
-a collection of information about particular types of datas.  Each
-attribute is can be determined at compile time (see DB2.pm for list
-of predefined attribute hashes), created at run time or modified at
-run time.
+DBD::Oracle reference implementation.  An attribute hash is simply
+a collection of information about particular types of data.  Each
+attribute can be determined at compile time (see DB2.pm for list
+of predefined attribute hashes), created at run time, or modified 
+at run time.
 
 The easiest method of creating a new attribute hash is to simply
 change an existing hash:
 
-=over 2
-
-$new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
-
-=back 
+  $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
 
 or simple create a complete new type:
 
-=over 2
-
-$attrib_char = { 'ParamT' => SQL_PARAM_INPUT,
-                 'Ctype' => SQL_C_CHAR,
-                 'Stype' => SQL_CHAR,
-                 'Prec'  => 254,
-                 'Scale' => 0,
-               };
-
-
-=back
- 
-=head2 The ToDo List - In No Particular Order
-
-=over 2
-
-=item *  Support for CLOBs and DLOBs 
-
-=item *  Fetching any type of blob directly to a file
-
-=item *  Writing of blobs 
-
-=item *  Usage of Output stored proceedures.
-
-=item *  Support for more configuration options
-
-=item *  Full functional compatibility with Oracle reference
-
-=item *  Support for connections to multiple instances
-
-=back
-
-=head1  Notes
-
-Just like perl, this is a spare time project.  I'll do my best to
-answer questions and issue fixes, but there are NO guaranteed turn
-around times.
-
-If you need something immediately, you have two choices.  First,
-write it yourself or second, find someone else to write it.  If you
-succeed, please, please, send deltas to db2perl@austin.ibm.com, so
-that others may benefit.
-
-Requests for the ToDo list and bug reports are accepted at 
-db2perl@austin.ibm.com.
-
-=head1 Author
-
-Mike Moran  <mhm@austin.ibm.com> or <mhm@acm.org>
+  $attrib_char = { 'ParamT' => SQL_PARAM_INPUT,
+                   'Ctype' => SQL_C_CHAR,
+                   'Stype' => SQL_CHAR,
+                   'Prec'  => 254,
+                   'Scale' => 0,
+                 };

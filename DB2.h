@@ -1,12 +1,7 @@
 /*
-   $Id: DB2.h,v 0.10 1998/05/21 03:58:27 mhm Rel $
+   engn/perldb2/DB2.h, engn_perldb2, db2_v3, 1.3 98/09/24 16:18:34
 
-   Copyright (c) 1995,1996,1997,1998  Mike Moran
-
-   You may distribute under the terms of either the GNU General Public
-   License or the Artistic License, as specified in the Perl README
-   file.
-
+   Copyright (c) 1995,1996,1997,1998  International Business Machines Corp. 
 */
 
 #define NEED_DBIXS_VERSION 7

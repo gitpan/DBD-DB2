@@ -12,7 +12,7 @@ exit 0;
 
 # ----------------------------------------------------------
 
-# $Id: main.t,v 0.2 1995/09/22 17:54:12 mhm Exp mhm $
+#  engn/perldb2/t/main.t, engn_perldb2, db2_v3, 1.3 98/09/24 16:25:34
 #
 # Copyright (c) 1994, Tim Bunce
 #

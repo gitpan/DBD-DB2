@@ -1,8 +1,7 @@
 /*
-   	$Id: DB2.xs,v 0.16 1998/05/21 03:58:27 mhm Rel $
+    engn/perldb2/DB2.xs, engn_perldb2, db2_v3, 1.3 98/09/24 16:45:30
 
-	Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
-
+    Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
 */
 
 #include "DB2.h"
@@ -77,23 +76,30 @@ db_do(dbh, statement)
     I32 rows;
     /* XXX currently implemented as execute(prepare()) in DBI.pm	*/
     rows = dbd_db_do(dbh, statement);
-    if      (rows == 0) {	XST_mPV(0, "OK");	}
-    else if (rows >  0) {	XST_mIV(0, rows);	}
-    else {			ST(0) = &sv_undef;	}
+    if (rows == 0)		/* ok with no rows affected 	*/ 
+	XST_mPV(0,"0E0");	/* (true but zero)		*/
+    else if (rows < -1)		/* -1 = unknown number of rows	*/
+        XST_mUNDEF(0);		/* <= -2 means error		*/
+    else
+	XST_mIV(0,rows); 	/* typically 1, row count or -1	*/ 
 
 
 void
 commit(dbh)
     SV *	dbh
     CODE:
-	D_imp_dbh(dbh);
+    D_imp_dbh(dbh);
+    if (DBIc_has(imp_dbh, DBIcf_AutoCommit))                      
+        warn("commit ineffective with AutoCommit enabled");       
     ST(0) = dbd_db_commit(dbh,imp_dbh) ? &sv_yes : &sv_no;
 
 void
 rollback(dbh)
     SV *	dbh
     CODE:
-	D_imp_dbh(dbh);
+    D_imp_dbh(dbh);
+    if (DBIc_has(imp_dbh, DBIcf_AutoCommit))                      
+        warn("rollback ineffective with AutoCommit enabled");     
     ST(0) = dbd_db_rollback(dbh,imp_dbh) ? &sv_yes : &sv_no;
 
 
@@ -125,14 +131,22 @@ disconnect(dbh)
     CODE:
     D_imp_dbh(dbh);
     if ( !DBIc_ACTIVE(imp_dbh) ) {
-	XSRETURN_YES;
+        XSRETURN_YES;
+    }
+    /* pre-disconnect checks and tidy-ups */                     
+    if (DBIc_CACHED_KIDS(imp_dbh)) {
+        SvREFCNT_dec(DBIc_CACHED_KIDS(imp_dbh));
+        DBIc_CACHED_KIDS(imp_dbh) = Nullhv;                      
     }
     /* Check for disconnect() being called whilst refs to cursors	*/
-    /* still exists. This needs some more thought.			*/
-    /* XXX We need to track DBIc_ACTIVE children not just all children	*/
+    /* still exist. This possibly needs some more thought.		*/
     if (DBIc_ACTIVE_KIDS(imp_dbh) && DBIc_WARN(imp_dbh) && !dirty) {
-	warn("disconnect(%s) invalidates %d associated cursor(s)",
-	    SvPV(dbh,na), (int)DBIc_ACTIVE_KIDS(imp_dbh));
+                                                                 
+        char *plural = (DBIc_ACTIVE_KIDS(imp_dbh)==1) ? "" : "s";
+        warn("disconnect(%s) invalidates %d active statement%s. %s",
+             SvPV(dbh,na), (int)DBIc_ACTIVE_KIDS(imp_dbh), plural,
+             "Either destroy statement handles or call finish on them before disconnecting.");
+	                                                         
     }
     ST(0) = dbd_db_disconnect(dbh,imp_dbh) ? &sv_yes : &sv_no;
 
@@ -144,17 +158,32 @@ DESTROY(dbh)
     D_imp_dbh(dbh);
     ST(0) = &sv_yes;
     if (!DBIc_IMPSET(imp_dbh)) {	/* was never fully set up	*/
-	if (DBIc_WARN(imp_dbh) && !dirty && dbis->debug >= 2)
-	     warn("Database handle %s DESTROY ignored - never set up", SvPV(dbh,na));
-    } else {
-    	if (DBIc_ACTIVE(imp_dbh)) {
-			if (DBIc_WARN(imp_dbh) && !dirty)
-	    		warn("Database handle destroyed without explicit disconnect");
-			dbd_db_disconnect(dbh,imp_dbh);
-    	}
-    	dbd_db_destroy(dbh);
-    	DBIc_IMPSET_off(imp_dbh);
+        if (DBIc_WARN(imp_dbh) && !dirty && dbis->debug >= 2)
+            warn("Database handle %s DESTROY ignored - never set up", SvPV(dbh,na));
+    } 
+    else {
+        /* pre-disconnect checks and tidy-ups */                 
+	if (DBIc_CACHED_KIDS(imp_dbh)) {
+	    SvREFCNT_dec(DBIc_CACHED_KIDS(imp_dbh));
+	    DBIc_CACHED_KIDS(imp_dbh) = Nullhv;
 	}
+        if (DBIc_IADESTROY(imp_dbh)) {  /* want's ineffective destroy  */
+            DBIc_ACTIVE_off(imp_dbh);                            
+        }
+        if (DBIc_ACTIVE(imp_dbh)) {
+            if (DBIc_WARN(imp_dbh) && !dirty)
+                warn("Database handle destroyed without explicit disconnect");
+		                                                 
+	    /* The application has not explicitly disconnected.  If AutoCommit	*/
+	    /* is OFF, we will issue a rollback here.  If the application	*/
+	    /* has explicitly committed the last transaction, the rollback	*/
+	    /* will be harmless.						*/
+	    if (!DBIc_has(imp_dbh, DBIcf_AutoCommit))
+	        dbd_db_rollback(dbh, imp_dbh);                   
+            dbd_db_disconnect(dbh,imp_dbh);
+        }
+        dbd_db_destroy(dbh);
+    }
 
 
 
@@ -175,7 +204,7 @@ void
 rows(sth)
     SV *	sth
     CODE:
-	D_imp_sth(sth);
+    D_imp_sth(sth);
     XST_mIV(0, dbd_st_rows(sth,imp_sth));
 
 
@@ -211,7 +240,7 @@ execute(sth, ...)
     SV *	sth
     CODE:
     D_imp_sth(sth);
-	int retval;
+    int retval;
     if (items > 1) {
 	/* Handle binding supplied values to placeholders	*/
 	int i, error = 0;
@@ -231,13 +260,13 @@ execute(sth, ...)
 	    XSRETURN_UNDEF;	/* dbd_bind_ph already registered error	*/
 	}
     }
-   	retval = dbd_st_execute(sth);
-	if (retval < 0)
-		XST_mUNDEF(0);		/* error */
-	else if (retval == 0)
-		XST_mPV(0,"0E0");		/* true but zero */
-	else
-		XST_mIV(0,retval); 	/* 1 or row count */
+    retval = dbd_st_execute(sth);
+    if (retval == 0)		/* ok with no rows affected 	*/ 
+	XST_mPV(0,"0E0");	/* (true but zero)		*/
+    else if (retval < -1)       /* -1 = unknown number of rows	*/
+        XST_mUNDEF(0);		/* <= -2 means error		*/ 
+    else
+	XST_mIV(0,retval); 	/* typically 1, row count or -1	*/
 
 
 void
@@ -337,12 +366,16 @@ DESTROY(sth)
     D_imp_sth(sth);
     ST(0) = &sv_yes;
     if (!DBIc_IMPSET(imp_sth)) {	/* was never fully set up	*/
-	if (DBIc_WARN(imp_sth) && !dirty && dbis->debug >=2 )
-	     warn("Statement handle %s DESTROY ignored - never set up", SvPV(sth,na));
-    } else {
-    	if (DBIc_ACTIVE(imp_sth)) 
-			dbd_st_finish(sth,imp_sth);
-    	dbd_st_destroy(sth);
+        if (DBIc_WARN(imp_sth) && !dirty && dbis->debug >=2)
+            warn("Statement handle %s DESTROY ignored - never set up", SvPV(sth,na));
+    } 
+    else {
+        if (DBIc_IADESTROY(imp_sth)) {  /* want's ineffective destroy   */ 
+            DBIc_ACTIVE_off(imp_sth);                                      
+        }
+        if (DBIc_ACTIVE(imp_sth)) 
+            dbd_st_finish(sth,imp_sth);
+        dbd_st_destroy(sth);
     }
 
 

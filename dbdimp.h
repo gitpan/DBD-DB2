@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.h,v 0.12 1998/08/21 12:59:56 mhm Rel $
+   engn/perldb2/dbdimp.h, engn_perldb2, db2_v3, 1.3 98/09/24 16:16:43
 
    Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
 */
@@ -13,14 +13,14 @@
 typedef struct imp_fbh_st imp_fbh_t;
 
 struct imp_drh_st {
-    dbih_drc_t com;				/* MUST be first element in structure	*/
+    dbih_drc_t com;			/* MUST be first element in structure	*/
 	SQLHENV	henv;
 	int 	connects;
 };
 
 /* Define dbh implementor data structure */
 struct imp_dbh_st {
-    dbih_dbc_t com;				/* MUST be first element in structure	*/
+    dbih_dbc_t com;			/* MUST be first element in structure	*/
 	SQLHENV	henv;
 	SQLHDBC	hdbc;
 };
@@ -28,21 +28,23 @@ struct imp_dbh_st {
 
 /* Define sth implementor data structure */
 struct imp_sth_st {
-    dbih_stc_t com;				/* MUST be first element in structure	*/
-	SQLHENV	henv;
-	SQLHDBC	hdbc;
+    dbih_stc_t 	com;			/* MUST be first element in structure	*/
+    SQLHENV	henv;
+    SQLHDBC	hdbc;
+    SQLHSTMT	phstmt;
 
-	SQLHSTMT	phstmt;
     /* Input Details	*/
-    SQLCHAR	*statement;  		/* sql (see sth_scan)		*/
+    SQLCHAR	*statement;  		/* sql (see sth_scan)			*/
     HV		*bind_names;
 
-    /* Output Details		*/
-    SQLINTEGER        done_desc;  		/* have we described this sth yet ?	*/
-    imp_fbh_t *fbh;	    		/* array of imp_fbh_t structs	*/
-    SQLCHAR      *fbh_cbuf;    	/* memory for all field names       */
-    SQLINTEGER		long_buflen;      	/* length for long/longraw (if >0)	*/
+    /* Output Details	*/
+    SQLINTEGER	done_desc;  		/* have we described this sth yet ?	*/
+    imp_fbh_t	*fbh;	    		/* array of imp_fbh_t structs		*/
+    SQLCHAR	*fbh_cbuf;		/* memory for all field names		*/
+    SQLINTEGER	long_buflen;      	/* length for long/longraw (if >0)	*/
     SQLCHAR 	long_trunc_ok;    	/* is truncating a long an error	*/
+    SQLINTEGER  RowCount;		/* Rows affected by insert, update,	*/
+					/* delete (unreliable for SELECT)	*/
 };
 #define IMP_STH_EXECUTING	0x0001
 
