@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.h,v 0.11 1998/05/21 03:58:27 mhm Rel $
+   $Id: dbdimp.h,v 0.12 1998/08/21 12:59:56 mhm Rel $
 
    Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
 */
@@ -81,16 +81,6 @@ struct phs_st {	/* scalar placeholder EXPERIMENTAL	*/
 };
 
 SQLCHAR sql_state[6];
-#ifdef Harvey
-void	do_error _((SV *h,SQLINTEGER rc, SQLHENV henv, SQLHDBC hconn, 
-					SQLHSTMT hstmt, char *what));
-void	fbh_dump _((imp_fbh_t *fbh, int i));
-
-void	dbd_init _((dbistate_t *dbistate));
-void	dbd_preparse _((imp_sth_t *imp_sth, char *statement));
-int	dbd_describe _((SV *h, imp_sth_t *imp_sth));
-#endif
-
 
 #define dbd_init        db2_init
 #define dbd_db_login        db2_db_login

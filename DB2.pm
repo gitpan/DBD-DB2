@@ -1,4 +1,4 @@
-#   $Id: DB2.pm,v 0.28 1998/07/06 04:50:39 mhm Rel $
+#   $Id: DB2.pm,v 0.29 1998/08/21 12:59:56 mhm Rel $
 #
 #   Copyright (c) 1995,1996,1997,1998  International Business Machines Corp. 
 #
@@ -16,9 +16,9 @@
 				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok
 				 $attrib_blobin $attrib_blobout);
 
-    $VERSION = '0.68';
-	my $revision = substr(q$Revision: 0.28 $, 10);
-	require_version DBI 0.93 ;
+    $VERSION = '0.69';
+	my $revision = substr(q$Revision: 0.29 $, 10);
+	require_version DBI 1.00;
 
     bootstrap DBD::DB2;
 
