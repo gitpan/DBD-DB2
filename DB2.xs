@@ -1,5 +1,5 @@
 /*
-   	$Id: DB2.xs,v 0.11 1997/04/10 14:46:44 mhm Rel $
+   	$Id: DB2.xs,v 0.13 1997/12/11 04:46:18 mhm Rel $
 
 	Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -172,7 +172,8 @@ void
 rows(sth)
     SV *	sth
     CODE:
-    XST_mIV(0, dbd_st_rows(sth));
+	D_imp_sth(sth);
+    XST_mIV(0, dbd_st_rows(sth,imp_sth));
 
 
 void
@@ -260,7 +261,7 @@ fetchrow(sth)
 
 
 void
-readblob(sth, field, offset, len, destrv=Nullsv, destoffset=0)
+blob_read(sth, field, offset, len, destrv=Nullsv, destoffset=0)
     SV *	sth
     int	field
     long	offset
@@ -270,7 +271,7 @@ readblob(sth, field, offset, len, destrv=Nullsv, destoffset=0)
     CODE:
     if (!destrv)
 	destrv = sv_2mortal(newRV(newSV(0)));
-    if (dbd_st_readblob(sth, field, offset, len, destrv, destoffset))
+    if (dbd_st_blob_read(sth, field, offset, len, destrv, destoffset))
 	    ST(0) = SvRV(destrv);
     else 
 		ST(0) = &sv_undef;
@@ -315,7 +316,7 @@ finish(sth)
 	/* No active statement to finish	*/
 	XSRETURN_YES;
     }
-    ST(0) = dbd_st_finish(sth) ? &sv_yes : &sv_no;
+    ST(0) = dbd_st_finish(sth,imp_sth) ? &sv_yes : &sv_no;
 
 
 void
@@ -329,7 +330,7 @@ DESTROY(sth)
 	     warn("Statement handle %s DESTROY ignored - never set up", SvPV(sth,na));
     } else {
     	if (DBIc_ACTIVE(imp_sth)) 
-			dbd_st_finish(sth);
+			dbd_st_finish(sth,imp_sth);
     	dbd_st_destroy(sth);
     }
 

@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.h,v 0.8 1997/02/07 18:21:38 mhm Rel $
+   $Id: dbdimp.h,v 0.9 1997/12/11 04:46:18 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 */
@@ -75,7 +75,7 @@ struct phs_st {	/* scalar placeholder EXPERIMENTAL	*/
 };
 
 SQLCHAR sql_state[6];
-
+#ifdef Harvey
 void	do_error _((SV *h,SQLINTEGER rc, SQLHENV henv, SQLHDBC hconn, 
 					SQLHSTMT hstmt, char *what));
 void	fbh_dump _((imp_fbh_t *fbh, int i));
@@ -83,5 +83,35 @@ void	fbh_dump _((imp_fbh_t *fbh, int i));
 void	dbd_init _((dbistate_t *dbistate));
 void	dbd_preparse _((imp_sth_t *imp_sth, char *statement));
 int	dbd_describe _((SV *h, imp_sth_t *imp_sth));
+#endif
 
+
+#define dbd_init        db2_init
+#define dbd_db_login        db2_db_login
+#define dbd_db_do       db2_db_do
+#define dbd_db_commit       db2_db_commit
+#define dbd_db_rollback     db2_db_rollback
+#define dbd_db_disconnect   db2_db_disconnect
+#define dbd_db_destroy      db2_db_destroy
+#define dbd_db_STORE_attrib db2_db_STORE_attrib
+#define dbd_db_FETCH_attrib db2_db_FETCH_attrib
+#define dbd_st_prepare      db2_st_prepare
+#define dbd_st_rows     db2_st_rows
+#define dbd_st_execute      db2_st_execute
+#define dbd_st_fetch        db2_st_fetch
+#define dbd_st_finish       db2_st_finish
+#define dbd_st_destroy      db2_st_destroy
+#define dbd_st_blob_read    db2_st_blob_read
+#define dbd_st_STORE_attrib db2_st_STORE_attrib
+#define dbd_st_FETCH_attrib db2_st_FETCH_attrib
+#define dbd_describe        db2_describe
+#define dbd_bind_ph     db2_bind_ph
+
+void	do_error _((SV *h,SQLINTEGER rc, SQLHENV henv, SQLHDBC hconn, 
+					SQLHSTMT hstmt, char *what));
+void	fbh_dump _((imp_fbh_t *fbh, int i));
+
+void	dbd_init _((dbistate_t *dbistate));
+void	dbd_preparse _((imp_sth_t *imp_sth, char *statement));
+int		dbd_describe _((SV *h, imp_sth_t *imp_sth));
 /* end */

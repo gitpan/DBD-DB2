@@ -1,3 +1,14 @@
+
+Feb 7, 1997
+
+   	Created a small pod for DBD::DB2.  Hopefully, this
+   	will lighten the email load.
+
+	Rolled in all the changes needed to make it compile cleanly
+   	on Solaris
+
+	Output Parameters for stored procedures now work.
+
 Dec 12, 1996
 	1. This version fixes a problem with setting/unsetting
        AutoCommit on the database handle...I need a better

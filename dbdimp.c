@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.c,v 0.15 1997/02/07 18:21:38 mhm Rel $
+   $Id: dbdimp.c,v 0.17 1997/12/11 04:46:18 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -66,6 +66,8 @@ SV *h;
 IV  rc, h_env, h_conn, h_stmt;
 char *what;
 {
+    IV rrc;
+
     if (rc != SQL_SUCCESS && rc != SQL_NO_DATA) {
         if (h_env == NHENV) {
             do_error(h,rc,NHENV,NHDBC,NHSTMT,what);
@@ -715,6 +717,7 @@ dbd_st_fetch(sth)
 	D_imp_dbh_from_sth;
     SQLINTEGER debug = dbis->debug;
     SQLINTEGER num_fields;
+    SQLINTEGER ChopBlanks;
     SQLINTEGER i,ret;
     AV *av;
 	char *msg;
@@ -744,6 +747,7 @@ dbd_st_fetch(sth)
     if (debug >= 3)
 	fprintf(DBILOGFP, "    dbd_st_fetch %d fields\n", num_fields);
 
+	ChopBlanks = DBIc_has(imp_sth, DBIcf_ChopBlanks);
     for(i=0; i < num_fields; ++i) {
 		imp_fbh_t *fbh = &imp_sth->fbh[i];
 		SV *sv = AvARRAY(av)[i]; /* Note: we reuse the supplied SV	*/
@@ -763,7 +767,7 @@ dbd_st_fetch(sth)
 }
 
 int
-dbd_st_readblob(sth, field, offset, len, destrv, destoffset)
+dbd_st_blob_read(sth, field, offset, len, destrv, destoffset)
     SV *sth;
     int field;
     long offset;
@@ -796,12 +800,12 @@ dbd_st_readblob(sth, field, offset, len, destrv, destoffset)
 
 
 int
-dbd_st_rows(sth)
+dbd_st_rows(sth, imp_sth)
     SV *sth;
+    imp_sth_t *imp_sth;
 {
-    D_imp_sth(sth);
 	D_imp_dbh_from_sth;
-	SQLINTEGER rows, ret;
+	SQLINTEGER rows=-2, ret;
 	char *msg;
 
 	ret = SQLRowCount(imp_sth->phstmt,&rows);
@@ -813,16 +817,16 @@ dbd_st_rows(sth)
 
 
 int
-dbd_st_finish(sth)
+dbd_st_finish(sth,imp_sth)
     SV *sth;
+	imp_sth_t *imp_sth;
 {
-    D_imp_sth(sth);
 	D_imp_dbh_from_sth; 
 	SQLINTEGER ret;
 	char *msg;
 
 	if (DBIc_ACTIVE(imp_sth) ) {
-		ret = SQLCancel(imp_sth->phstmt);
+		ret = SQLFreeStmt(imp_sth->phstmt,SQL_CLOSE);
 		msg = (ERRTYPE(ret) ? "SQLCancel failed" : "Invaild Handle");
     	ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
 		EOI(ret);
@@ -832,7 +836,7 @@ dbd_st_finish(sth)
 }
 
 
-void
+int
 dbd_st_destroy(sth)
     SV *sth;
 {
@@ -871,10 +875,13 @@ dbd_st_destroy(sth)
  * Chet Murthy's patch for DB2 heap overflow problems
  */
     i = SQLFreeStmt (imp_sth->phstmt, SQL_DROP);
-    i = check_error(NULL,i,henv,imp_dbh->hdbc,NHSTMT,
+	if (i != SQL_SUCCESS && i != SQL_INVALID_HANDLE) {
+    	i = check_error(NULL,i,henv,imp_dbh->hdbc,NHSTMT,
 				   				"Statement destruction error");
+	}
 /* End Chet */
-    DBIc_IMPSET_off(imp_sth);		/* let DBI know we've done it	*/
+	DBIc_IMPSET_off(imp_sth);		/*  let DBI know we've done it	*/
+	return 1;
 }
 
 
@@ -938,7 +945,7 @@ dbd_st_FETCH(sth, keysv)
 	    		av_store(av, i, newSViv(imp_sth->fbh[i].dbtype));
 
     	} else  {
-			if (kl==13 && strEQ(key, "Num_OF_Params")) {
+			if (kl==13 && strEQ(key, "NUM_OF_PARAMS")) {
 				HV *bn = imp_sth->bind_names;
 				retsv = newSViv( (bn) ? HvKEYS(bn) : 0 );
 
@@ -948,7 +955,12 @@ dbd_st_FETCH(sth, keysv)
 				while(--i >= 0)
 		    		av_store(av, i, newSVpv((char *)imp_sth->fbh[i].cbuf,0));
 
-    		} else {
+    		} else if (kl==8 && strEQ(key, "NULLABLE")) {
+    			AV *av = newAV();
+    			retsv = newRV(sv_2mortal((SV*)av));
+    			while(--i >= 0)
+        			av_store(av, i, boolSV(imp_sth->fbh[i].nullok == 1));
+            } else {
 				return Nullsv;
     		}
 		}

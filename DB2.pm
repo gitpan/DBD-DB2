@@ -1,4 +1,4 @@
-#   $Id: DB2.pm,v 0.22 1997/04/10 14:45:32 mhm Rel $
+#   $Id: DB2.pm,v 0.24 1997/12/11 04:46:18 mhm Rel $
 #
 #   Copyright (c) 1995,1996 International Business Machines Corp. 
 #
@@ -16,9 +16,9 @@
 				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok
 				 $attrib_blobin $attrib_blobout);
 
-    $VERSION = '0.64';
-	my $revision = substr(q$Revision: 0.22 $, 10);
-	require_version DBI 0.79 ;
+    $VERSION = '0.65';
+	my $revision = substr(q$Revision: 0.24 $, 10);
+	require_version DBI 0.90 ;
 
     bootstrap DBD::DB2;
 
@@ -27,6 +27,9 @@
     $err = 0;		# holds error code   for DBI::err
     $errstr = "";	# holds error string for DBI::errstr
     $drh = undef;	# holds driver handle once initialised
+
+    $warn_success = $ENV{'WARNING_OK'};
+#print $warn_success,"\n";
 
     $attrib_dec = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
                     'Ctype' => SQL_C_CHAR,

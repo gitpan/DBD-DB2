@@ -39,7 +39,7 @@ $opts{INC}  = "$OCIINCLUDE -I$Config{sitearch}/auto/DBI";
 #$opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '.$linkwith };
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 $opts{OBJECT} = '$(O_FILES)';
-$opts{DEFINE} = ' ';
+$opts{DEFINE} = '';
 # --- Handle special cases ---
 
 
