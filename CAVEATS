@@ -1,0 +1,30 @@
+April 25, 1996
+    No KNOWN problems -- it is however alpha software.
+
+Caveats:
+    DBD::DB2 assumes the following:
+        1.  That the DBD::DB2 is built against
+            DB2 v2.1.0 or higher (AIX/UNIX, OS/2 versions)
+
+        2.  DB2 is installed in /usr/lpp/db2_02_01
+            or DB2_HOME points to the installed location
+
+        3.  That the following have been exported in the current
+            environment:
+
+            export DBI_DRIVER=DB2
+            export DBI_NAME="instance"  where "instance" is the DB2
+                                        instance name
+
+    Immediately prior to calling $sth->execute() you must call
+    $sth->bind_param(index, name, type_hash_ref).   Note, that a
+    minimal set of type_hash_refs are provided by DB2.pm and they
+    may be used to create new type_hash_refs
+        $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+
+    Fetching of CLOB and DLOBS is not currently supported.
+
+    Fetching any type of blob directly to a file is not implemented.
+
+    All requested columns are returned.  So if you don't want the
+    column, don't ask for it.

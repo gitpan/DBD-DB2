@@ -1,0 +1,126 @@
+April 25, 1996
+    No KNOWN problems -- it is however alpha software.
+
+Caveats:
+    DBD::DB2 assumes the following:
+        2.  DB2 is installed in /usr/lpp/db2_02_01
+            or DB2_HOME points to the installed location
+
+        3.  That the following have been exported in the current
+            environment:
+
+            export DBI_DRIVER=DB2
+            export DBI_NAME="instance"  where "instance" is the DB2
+                                        instance name
+
+    Immediately prior to calling $sth->execute() you must call
+    $sth->bind_param(index, name, type_hash_ref).   Note, that a
+    minimal set of type_hash_refs are provided by DB2.pm and they
+    may be used to create new type_hash_refs
+        $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+
+    Fetching of CLOB and DLOBS is not currently supported.
+
+    Fetching any type of blob directly to a file is not implemented.
+
+    All requested columns are returned.  So if you don't want the
+    column, don't ask for it.
+
+
+Nov. 17, 1995
+
+	NOTE: ***********************************************************
+          This will be the last release of DB2perl this year.  I will
+          be migrating the functionality to the new foundation just
+          announced by Tim.Bunce@ig.co.uk.  Only major bug fixes will
+          be done.
+    NOTE: ***********************************************************
+
+    Fetching of BLOBs (not CLOBs, or DLOBs) is working.
+
+    Fixed some problems with inserting explicit NULLs into tables and
+      retrieving rows containing explict NULLs reported by
+      chet@watson.ibm.com
+
+Caveats:
+    DBD::DB2 assumes the following:
+        1.  DB2 is installed in /usr/lpp/db2_02_01
+        2.  That the following have been exported in the current
+            environment:
+
+            export DBI_DRIVER=DB2
+            export DBI_NAME="instance"  where "instance" is the DB2
+                                        instance name
+
+    Immediately prior to calling $sth->execute() you must call
+    $sth->bind_param(index, name, type_hash_ref).   Note, that a
+    minimal set of type_hash_refs are provided by DB2.pm and they
+    may be used to create new type_hash_refs
+        $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+
+    Fetching of CLOB and DLOBS is not currently supported.
+
+	Fetching any type of blob directly to a file is not implemented.
+
+    All requested columns are returned.  So if you don't want the
+    column, don't ask for it.
+
+
+Sept. 22, 1995
+    Fetching data works by either
+       @row = $sth->fetchrow()  or ($f1, $f2, $f2) = $sth->fetchrow()
+
+Caveats:
+    DBD::DB2 assumes the following:
+        1.  DB2 is installed in /usr/lpp/db2_02_01
+        2.  That the following have been exported in the current
+            environment:
+
+            export DBI_DRIVER=DB2
+            export DBI_NAME="instance"  where "instance" is the DB2
+                                        instance name
+
+    Immediately prior to calling $sth->execute() you must call
+    $sth->bind_param(index, name, type_hash_ref).   Note, that a
+    minimal set of type_hash_refs are provided by DB2.pm and they
+    may be used to create new type_hash_refs
+        $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+
+	Fetching blobs is not currently supported, this means BLOBs, CLOBs
+    and DLOBs.
+
+	All requested columns are returned.  So if you don't want the
+    column, don't ask for it.
+
+Sept. 19, 1995
+
+Caveats:
+	DBD::DB2 assumes the following:
+		1.  DB2 is installed in /usr/lpp/db2_02_01
+		2.  That the following have been exported in the current
+			environment:
+			
+			export DBI_DRIVER=DB2
+			export DBI_NAME="instance" 	where "instance" is the DB2
+										instance name
+
+	Immediately prior to calling $sth->execute() you must call
+	$sth->bind_param(index, name, type_hash_ref).	Note, that a
+	minimal set of type_hash_refs are provided by DB2.pm and they
+	may be used to create new type_hash_refs
+		$new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
+
+	Fetching data is this weeks project -- in other words 
+	"NOT YET TESTED!"
+
+
+Bugs:
+	sqlstate - perl variable is not set presently
+
+	$dbh->disconnect() - cause an unknow DBI error, but all transactions
+						 are completed
+
+	Problem inserting char data into char column when data contains
+		single quotes.
+
+	
