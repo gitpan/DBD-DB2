@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.c,v 0.9 1996/06/07 03:01:38 mhm Rel $
+   $Id: dbdimp.c,v 0.10 1996/06/12 17:33:39 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -51,15 +51,11 @@ char *what;
 void
 do_error(SV *h, int rc, SQLHENV h_env, SQLHDBC h_conn, SQLHSTMT h_stmt, 
 	 SQLCHAR *what)
-/*    SV *h;
-    IV rc, h_env, h_conn, h_stmt;
-    char *what;
-*/
 {
     D_imp_xxh(h);
     SV *errstr = DBIc_ERRSTR(imp_xxh);
     SQLSMALLINT length;
-/*	SV *sql_state = DBIc_SQLSTATE(imp_xxh);*/
+	SV *state = DBIc_STATE(imp_xxh);
     SQLINTEGER  sqlcode;
 	SQLCHAR sqlstate[6];
     SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH+1];
@@ -69,12 +65,12 @@ do_error(SV *h, int rc, SQLHENV h_env, SQLHDBC h_conn, SQLHSTMT h_stmt,
     if (h_env != NHENV) {
         SQLError(h_env,h_conn,h_stmt, sqlstate, &sqlcode, msg,
                  msgsize,&length);
-		fprintf(stderr,"SQLSTATE = %s\n",sqlstate);
     } else {
         strcpy((char *)msg, (char *)what);
 	}
-    sv_setiv(DBIc_ERR(imp_xxh), (IV)rc);
-    sv_setpv(errstr, (char*)msg);
+    sv_setiv(DBIc_ERR(imp_xxh), (IV)sqlcode);
+    sv_setpv(errstr, (char *)msg);
+	sv_setpv(state,(char *)sqlstate);
     if (what && (h_env == NHENV)) {
         sv_catpv(errstr, " (DBD: ");
         sv_catpv(errstr, (char *)what);
@@ -152,13 +148,16 @@ dbd_db_connect(dbh,henv,dbname,uid,pwd)
     msg = (ERRTYPE(ret) ? "Connect allocation failed" :
                                 "Invalid Handle");
     ret = check_error(dbh,ret,henv,NHDBC,NHSTMT,msg);
-    EOI(ret);
-
+   	if (ret != SQL_SUCCESS) { 
+		return(ret);			/* Must return SQL codes not perl/DBD/DBI */
+	}						 	/* otherwise failure is not caught  */
+								
     ret = SQLConnect(imp_dbh->hdbc,dbname,SQL_NTS,uid,SQL_NTS,pwd,SQL_NTS);
     msg = ( ERRTYPE(ret) ? "Connect failed" : "Invalid handle");
     ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
-    EOI(ret);
-
+   	if (ret != SQL_SUCCESS) {	
+		return(ret);			/* Must return SQL codes not perl/DBD/DBI */
+	} 							/* otherwise failure is not caught  */
     return 1;
 }
 
