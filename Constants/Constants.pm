@@ -1,7 +1,7 @@
 #
 #	   Copyright (c) 1995,1996 International Business Machines Corp.
 #
-package DB2::Constants;
+package DBD::DB2::Constants;
 
 require Exporter;
 require DynaLoader;
@@ -719,7 +719,7 @@ sub AUTOLOAD {
 	}
 	else {
 	    ($pack,$file,$line) = caller;
-	    die "Your vendor has not defined DB2::Constants macro $constname, used at $file line $line.
+	    die "Your vendor has not defined DBD::DB2::Constants macro $constname, used at $file line $line.
 ";
 	}
     }
@@ -727,7 +727,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap DB2::Constants;
+bootstrap DBD::DB2::Constants;
 
 # Preloaded methods go here.
 

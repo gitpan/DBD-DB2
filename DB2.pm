@@ -1,4 +1,4 @@
-#   $Id: DB2.pm,v 0.10 1996/06/12 17:39:50 mhm Rel $
+#   $Id: DB2.pm,v 0.11 1996/06/21 12:41:50 mhm Rel $
 #
 #   Copyright (c) 1995,1996 International Business Machines Corp. 
 #
@@ -15,13 +15,13 @@
 				 $attrib_date $attrib_ts $attrib_dec
 				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok);
 
-    $VERSION = '0.58';
-	my $revision = substr(q$Revision: 0.10 $, 10);
-	require_version DBI 0.69 ;
+    $VERSION = '0.59';
+	my $revision = substr(q$Revision: 0.11 $, 10);
+	require_version DBI 0.70 ;
 
     bootstrap DBD::DB2;
 
-	use DB2::Constants;
+	use DBD::DB2::Constants;
 
     $err = 0;		# holds error code   for DBI::err
     $errstr = "";	# holds error string for DBI::errstr
