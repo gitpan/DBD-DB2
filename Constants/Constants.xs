@@ -4242,6 +4242,7 @@ not_there:
 
 MODULE = DBD::DB2::Constants		PACKAGE = DBD::DB2::Constants
 
+PROTOTYPES: DISABLE
 
 double
 constant(name,arg)

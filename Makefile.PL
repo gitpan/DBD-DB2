@@ -12,14 +12,9 @@ use DBI;	# The DBI must be installed before we can build a DBD
     'VERSION_FROM' => 'DB2.pm',
 );
 
-# Options, typically only used for debugging
-$opt_m = '';		# path to proc.mk or oracle.mk file to read
-
-getopts('m:') or die "Invalid arguments";
-
 # --- Introduction
 
-print "\nConfiguring DBD::DB2 version $opts{VERSION}...\n";
+print "\nConfiguring DBD::DB2 version $opts{VERSION_FROM}...\n";
 print "Remember to actually read the CAVEATS file!\n\n";
 
 # --- Where is DB2 installed...
@@ -40,8 +35,9 @@ print "DB2 sysliblist: $sysliblist\n";
 $OCIINCLUDE = $MK{INCLUDE} || "-I$DB2/include";
 
 $opts{LIBS} = [ $sysliblist ];
-$opts{INC}  = "$OCIINCLUDE -I$Config{sitearch}/DBI";
-$opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '.$linkwith };
+$opts{INC}  = "$OCIINCLUDE -I$Config{sitearch}/auto/DBI";
+#$opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '.$linkwith };
+$opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 $opts{OBJECT} = '$(O_FILES)';
 $opts{DEFINE} = ' ';
 # --- Handle special cases ---
@@ -100,10 +96,10 @@ dist:  ci clean
 	cd ..; tar cvFf $(DISTNAME)-$(VERSION).tar \
 		`sed -e "s:^:$(BASEEXT)/:" < $(BASEEXT)/MANIFEST`
 	cd ..; gzip -9 $(DISTNAME)-$(VERSION).tar;
-	@chmod -w ../$(DISTNAME)-$(VERSION).tar.Z
-	mv ../$(DISTNAME)-$(VERSION).tar.Z /u/ftp/pub/perl/db/DBD/DB2/
-	@cp README /u/ftp/pub/perl/db/DBD/DB2/
-	@cd /u/ftp/pub/perl/db/DBD/DB2; pwd; ls -l *.Z
+	@chmod -w ../$(DISTNAME)-$(VERSION).tar.gz
+	mv ../$(DISTNAME)-$(VERSION).tar.gz /usr/misc/ftp/pub/perl/db/DBD/DB2/
+	@cp README /usr/misc/ftp/pub/perl/db/DBD/DB2/
+	@cd /usr/misc/ftp/pub/perl/db/DBD/DB2; pwd; ls -l *.gz
 ';
 }
 

@@ -1,5 +1,5 @@
 /*
-   	$Id: DB2.xs,v 0.10 1997/02/07 18:21:38 mhm Rel $
+   	$Id: DB2.xs,v 0.11 1997/04/10 14:46:44 mhm Rel $
 
 	Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -150,6 +150,7 @@ DESTROY(dbh)
 			dbd_db_disconnect(dbh);
     	}
     	dbd_db_destroy(dbh);
+    	DBIc_IMPSET_off(imp_dbh);
 	}
 
 

@@ -143,9 +143,9 @@ or that the connect call is made with all the arguments.
 
 Do to DB2 deficiencies, it is not possible to call execute with
 parameters.  Instead, one must make use of the 
-$sth->bind_param(index, variable_name, attribute_hash) call for
+I<bind_param(index, variable_name, attribute_hash)> call for
 each parameter in the SQL statement.  This must be done immediately
-prior to call $sth->execute().  See the earlier example code.
+prior to call \$sth->execute().  See the earlier example code.
 
 =item *  Attribute Hashes
 
