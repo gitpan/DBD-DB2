@@ -1,81 +1,58 @@
 #
-#   engn/perldb2/Constants/Makefile.PL, engn_perldb2, db2_v81, 1.4 00/09/06 16:02:04
-#
-#   Copyright (c) 1995,1996,1998,1999 International Business Machines Corp.
+#	Copyright (c) 1995,1996,1998 International Business Machines Corp.
 #
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
-%opts = (
-        'NAME'          => 'DBD::DB2::Constants',
-        'VERSION_FROM'  => 'Constants.pm',
-        'LIBS'          => [''],   # e.g., '-lm'
-        'DEFINE'        => '',     # e.g., '-DHAVE_SOMETHING'
+%opts = (    'NAME'      => 'DBD::DB2::Constants',
+    'VERSION'   => '0.13',
+    'LIBS'      => [''],   # e.g., '-lm'
+    'DEFINE'    => '',     # e.g., '-DHAVE_SOMETHING'
 );
 
-# --- Operating system
-my $os = $^O;
+$DB2 = $ENV{DB2_HOME} ;
+die "DB2_HOME enviroment variable must be set to the location of the
+      header file\n" unless $DB2;
+die "DB2_HOME enviroment variable ($DB2) not valid.\n"
+     unless -d $DB2;
+print "Using The header files in $DB2\n";
 
-# --- Where is DB2 installed...
+$OCIINCLUDE = $MK{INCLUDE} || "-I$DB2";
 
-my $envvar = 'DB2_HOME';
-my $DB2 = $ENV{$envvar};
-if( not $DB2 )
-{
-  $envvar = 'DB2PATH';
-  $DB2 = $ENV{$envvar};
-}
-if( not $DB2 )
-{
-  my ($pathsep, $path, @pathlist);
+$opts{INC} = "$OCIINCLUDE";
 
-  $pathsep = $Config{'path_sep'};
-  $pathsep = ':' unless $pathsep;
-
-  $path = $ENV{'PATH'};
-  $path =~ s:\\:/:g if $pathsep eq ';';
-
-  @pathlist = split /$pathsep/, $path;
-  undef $DB2;
-  while( @pathlist && not $DB2 )
-  {
-    $DB2 = shift( @pathlist );
-    if( lc( substr( $DB2, -4 ) ) eq '/bin' &&
-        -f "$DB2/../include/sqlcli.h" )
-    {
-      substr( $DB2, -4 ) = '';
-    }
-    else
-    {
-      undef $DB2;
-    }
-  }
-}
-$DB2 =~ s:\\:/:g        if $os eq 'MSWin32' || $os eq 'os2';
-$DB2 =~ s/"//g;
-die "DB2_HOME environment variable must be set to installed location of DB2.\n"
-    unless $DB2;
-die "$envvar environment variable ($DB2) not valid.\n" unless -d $DB2;
-
-# --- Setup include path
-
-$opts{INC} = qq(-I"$DB2/include");
+# --- Get UNIX name
+chop($uname = `uname`);
 
 # --- Handle special cases
-if( $os eq "hpux" )
+if ($uname eq "HP-UX")
 {
   $opts{DEFINE} .= ' +Onolimit +e';
 }
-elsif( $os eq "aix" )
-{
-  $opts{DEFINE} .= ' -qcpluscmt';
-}
-elsif( $os eq "solaris" )
-{
-  if( $Config{cc} eq 'cc' )
-  {
-    $opts{DEFINE} .= ' -xCC';
-  }
-}
 
 WriteMakefile( %opts );
+
+sub MY::dist {          # new name with 5.001e
+    '
+DISTFILES=RCS/*
+
+ci:
+	-ci -u $(DISTFILES) 2>&1 | grep -v "no lock set by "
+	-rcs -q -Nv`echo "$(VERSION)" | tr . _`: $(DISTFILES)
+
+rcsdiff:
+	for f in $(DISTFILES); do rcsdiff -r$(V) $$f; done 2>&1 | less
+
+dist:  ci clean
+	rcs -q -sRel $(DISTFILES)
+	co -q -u     $(DISTFILES)
+	rm -f Makefile *~ t/*~
+	cd ..; tar cvFf $(DISTNAME)-$(VERSION).tar \
+	`sed -e "s:^:$(BASEEXT)/:" < $(BASEEXT)/MANIFEST`
+	cd ..; compress $(DISTNAME)-$(VERSION).tar;
+	@chmod -w ../$(DISTNAME)-$(VERSION).tar.Z
+	mv ../$(DISTNAME)-$(VERSION).tar.Z /u/ftp/pub/perl/db/DBD/DB2
+	@cp README /u/ftp/pub/perl/db/DBD/DB2/
+	@cd /u/ftp/pub/perl/db/DBD/DB2; pwd; ls -l *.Z
+';
+}

@@ -1,82 +1,113 @@
-Building DBD::DB2
------------------
-1.  The DBD::DB2 driver is supported by DB2 UDB V5.2 and
-    later.  For existing DB2 UDB V5.0 customers, FixPak 6
-    is required.  The actual FixPak 6 numbers for the
-    supported operating system platforms are as follows:
-        AIX - U459852
-        HP V10 - U459854
-        HP V11 - U459872
-        Solaris - U459853
-        Windows NT - 9074
-    See http://www.software.ibm.com/data/db2/perl for more
-    information on supported environments.
-2.  The DB2 Software Developer's Kit or DB2 Application
-    Development Client is required.
-3.  The build must be performed in a properly configured
-    DB2 environment or the DB2_HOME environment variable
-    must point to the installed location of DB2.
+DBD::DB2  for OS/390
+-------------------
 
-Special Notes re: Perl Object abstraction/ActivePerl 5.005
-----------------------------------------------------------
-1.  DBI 1.13 has a bug that causes DBD builds to fail, do
-    not use this version of DBI if Perl Object abstraction
-    is enabled (ActivePerl 5.005 always has this enabled).
-    DBI 1.12 is OK.  The DBI PPM package 1.13.1 is also OK,
-    it has the necessary patch. ActivePerl 5.6 does not
-    use Perl Object abstraction.
+1.  The DBD::DB2 driver is tested on OS/390 2.8, DB2 OS/390 V5 and C/C++ compiler for OS/390.
+    See http://www.software.ibm.com/data/db2/perl for
+    more information on supported environments.
 
-Special Notes re: Linux
------------------------
-Some versions of gcc have problems with optimization.  This
-can cause Contants.C to take a long time to compile.  Please
-be patient, it will probably finish eventually.  If it
-doesn't, or the resulting build causes a 'Total
-Environment allocation failure!' error when you try to
-connect, you will have to edit the Makefile (after running
-perl Makefile.PL) and change:
+2.  Minimum Prereqs. for DBD::DB2 OS/390 0.70
+    Perl 5.005.03 
+    DBI 1.13
+    DB2 OS/390 V5
+    DB2 OS/390 V5 CLI
+    GNU make-3.76.1 for OS/390
+Building DBD::DB2 driver
+------------------------
 
-        OPTIMIZE = -O2
-          to
-        OPTIMIZE = -O0
+Since Perl 5.005.03 does not support dynamic loading,
+DBI and DBD::DB2 are static linked to Perl in the steps below:
+1.  Setting up the Enviroment:
+       PERL
+       a.  Obtain stable_tar from http://www.perl.com
+       b.  Perform the following steps:
+              pax -o to=IBM-1047,from=ISO8859-1 -r < perl5.005_03.tar  
+              cd  perl5.xxx_yy (i.e perl5.005_03)
+              sh configure -des
+              ( to change the installation directory from the default /usr/local,
+                configure can be run as follows:
+                sh configure -Dprefix=/somedir -des )
+              make
+              make test
+              make install
 
-Special Notes re: HP-UX
------------------------
-1.  At the present time, HP-UX V11 cannot dynamically load
-    libraries that contain thread local storage.  As such,
-    additional libraries, -lpthread and -lcl, MUST be
-    specified when building perl.  If this is not done,
-    errors will occur during the DBD::DB2 "make test" phase.
-2.  In order to avoid some warnings when building perl, DBI,
-    and DBD::DB2, you may want to add the compile option,
-    +DAportable.  This compile option is used to generate
-    code that is compatible across both PA_RISC 1.1 and 2.0
-    workstations and servers.
-3.  If an "out of memory" error is returned when compiling
-    the file Constants.c during the DBD::DB2 build process,
-    remove the "+Onolimit" compile option from the file
-    Makefile.PL in the Constants subdirectory and restart
-    the build process.  Removing this compile option will
-    result in a warning like "Exceeding compiler resource
-    limits in constants; some optimizations skipped", but
-    this warning can be ignored.
+        DBI
+        a. Obtain DBI-1.13 from
+              http://www.perl.com/CPAN-local/modules/by-module/DBI
+	b. Perform the following steps:
+              pax -o to=IBM-1047, from=ISO8859-1 -r <DBI-1.13.tar
+              cd DBI-1.13
+              perl Makefile.PL
+              make -f Makefile
+              rm -f *.o
+              make -f Makefile perl
+              make -f Makefile.aperl inst_perl MAP_TARGET=perl
+              make -f Makefile install
+              make -f Makefile test
+
+        DBD::DB2
+         a. Get the DB2 CLI header files: SQL, SQLCA, SQLCLI, SQLCLI1,
+         SQLDA, SQLEXT, SQLSYSTM from DSN510.SDSNC.H to an HFS directory:
+              oput 'DSN510.SDSNC.H(SQL)'       '/somedir/sql.h'
+              oput 'DSN510.SDSNC.H(SQLCA)'     '/somedir/sqlca.h'
+              oput 'DSN510.SDSNC.H(SQLCLI)'    '/somedir/sqlcli.h'
+              oput 'DSN510.SDSNC.H(SQLCLI1)'   '/somedir/sqlcli1.h'
+              oput 'DSN510.SDSNC.H(SQLDA)'     '/somedir/sqlda'
+              oput 'DSN510.SDSNC.H(SQLEXT)'    '/somedir/sqlext'
+              oput 'DSN510.SDSNC.H(SQLSYSTM)'  '/somedir/sqlsystm.h'
+         b. Set up the .profile file:
+              Add the path '/somedir' to $(PATH) variable.
+              Logout and login system.
+         c. Make the DB2 CLI definition side-deck available to OS/390 UNIX:
+              Create the alias that uses .EXP as the last qualifier in the name.
+              This alias should relate to the SDSNMACS data set which is where
+              the DB2 CLI definition side-deck is installed.
+              For example, assume that DB2 is installed using DSN510 as the high level
+              data set qualifer. You can define the alias using the following command:
+	         DEFINE   ALIAS(NAME('DSN.DSN5.SDSNC.EXP')  RELATE('DSN510.SDSNMACS'))		
+         d. Obtain DBD-DB2-0.70 for OS/390 from:
+              http://www.software.ibm.com/data/db2/perl
+         e. Perform the following steps:
+              gunzip DBD-DB2-0.70.0S390.tar.gz
+              pax -o to=IBM-1047, from=ISO8859-1 -r < DBD-DB2-0.70.0S390.tar
+              cd DBD-DB2-0.70.OS390
+              export DB2_HOME=/somedir
+              cd Constants
+              perl Makefile.PL
+              make -f Makefile perl
+              make -f Makefile.aperl inst_perl MAP_TARGET=perl
+              make -f Makefile install
+              cd ..
+              perl Makefile.PL
+              oedit Makefile  ( open this file and edit)
+                    Change "CC = c89" to "CC = c89 -W c,dll" ( it should be line 32)
+              make -f Makefile perl
+                    You will get the error and return code "8" from the LINKEDIT step.
+              oedit Makefile.aperl ( open this file and edit)
+                    Look for the first "MAP_LINKCMD" and change:
+                    "MAP_LINKCMD = $CC" to "MAP_LINKCMD = c89 -W l,p,dll,AMODE=31"
+                     (It should be line 710)
+                    Look for the first "MAP_PRELIBS" and change:
+                    "MAP_PRELIBS = -lm -lc" to "MAP_PRELIBS = -lm -lc "//'DSN.DSN5.SDSNC.EXP(DSNAOCLI)'""
+                     (It should be line 729)
+
+              make -f Makefile perl
+              make -f Makefile.aperl inst_perl MAP_TARGET=perl
+              make -f Makefile install
+              make -f Makefile test
 
 Using DBD::DB2
 --------------
-1.  Note that as of DB2 UDB CLI V5.0, deferred prepare is on
-    by default (DBD::DB2 is a CLI application).  To change
-    this behaviour, the value of the DEFERREDPREPARE keyword
-    in db2cli.ini must be changed.  Support is not yet
-    available to change this value at the statement level
-    (via a statement attribute).
+1.  In order to execute a statement with parameter markers
+    against a host DBMS (i.e. DB2 for OS/390), you must call
+    bind_param() to bind values to the parameter markers.
+2.  If you are using $sth->bind_param(index, value, type_hash_ref)
+    to bind values to parameter markers, then it must be called
+    immediately prior to calling execute().  Note that a minimal
+    set of type_hash_refs are provided by DB2.pm and they may
+    be used to create new type_hash_refs
+        $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
 
-Unsupported Features
---------------------
-1.  Fetching any type of LOB directly to a file.
-2.  $dbh->type_info
-3.  $dbh->type_info_all
-4.  Multiple result sets returned from stored procedures.  Only
-    the first one is available to the application.
-5.  The child process of a fork cannot use the DB2 Perl driver
-    whatsoever.  In addition the child process must turn on the
-    InactiveDestroy flag for any DBI handles inherited.
+Unsupported Features (wrt DBI 0.93)
+-----------------------------------
+1.  The following attributes are not yet supported:
+         ChopBlanks, LongReadLen, LongTruncOk

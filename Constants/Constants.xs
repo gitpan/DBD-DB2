@@ -1,7 +1,7 @@
 /*
- *	engn/perldb2/Constants/Constants.xs, engn_perldb2, db2_v6, 1.2 99/01/12 13:51:47
- *
- *	Copyright (c) 1995,1996,1999 International Business Machines Corp.
+ *    Constants.xs , db2_v5, 12/03/99
+ *	   Copyright (c) 1995,1996,1997,1998,1999 International Business Machines Corp.
+ *    Port DBD:DB2 driver 0.70 to OS390 system.
  */
 #ifdef __cplusplus
 extern "C" {
@@ -16,6 +16,7 @@ extern "C" {
 #include <sqlcli.h>
 #include <sqlcli1.h>
 #include <sqlext.h>
+#include <sql.h>   /*  TD01  */
 
 static int
 not_here(s)
@@ -49,12 +50,30 @@ int arg;
     case 'E':
 	break;
     case 'F':
-        break;
+	if (strEQ(name, "FAR"))
+#ifdef FAR
+	    return FAR;
+#else
+	    goto not_there;
+#endif
+	break;
     case 'G':
 	break;
     case 'H':
 	break;
     case 'I':
+	if (strEQ(name, "INCL_DOS"))
+#ifdef INCL_DOS
+	    return INCL_DOS;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "INCL_WIN"))
+#ifdef INCL_WIN
+	    return INCL_WIN;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'J':
 	break;
@@ -81,12 +100,6 @@ int arg;
     case 'R':
 	break;
     case 'S':
-	if (strEQ(name, "SQLAllocHandle"))
-#ifdef SQLAllocHandle
-	    return SQLAllocHandle;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ACCESSIBLE_PROCEDURES"))
 #ifdef SQL_ACCESSIBLE_PROCEDURES
 	    return SQL_ACCESSIBLE_PROCEDURES;
@@ -111,12 +124,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ACTIVE_ENVIRONMENTS"))
-#ifdef SQL_ACTIVE_ENVIRONMENTS
-	    return SQL_ACTIVE_ENVIRONMENTS;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ACTIVE_STATEMENTS"))
 #ifdef SQL_ACTIVE_STATEMENTS
 	    return SQL_ACTIVE_STATEMENTS;
@@ -126,108 +133,6 @@ int arg;
 	if (strEQ(name, "SQL_ADD"))
 #ifdef SQL_ADD
 	    return SQL_ADD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_ADD_CONSTRAINT_DEFERRABLE"))
-#ifdef SQL_AD_ADD_CONSTRAINT_DEFERRABLE
-	    return SQL_AD_ADD_CONSTRAINT_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_ADD_CONSTRAINT_INITIALLY_DEFERRED"))
-#ifdef SQL_AD_ADD_CONSTRAINT_INITIALLY_DEFERRED
-	    return SQL_AD_ADD_CONSTRAINT_INITIALLY_DEFERRED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_ADD_CONSTRAINT_INITIALLY_IMMEDIATE"))
-#ifdef SQL_AD_ADD_CONSTRAINT_INITIALLY_IMMEDIATE
-	    return SQL_AD_ADD_CONSTRAINT_INITIALLY_IMMEDIATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_ADD_CONSTRAINT_NON_DEFERRABLE"))
-#ifdef SQL_AD_ADD_CONSTRAINT_NON_DEFERRABLE
-	    return SQL_AD_ADD_CONSTRAINT_NON_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_ADD_DOMAIN_CONSTRAINT"))
-#ifdef SQL_AD_ADD_DOMAIN_CONSTRAINT
-	    return SQL_AD_ADD_DOMAIN_CONSTRAINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_ADD_DOMAIN_DEFAULT"))
-#ifdef SQL_AD_ADD_DOMAIN_DEFAULT
-	    return SQL_AD_ADD_DOMAIN_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_CONSTRAINT_NAME_DEFINITION"))
-#ifdef SQL_AD_CONSTRAINT_NAME_DEFINITION
-	    return SQL_AD_CONSTRAINT_NAME_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_DROP_DOMAIN_CONSTRAINT"))
-#ifdef SQL_AD_DROP_DOMAIN_CONSTRAINT
-	    return SQL_AD_DROP_DOMAIN_CONSTRAINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AD_DROP_DOMAIN_DEFAULT"))
-#ifdef SQL_AD_DROP_DOMAIN_DEFAULT
-	    return SQL_AD_DROP_DOMAIN_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AF_ALL"))
-#ifdef SQL_AF_ALL
-	    return SQL_AF_ALL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AF_AVG"))
-#ifdef SQL_AF_AVG
-	    return SQL_AF_AVG;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AF_COUNT"))
-#ifdef SQL_AF_COUNT
-	    return SQL_AF_COUNT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AF_DISTINCT"))
-#ifdef SQL_AF_DISTINCT
-	    return SQL_AF_DISTINCT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AF_MAX"))
-#ifdef SQL_AF_MAX
-	    return SQL_AF_MAX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AF_MIN"))
-#ifdef SQL_AF_MIN
-	    return SQL_AF_MIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AF_SUM"))
-#ifdef SQL_AF_SUM
-	    return SQL_AF_SUM;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AGGREGATE_FUNCTIONS"))
-#ifdef SQL_AGGREGATE_FUNCTIONS
-	    return SQL_AGGREGATE_FUNCTIONS;
 #else
 	    goto not_there;
 #endif
@@ -243,57 +148,21 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ALTER_DOMAIN"))
-#ifdef SQL_ALTER_DOMAIN
-	    return SQL_ALTER_DOMAIN;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ALTER_TABLE"))
 #ifdef SQL_ALTER_TABLE
 	    return SQL_ALTER_TABLE;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_AM_CONNECTION"))
-#ifdef SQL_AM_CONNECTION
-	    return SQL_AM_CONNECTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AM_NONE"))
-#ifdef SQL_AM_NONE
-	    return SQL_AM_NONE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AM_STATEMENT"))
-#ifdef SQL_AM_STATEMENT
-	    return SQL_AM_STATEMENT;
+	if (strEQ(name, "SQL_API"))
+#ifdef SQL_API
+	    return SQL_API;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "SQL_API_ALL_FUNCTIONS"))
 #ifdef SQL_API_ALL_FUNCTIONS
 	    return SQL_API_ALL_FUNCTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_LOADBYORDINAL"))
-#ifdef SQL_API_LOADBYORDINAL
-	    return SQL_API_LOADBYORDINAL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_ODBC3_ALL_FUNCTIONS"))
-#ifdef SQL_API_ODBC3_ALL_FUNCTIONS
-	    return SQL_API_ODBC3_ALL_FUNCTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_ODBC3_ALL_FUNCTIONS_SIZE"))
-#ifdef SQL_API_ODBC3_ALL_FUNCTIONS_SIZE
-	    return SQL_API_ODBC3_ALL_FUNCTIONS_SIZE;
 #else
 	    goto not_there;
 #endif
@@ -306,18 +175,6 @@ int arg;
 	if (strEQ(name, "SQL_API_SQLALLOCENV"))
 #ifdef SQL_API_SQLALLOCENV
 	    return SQL_API_SQLALLOCENV;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLALLOCHANDLE"))
-#ifdef SQL_API_SQLALLOCHANDLE
-	    return SQL_API_SQLALLOCHANDLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLALLOCHANDLESTD"))
-#ifdef SQL_API_SQLALLOCHANDLESTD
-	    return SQL_API_SQLALLOCHANDLESTD;
 #else
 	    goto not_there;
 #endif
@@ -345,12 +202,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_API_SQLBINDPARAM"))
-#ifdef SQL_API_SQLBINDPARAM
-	    return SQL_API_SQLBINDPARAM;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_API_SQLBINDPARAMETER"))
 #ifdef SQL_API_SQLBINDPARAMETER
 	    return SQL_API_SQLBINDPARAMETER;
@@ -363,33 +214,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_API_SQLBUILDDATALINK"))
-#ifdef SQL_API_SQLBUILDDATALINK
-	    return SQL_API_SQLBUILDDATALINK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLBULKOPERATIONS"))
-#ifdef SQL_API_SQLBULKOPERATIONS
-	    return SQL_API_SQLBULKOPERATIONS;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_API_SQLCANCEL"))
 #ifdef SQL_API_SQLCANCEL
 	    return SQL_API_SQLCANCEL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLCLOSECURSOR"))
-#ifdef SQL_API_SQLCLOSECURSOR
-	    return SQL_API_SQLCLOSECURSOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLCOLATTRIBUTE"))
-#ifdef SQL_API_SQLCOLATTRIBUTE
-	    return SQL_API_SQLCOLATTRIBUTE;
 #else
 	    goto not_there;
 #endif
@@ -414,12 +241,6 @@ int arg;
 	if (strEQ(name, "SQL_API_SQLCONNECT"))
 #ifdef SQL_API_SQLCONNECT
 	    return SQL_API_SQLCONNECT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLCOPYDESC"))
-#ifdef SQL_API_SQLCOPYDESC
-	    return SQL_API_SQLCOPYDESC;
 #else
 	    goto not_there;
 #endif
@@ -459,12 +280,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_API_SQLENDTRAN"))
-#ifdef SQL_API_SQLENDTRAN
-	    return SQL_API_SQLENDTRAN;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_API_SQLERROR"))
 #ifdef SQL_API_SQLERROR
 	    return SQL_API_SQLERROR;
@@ -495,12 +310,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_API_SQLFETCHSCROLL"))
-#ifdef SQL_API_SQLFETCHSCROLL
-	    return SQL_API_SQLFETCHSCROLL;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_API_SQLFOREIGNKEYS"))
 #ifdef SQL_API_SQLFOREIGNKEYS
 	    return SQL_API_SQLFOREIGNKEYS;
@@ -519,21 +328,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_API_SQLFREEHANDLE"))
-#ifdef SQL_API_SQLFREEHANDLE
-	    return SQL_API_SQLFREEHANDLE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_API_SQLFREESTMT"))
 #ifdef SQL_API_SQLFREESTMT
 	    return SQL_API_SQLFREESTMT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLGETCONNECTATTR"))
-#ifdef SQL_API_SQLGETCONNECTATTR
-	    return SQL_API_SQLGETCONNECTATTR;
 #else
 	    goto not_there;
 #endif
@@ -552,36 +349,6 @@ int arg;
 	if (strEQ(name, "SQL_API_SQLGETDATA"))
 #ifdef SQL_API_SQLGETDATA
 	    return SQL_API_SQLGETDATA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLGETDATALINKATTR"))
-#ifdef SQL_API_SQLGETDATALINKATTR
-	    return SQL_API_SQLGETDATALINKATTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLGETDESCFIELD"))
-#ifdef SQL_API_SQLGETDESCFIELD
-	    return SQL_API_SQLGETDESCFIELD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLGETDESCREC"))
-#ifdef SQL_API_SQLGETDESCREC
-	    return SQL_API_SQLGETDESCREC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLGETDIAGFIELD"))
-#ifdef SQL_API_SQLGETDIAGFIELD
-	    return SQL_API_SQLGETDIAGFIELD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLGETDIAGREC"))
-#ifdef SQL_API_SQLGETDIAGREC
-	    return SQL_API_SQLGETDIAGREC;
 #else
 	    goto not_there;
 #endif
@@ -618,12 +385,6 @@ int arg;
 	if (strEQ(name, "SQL_API_SQLGETSQLCA"))
 #ifdef SQL_API_SQLGETSQLCA
 	    return SQL_API_SQLGETSQLCA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLGETSTMTATTR"))
-#ifdef SQL_API_SQLGETSTMTATTR
-	    return SQL_API_SQLGETSTMTATTR;
 #else
 	    goto not_there;
 #endif
@@ -723,12 +484,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_API_SQLSETCONNECTATTR"))
-#ifdef SQL_API_SQLSETCONNECTATTR
-	    return SQL_API_SQLSETCONNECTATTR;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_API_SQLSETCONNECTION"))
 #ifdef SQL_API_SQLSETCONNECTION
 	    return SQL_API_SQLSETCONNECTION;
@@ -744,18 +499,6 @@ int arg;
 	if (strEQ(name, "SQL_API_SQLSETCURSORNAME"))
 #ifdef SQL_API_SQLSETCURSORNAME
 	    return SQL_API_SQLSETCURSORNAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLSETDESCFIELD"))
-#ifdef SQL_API_SQLSETDESCFIELD
-	    return SQL_API_SQLSETDESCFIELD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLSETDESCREC"))
-#ifdef SQL_API_SQLSETDESCREC
-	    return SQL_API_SQLSETDESCREC;
 #else
 	    goto not_there;
 #endif
@@ -780,12 +523,6 @@ int arg;
 	if (strEQ(name, "SQL_API_SQLSETSCROLLOPTIONS"))
 #ifdef SQL_API_SQLSETSCROLLOPTIONS
 	    return SQL_API_SQLSETSCROLLOPTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_API_SQLSETSTMTATTR"))
-#ifdef SQL_API_SQLSETSTMTATTR
-	    return SQL_API_SQLSETSTMTATTR;
 #else
 	    goto not_there;
 #endif
@@ -825,12 +562,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ARD_TYPE"))
-#ifdef SQL_ARD_TYPE
-	    return SQL_ARD_TYPE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ASYNC_ENABLE"))
 #ifdef SQL_ASYNC_ENABLE
 	    return SQL_ASYNC_ENABLE;
@@ -855,12 +586,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ASYNC_MODE"))
-#ifdef SQL_ASYNC_MODE
-	    return SQL_ASYNC_MODE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ATOMIC_DEFAULT"))
 #ifdef SQL_ATOMIC_DEFAULT
 	    return SQL_ATOMIC_DEFAULT;
@@ -879,459 +604,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ATTR_ACCESS_MODE"))
-#ifdef SQL_ATTR_ACCESS_MODE
-	    return SQL_ATTR_ACCESS_MODE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_APP_PARAM_DESC"))
-#ifdef SQL_ATTR_APP_PARAM_DESC
-	    return SQL_ATTR_APP_PARAM_DESC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_APP_ROW_DESC"))
-#ifdef SQL_ATTR_APP_ROW_DESC
-	    return SQL_ATTR_APP_ROW_DESC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ASYNC_ENABLE"))
-#ifdef SQL_ATTR_ASYNC_ENABLE
-	    return SQL_ATTR_ASYNC_ENABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_AUTOCOMMIT"))
-#ifdef SQL_ATTR_AUTOCOMMIT
-	    return SQL_ATTR_AUTOCOMMIT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_AUTO_IPD"))
-#ifdef SQL_ATTR_AUTO_IPD
-	    return SQL_ATTR_AUTO_IPD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CLISCHEMA"))
-#ifdef SQL_ATTR_CLISCHEMA
-	    return SQL_ATTR_CLISCHEMA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CLOSEOPEN"))
-#ifdef SQL_ATTR_CLOSEOPEN
-	    return SQL_ATTR_CLOSEOPEN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CLOSE_BEHAVIOR"))
-#ifdef SQL_ATTR_CLOSE_BEHAVIOR
-	    return SQL_ATTR_CLOSE_BEHAVIOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CONCURRENCY"))
-#ifdef SQL_ATTR_CONCURRENCY
-	    return SQL_ATTR_CONCURRENCY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CONNECTION_DEAD"))
-#ifdef SQL_ATTR_CONNECTION_DEAD
-	    return SQL_ATTR_CONNECTION_DEAD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CONNECTION_POOLING"))
-#ifdef SQL_ATTR_CONNECTION_POOLING
-	    return SQL_ATTR_CONNECTION_POOLING;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CONNECTION_TIMEOUT"))
-#ifdef SQL_ATTR_CONNECTION_TIMEOUT
-	    return SQL_ATTR_CONNECTION_TIMEOUT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CONNECTTYPE"))
-#ifdef SQL_ATTR_CONNECTTYPE
-	    return SQL_ATTR_CONNECTTYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CONN_CONTEXT"))
-#ifdef SQL_ATTR_CONN_CONTEXT
-	    return SQL_ATTR_CONN_CONTEXT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CP_MATCH"))
-#ifdef SQL_ATTR_CP_MATCH
-	    return SQL_ATTR_CP_MATCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CURRENT_CATALOG"))
-#ifdef SQL_ATTR_CURRENT_CATALOG
-	    return SQL_ATTR_CURRENT_CATALOG;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CURRENT_PACKAGE_SET"))
-#ifdef SQL_ATTR_CURRENT_PACKAGE_SET
-	    return SQL_ATTR_CURRENT_PACKAGE_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CURRENT_SCHEMA"))
-#ifdef SQL_ATTR_CURRENT_SCHEMA
-	    return SQL_ATTR_CURRENT_SCHEMA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CURSOR_HOLD"))
-#ifdef SQL_ATTR_CURSOR_HOLD
-	    return SQL_ATTR_CURSOR_HOLD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CURSOR_SCROLLABLE"))
-#ifdef SQL_ATTR_CURSOR_SCROLLABLE
-	    return SQL_ATTR_CURSOR_SCROLLABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CURSOR_SENSITIVITY"))
-#ifdef SQL_ATTR_CURSOR_SENSITIVITY
-	    return SQL_ATTR_CURSOR_SENSITIVITY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_CURSOR_TYPE"))
-#ifdef SQL_ATTR_CURSOR_TYPE
-	    return SQL_ATTR_CURSOR_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DATALINK_COMMENT"))
-#ifdef SQL_ATTR_DATALINK_COMMENT
-	    return SQL_ATTR_DATALINK_COMMENT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DATALINK_LINKTYPE"))
-#ifdef SQL_ATTR_DATALINK_LINKTYPE
-	    return SQL_ATTR_DATALINK_LINKTYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DATALINK_URLCOMPLETE"))
-#ifdef SQL_ATTR_DATALINK_URLCOMPLETE
-	    return SQL_ATTR_DATALINK_URLCOMPLETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DATALINK_URLPATH"))
-#ifdef SQL_ATTR_DATALINK_URLPATH
-	    return SQL_ATTR_DATALINK_URLPATH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DATALINK_URLPATHONLY"))
-#ifdef SQL_ATTR_DATALINK_URLPATHONLY
-	    return SQL_ATTR_DATALINK_URLPATHONLY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DATALINK_URLSCHEME"))
-#ifdef SQL_ATTR_DATALINK_URLSCHEME
-	    return SQL_ATTR_DATALINK_URLSCHEME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DATALINK_URLSERVER"))
-#ifdef SQL_ATTR_DATALINK_URLSERVER
-	    return SQL_ATTR_DATALINK_URLSERVER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DB2ESTIMATE"))
-#ifdef SQL_ATTR_DB2ESTIMATE
-	    return SQL_ATTR_DB2ESTIMATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DB2EXPLAIN"))
-#ifdef SQL_ATTR_DB2EXPLAIN
-	    return SQL_ATTR_DB2EXPLAIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DEFERRED_PREPARE"))
-#ifdef SQL_ATTR_DEFERRED_PREPARE
-	    return SQL_ATTR_DEFERRED_PREPARE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_DISCONNECT_BEHAVIOR"))
-#ifdef SQL_ATTR_DISCONNECT_BEHAVIOR
-	    return SQL_ATTR_DISCONNECT_BEHAVIOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_EARLYCLOSE"))
-#ifdef SQL_ATTR_EARLYCLOSE
-	    return SQL_ATTR_EARLYCLOSE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ENABLE_AUTO_IPD"))
-#ifdef SQL_ATTR_ENABLE_AUTO_IPD
-	    return SQL_ATTR_ENABLE_AUTO_IPD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ENABLE_IPD_SETTING"))
-#ifdef SQL_ATTR_ENABLE_IPD_SETTING
-	    return SQL_ATTR_ENABLE_IPD_SETTING;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ENLIST_IN_DTC"))
-#ifdef SQL_ATTR_ENLIST_IN_DTC
-	    return SQL_ATTR_ENLIST_IN_DTC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ENLIST_IN_XA"))
-#ifdef SQL_ATTR_ENLIST_IN_XA
-	    return SQL_ATTR_ENLIST_IN_XA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_FETCH_BOOKMARK_PTR"))
-#ifdef SQL_ATTR_FETCH_BOOKMARK_PTR
-	    return SQL_ATTR_FETCH_BOOKMARK_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_FORCE_CONVERSION_ON_CLIENT"))
-#ifdef SQL_ATTR_FORCE_CONVERSION_ON_CLIENT
-	    return SQL_ATTR_FORCE_CONVERSION_ON_CLIENT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_IMP_PARAM_DESC"))
-#ifdef SQL_ATTR_IMP_PARAM_DESC
-	    return SQL_ATTR_IMP_PARAM_DESC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_IMP_ROW_DESC"))
-#ifdef SQL_ATTR_IMP_ROW_DESC
-	    return SQL_ATTR_IMP_ROW_DESC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_INFO_ACCTSTR"))
-#ifdef SQL_ATTR_INFO_ACCTSTR
-	    return SQL_ATTR_INFO_ACCTSTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_INFO_APPLNAME"))
-#ifdef SQL_ATTR_INFO_APPLNAME
-	    return SQL_ATTR_INFO_APPLNAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_INFO_USERID"))
-#ifdef SQL_ATTR_INFO_USERID
-	    return SQL_ATTR_INFO_USERID;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_INFO_WRKSTNNAME"))
-#ifdef SQL_ATTR_INFO_WRKSTNNAME
-	    return SQL_ATTR_INFO_WRKSTNNAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_INHERIT_NULL_CONNECT"))
-#ifdef SQL_ATTR_INHERIT_NULL_CONNECT
-	    return SQL_ATTR_INHERIT_NULL_CONNECT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_KEYSET_SIZE"))
-#ifdef SQL_ATTR_KEYSET_SIZE
-	    return SQL_ATTR_KEYSET_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_LOGIN_TIMEOUT"))
-#ifdef SQL_ATTR_LOGIN_TIMEOUT
-	    return SQL_ATTR_LOGIN_TIMEOUT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_LONGDATA_COMPAT"))
-#ifdef SQL_ATTR_LONGDATA_COMPAT
-	    return SQL_ATTR_LONGDATA_COMPAT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_MAXCONN"))
-#ifdef SQL_ATTR_MAXCONN
-	    return SQL_ATTR_MAXCONN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_MAX_LENGTH"))
-#ifdef SQL_ATTR_MAX_LENGTH
-	    return SQL_ATTR_MAX_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_MAX_ROWS"))
-#ifdef SQL_ATTR_MAX_ROWS
-	    return SQL_ATTR_MAX_ROWS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_METADATA_ID"))
-#ifdef SQL_ATTR_METADATA_ID
-	    return SQL_ATTR_METADATA_ID;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_MINMEMORY_USAGE"))
-#ifdef SQL_ATTR_MINMEMORY_USAGE
-	    return SQL_ATTR_MINMEMORY_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_NODESCRIBE"))
-#ifdef SQL_ATTR_NODESCRIBE
-	    return SQL_ATTR_NODESCRIBE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_NODESCRIBE_INPUT"))
-#ifdef SQL_ATTR_NODESCRIBE_INPUT
-	    return SQL_ATTR_NODESCRIBE_INPUT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_NODESCRIBE_OUTPUT"))
-#ifdef SQL_ATTR_NODESCRIBE_OUTPUT
-	    return SQL_ATTR_NODESCRIBE_OUTPUT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_NOSCAN"))
-#ifdef SQL_ATTR_NOSCAN
-	    return SQL_ATTR_NOSCAN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ODBC_CURSORS"))
-#ifdef SQL_ATTR_ODBC_CURSORS
-	    return SQL_ATTR_ODBC_CURSORS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ODBC_VERSION"))
-#ifdef SQL_ATTR_ODBC_VERSION
-	    return SQL_ATTR_ODBC_VERSION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_OPTIMIZE_SQLCOLUMNS"))
-#ifdef SQL_ATTR_OPTIMIZE_SQLCOLUMNS
-	    return SQL_ATTR_OPTIMIZE_SQLCOLUMNS;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ATTR_OUTPUT_NTS"))
 #ifdef SQL_ATTR_OUTPUT_NTS
 	    return SQL_ATTR_OUTPUT_NTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PACKET_SIZE"))
-#ifdef SQL_ATTR_PACKET_SIZE
-	    return SQL_ATTR_PACKET_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PARAMOPT_ATOMIC"))
-#ifdef SQL_ATTR_PARAMOPT_ATOMIC
-	    return SQL_ATTR_PARAMOPT_ATOMIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PARAMSET_SIZE"))
-#ifdef SQL_ATTR_PARAMSET_SIZE
-	    return SQL_ATTR_PARAMSET_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PARAMS_PROCESSED_PTR"))
-#ifdef SQL_ATTR_PARAMS_PROCESSED_PTR
-	    return SQL_ATTR_PARAMS_PROCESSED_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PARAM_BIND_OFFSET_PTR"))
-#ifdef SQL_ATTR_PARAM_BIND_OFFSET_PTR
-	    return SQL_ATTR_PARAM_BIND_OFFSET_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PARAM_BIND_TYPE"))
-#ifdef SQL_ATTR_PARAM_BIND_TYPE
-	    return SQL_ATTR_PARAM_BIND_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PARAM_OPERATION_PTR"))
-#ifdef SQL_ATTR_PARAM_OPERATION_PTR
-	    return SQL_ATTR_PARAM_OPERATION_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PARAM_STATUS_PTR"))
-#ifdef SQL_ATTR_PARAM_STATUS_PTR
-	    return SQL_ATTR_PARAM_STATUS_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PREFETCH"))
-#ifdef SQL_ATTR_PREFETCH
-	    return SQL_ATTR_PREFETCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_PROCESSCTL"))
-#ifdef SQL_ATTR_PROCESSCTL
-	    return SQL_ATTR_PROCESSCTL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_QUERY_TIMEOUT"))
-#ifdef SQL_ATTR_QUERY_TIMEOUT
-	    return SQL_ATTR_QUERY_TIMEOUT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_QUIET_MODE"))
-#ifdef SQL_ATTR_QUIET_MODE
-	    return SQL_ATTR_QUIET_MODE;
 #else
 	    goto not_there;
 #endif
@@ -1347,114 +622,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ATTR_RETRIEVE_DATA"))
-#ifdef SQL_ATTR_RETRIEVE_DATA
-	    return SQL_ATTR_RETRIEVE_DATA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ROWS_FETCHED_PTR"))
-#ifdef SQL_ATTR_ROWS_FETCHED_PTR
-	    return SQL_ATTR_ROWS_FETCHED_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ROW_ARRAY_SIZE"))
-#ifdef SQL_ATTR_ROW_ARRAY_SIZE
-	    return SQL_ATTR_ROW_ARRAY_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ROW_BIND_OFFSET_PTR"))
-#ifdef SQL_ATTR_ROW_BIND_OFFSET_PTR
-	    return SQL_ATTR_ROW_BIND_OFFSET_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ROW_BIND_TYPE"))
-#ifdef SQL_ATTR_ROW_BIND_TYPE
-	    return SQL_ATTR_ROW_BIND_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ROW_NUMBER"))
-#ifdef SQL_ATTR_ROW_NUMBER
-	    return SQL_ATTR_ROW_NUMBER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ROW_OPERATION_PTR"))
-#ifdef SQL_ATTR_ROW_OPERATION_PTR
-	    return SQL_ATTR_ROW_OPERATION_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_ROW_STATUS_PTR"))
-#ifdef SQL_ATTR_ROW_STATUS_PTR
-	    return SQL_ATTR_ROW_STATUS_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_SIMULATE_CURSOR"))
-#ifdef SQL_ATTR_SIMULATE_CURSOR
-	    return SQL_ATTR_SIMULATE_CURSOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_STMTTXN_ISOLATION"))
-#ifdef SQL_ATTR_STMTTXN_ISOLATION
-	    return SQL_ATTR_STMTTXN_ISOLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_SYNC_POINT"))
-#ifdef SQL_ATTR_SYNC_POINT
-	    return SQL_ATTR_SYNC_POINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_TRACE"))
-#ifdef SQL_ATTR_TRACE
-	    return SQL_ATTR_TRACE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_TRACEFILE"))
-#ifdef SQL_ATTR_TRACEFILE
-	    return SQL_ATTR_TRACEFILE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_TRANSLATE_LIB"))
-#ifdef SQL_ATTR_TRANSLATE_LIB
-	    return SQL_ATTR_TRANSLATE_LIB;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_TRANSLATE_OPTION"))
-#ifdef SQL_ATTR_TRANSLATE_OPTION
-	    return SQL_ATTR_TRANSLATE_OPTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_TXN_ISOLATION"))
-#ifdef SQL_ATTR_TXN_ISOLATION
-	    return SQL_ATTR_TXN_ISOLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_USE_BOOKMARKS"))
-#ifdef SQL_ATTR_USE_BOOKMARKS
-	    return SQL_ATTR_USE_BOOKMARKS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ATTR_WCHARTYPE"))
-#ifdef SQL_ATTR_WCHARTYPE
-	    return SQL_ATTR_WCHARTYPE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ATTR_WRITE"))
 #ifdef SQL_ATTR_WRITE
 	    return SQL_ATTR_WRITE;
@@ -1467,105 +634,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_AT_ADD_COLUMN_COLLATION"))
-#ifdef SQL_AT_ADD_COLUMN_COLLATION
-	    return SQL_AT_ADD_COLUMN_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_ADD_COLUMN_DEFAULT"))
-#ifdef SQL_AT_ADD_COLUMN_DEFAULT
-	    return SQL_AT_ADD_COLUMN_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_ADD_COLUMN_SINGLE"))
-#ifdef SQL_AT_ADD_COLUMN_SINGLE
-	    return SQL_AT_ADD_COLUMN_SINGLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_ADD_CONSTRAINT"))
-#ifdef SQL_AT_ADD_CONSTRAINT
-	    return SQL_AT_ADD_CONSTRAINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_ADD_TABLE_CONSTRAINT"))
-#ifdef SQL_AT_ADD_TABLE_CONSTRAINT
-	    return SQL_AT_ADD_TABLE_CONSTRAINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_CONSTRAINT_DEFERRABLE"))
-#ifdef SQL_AT_CONSTRAINT_DEFERRABLE
-	    return SQL_AT_CONSTRAINT_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_CONSTRAINT_INITIALLY_DEFERRED"))
-#ifdef SQL_AT_CONSTRAINT_INITIALLY_DEFERRED
-	    return SQL_AT_CONSTRAINT_INITIALLY_DEFERRED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_CONSTRAINT_INITIALLY_IMMEDIATE"))
-#ifdef SQL_AT_CONSTRAINT_INITIALLY_IMMEDIATE
-	    return SQL_AT_CONSTRAINT_INITIALLY_IMMEDIATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_CONSTRAINT_NAME_DEFINITION"))
-#ifdef SQL_AT_CONSTRAINT_NAME_DEFINITION
-	    return SQL_AT_CONSTRAINT_NAME_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_CONSTRAINT_NON_DEFERRABLE"))
-#ifdef SQL_AT_CONSTRAINT_NON_DEFERRABLE
-	    return SQL_AT_CONSTRAINT_NON_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_AT_DROP_COLUMN"))
 #ifdef SQL_AT_DROP_COLUMN
 	    return SQL_AT_DROP_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_DROP_COLUMN_CASCADE"))
-#ifdef SQL_AT_DROP_COLUMN_CASCADE
-	    return SQL_AT_DROP_COLUMN_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_DROP_COLUMN_DEFAULT"))
-#ifdef SQL_AT_DROP_COLUMN_DEFAULT
-	    return SQL_AT_DROP_COLUMN_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_DROP_COLUMN_RESTRICT"))
-#ifdef SQL_AT_DROP_COLUMN_RESTRICT
-	    return SQL_AT_DROP_COLUMN_RESTRICT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_DROP_TABLE_CONSTRAINT_CASCADE"))
-#ifdef SQL_AT_DROP_TABLE_CONSTRAINT_CASCADE
-	    return SQL_AT_DROP_TABLE_CONSTRAINT_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_DROP_TABLE_CONSTRAINT_RESTRICT"))
-#ifdef SQL_AT_DROP_TABLE_CONSTRAINT_RESTRICT
-	    return SQL_AT_DROP_TABLE_CONSTRAINT_RESTRICT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_AT_SET_COLUMN_DEFAULT"))
-#ifdef SQL_AT_SET_COLUMN_DEFAULT
-	    return SQL_AT_SET_COLUMN_DEFAULT;
 #else
 	    goto not_there;
 #endif
@@ -1590,18 +661,6 @@ int arg;
 	if (strEQ(name, "SQL_AUTOCOMMIT_ON"))
 #ifdef SQL_AUTOCOMMIT_ON
 	    return SQL_AUTOCOMMIT_ON;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BATCH_ROW_COUNT"))
-#ifdef SQL_BATCH_ROW_COUNT
-	    return SQL_BATCH_ROW_COUNT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BATCH_SUPPORT"))
-#ifdef SQL_BATCH_SUPPORT
-	    return SQL_BATCH_SUPPORT;
 #else
 	    goto not_there;
 #endif
@@ -1707,327 +766,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_BRC_EXPLICIT"))
-#ifdef SQL_BRC_EXPLICIT
-	    return SQL_BRC_EXPLICIT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BRC_PROCEDURES"))
-#ifdef SQL_BRC_PROCEDURES
-	    return SQL_BRC_PROCEDURES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BRC_ROLLED_UP"))
-#ifdef SQL_BRC_ROLLED_UP
-	    return SQL_BRC_ROLLED_UP;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BS_ROW_COUNT_EXPLICIT"))
-#ifdef SQL_BS_ROW_COUNT_EXPLICIT
-	    return SQL_BS_ROW_COUNT_EXPLICIT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BS_ROW_COUNT_PROC"))
-#ifdef SQL_BS_ROW_COUNT_PROC
-	    return SQL_BS_ROW_COUNT_PROC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BS_SELECT_EXPLICIT"))
-#ifdef SQL_BS_SELECT_EXPLICIT
-	    return SQL_BS_SELECT_EXPLICIT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_BS_SELECT_PROC"))
-#ifdef SQL_BS_SELECT_PROC
-	    return SQL_BS_SELECT_PROC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_ABSOLUTE"))
-#ifdef SQL_CA1_ABSOLUTE
-	    return SQL_CA1_ABSOLUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_BOOKMARK"))
-#ifdef SQL_CA1_BOOKMARK
-	    return SQL_CA1_BOOKMARK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_BULK_ADD"))
-#ifdef SQL_CA1_BULK_ADD
-	    return SQL_CA1_BULK_ADD;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_BULK_DELETE_BY_BOOKMARK"))
-#ifdef SQL_CA1_BULK_DELETE_BY_BOOKMARK
-	    return SQL_CA1_BULK_DELETE_BY_BOOKMARK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_BULK_FETCH_BY_BOOKMARK"))
-#ifdef SQL_CA1_BULK_FETCH_BY_BOOKMARK
-	    return SQL_CA1_BULK_FETCH_BY_BOOKMARK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_BULK_UPDATE_BY_BOOKMARK"))
-#ifdef SQL_CA1_BULK_UPDATE_BY_BOOKMARK
-	    return SQL_CA1_BULK_UPDATE_BY_BOOKMARK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_LOCK_EXCLUSIVE"))
-#ifdef SQL_CA1_LOCK_EXCLUSIVE
-	    return SQL_CA1_LOCK_EXCLUSIVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_LOCK_NO_CHANGE"))
-#ifdef SQL_CA1_LOCK_NO_CHANGE
-	    return SQL_CA1_LOCK_NO_CHANGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_LOCK_UNLOCK"))
-#ifdef SQL_CA1_LOCK_UNLOCK
-	    return SQL_CA1_LOCK_UNLOCK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_NEXT"))
-#ifdef SQL_CA1_NEXT
-	    return SQL_CA1_NEXT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_POSITIONED_DELETE"))
-#ifdef SQL_CA1_POSITIONED_DELETE
-	    return SQL_CA1_POSITIONED_DELETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_POSITIONED_UPDATE"))
-#ifdef SQL_CA1_POSITIONED_UPDATE
-	    return SQL_CA1_POSITIONED_UPDATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_POS_DELETE"))
-#ifdef SQL_CA1_POS_DELETE
-	    return SQL_CA1_POS_DELETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_POS_POSITION"))
-#ifdef SQL_CA1_POS_POSITION
-	    return SQL_CA1_POS_POSITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_POS_REFRESH"))
-#ifdef SQL_CA1_POS_REFRESH
-	    return SQL_CA1_POS_REFRESH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_POS_UPDATE"))
-#ifdef SQL_CA1_POS_UPDATE
-	    return SQL_CA1_POS_UPDATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_RELATIVE"))
-#ifdef SQL_CA1_RELATIVE
-	    return SQL_CA1_RELATIVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA1_SELECT_FOR_UPDATE"))
-#ifdef SQL_CA1_SELECT_FOR_UPDATE
-	    return SQL_CA1_SELECT_FOR_UPDATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_CRC_APPROXIMATE"))
-#ifdef SQL_CA2_CRC_APPROXIMATE
-	    return SQL_CA2_CRC_APPROXIMATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_CRC_EXACT"))
-#ifdef SQL_CA2_CRC_EXACT
-	    return SQL_CA2_CRC_EXACT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_LOCK_CONCURRENCY"))
-#ifdef SQL_CA2_LOCK_CONCURRENCY
-	    return SQL_CA2_LOCK_CONCURRENCY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_MAX_ROWS_AFFECTS_ALL"))
-#ifdef SQL_CA2_MAX_ROWS_AFFECTS_ALL
-	    return SQL_CA2_MAX_ROWS_AFFECTS_ALL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_MAX_ROWS_CATALOG"))
-#ifdef SQL_CA2_MAX_ROWS_CATALOG
-	    return SQL_CA2_MAX_ROWS_CATALOG;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_MAX_ROWS_DELETE"))
-#ifdef SQL_CA2_MAX_ROWS_DELETE
-	    return SQL_CA2_MAX_ROWS_DELETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_MAX_ROWS_INSERT"))
-#ifdef SQL_CA2_MAX_ROWS_INSERT
-	    return SQL_CA2_MAX_ROWS_INSERT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_MAX_ROWS_SELECT"))
-#ifdef SQL_CA2_MAX_ROWS_SELECT
-	    return SQL_CA2_MAX_ROWS_SELECT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_MAX_ROWS_UPDATE"))
-#ifdef SQL_CA2_MAX_ROWS_UPDATE
-	    return SQL_CA2_MAX_ROWS_UPDATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_OPT_ROWVER_CONCURRENCY"))
-#ifdef SQL_CA2_OPT_ROWVER_CONCURRENCY
-	    return SQL_CA2_OPT_ROWVER_CONCURRENCY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_OPT_VALUES_CONCURRENCY"))
-#ifdef SQL_CA2_OPT_VALUES_CONCURRENCY
-	    return SQL_CA2_OPT_VALUES_CONCURRENCY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_READ_ONLY_CONCURRENCY"))
-#ifdef SQL_CA2_READ_ONLY_CONCURRENCY
-	    return SQL_CA2_READ_ONLY_CONCURRENCY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_SENSITIVITY_ADDITIONS"))
-#ifdef SQL_CA2_SENSITIVITY_ADDITIONS
-	    return SQL_CA2_SENSITIVITY_ADDITIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_SENSITIVITY_DELETIONS"))
-#ifdef SQL_CA2_SENSITIVITY_DELETIONS
-	    return SQL_CA2_SENSITIVITY_DELETIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_SENSITIVITY_UPDATES"))
-#ifdef SQL_CA2_SENSITIVITY_UPDATES
-	    return SQL_CA2_SENSITIVITY_UPDATES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_SIMULATE_NON_UNIQUE"))
-#ifdef SQL_CA2_SIMULATE_NON_UNIQUE
-	    return SQL_CA2_SIMULATE_NON_UNIQUE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_SIMULATE_TRY_UNIQUE"))
-#ifdef SQL_CA2_SIMULATE_TRY_UNIQUE
-	    return SQL_CA2_SIMULATE_TRY_UNIQUE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA2_SIMULATE_UNIQUE"))
-#ifdef SQL_CA2_SIMULATE_UNIQUE
-	    return SQL_CA2_SIMULATE_UNIQUE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_CASCADE"))
 #ifdef SQL_CASCADE
 	    return SQL_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CATALOG_LOCATION"))
-#ifdef SQL_CATALOG_LOCATION
-	    return SQL_CATALOG_LOCATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CATALOG_NAME"))
-#ifdef SQL_CATALOG_NAME
-	    return SQL_CATALOG_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CATALOG_NAME_SEPARATOR"))
-#ifdef SQL_CATALOG_NAME_SEPARATOR
-	    return SQL_CATALOG_NAME_SEPARATOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CATALOG_TERM"))
-#ifdef SQL_CATALOG_TERM
-	    return SQL_CATALOG_TERM;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CATALOG_USAGE"))
-#ifdef SQL_CATALOG_USAGE
-	    return SQL_CATALOG_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA_CONSTRAINT_DEFERRABLE"))
-#ifdef SQL_CA_CONSTRAINT_DEFERRABLE
-	    return SQL_CA_CONSTRAINT_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA_CONSTRAINT_INITIALLY_DEFERRED"))
-#ifdef SQL_CA_CONSTRAINT_INITIALLY_DEFERRED
-	    return SQL_CA_CONSTRAINT_INITIALLY_DEFERRED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA_CONSTRAINT_INITIALLY_IMMEDIATE"))
-#ifdef SQL_CA_CONSTRAINT_INITIALLY_IMMEDIATE
-	    return SQL_CA_CONSTRAINT_INITIALLY_IMMEDIATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA_CONSTRAINT_NON_DEFERRABLE"))
-#ifdef SQL_CA_CONSTRAINT_NON_DEFERRABLE
-	    return SQL_CA_CONSTRAINT_NON_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CA_CREATE_ASSERTION"))
-#ifdef SQL_CA_CREATE_ASSERTION
-	    return SQL_CA_CREATE_ASSERTION;
 #else
 	    goto not_there;
 #endif
@@ -2061,132 +802,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_CCOL_CREATE_COLLATION"))
-#ifdef SQL_CCOL_CREATE_COLLATION
-	    return SQL_CCOL_CREATE_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CCS_COLLATE_CLAUSE"))
-#ifdef SQL_CCS_COLLATE_CLAUSE
-	    return SQL_CCS_COLLATE_CLAUSE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CCS_CREATE_CHARACTER_SET"))
-#ifdef SQL_CCS_CREATE_CHARACTER_SET
-	    return SQL_CCS_CREATE_CHARACTER_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CCS_LIMITED_COLLATION"))
-#ifdef SQL_CCS_LIMITED_COLLATION
-	    return SQL_CCS_LIMITED_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CC_CLOSE"))
-#ifdef SQL_CC_CLOSE
-	    return SQL_CC_CLOSE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CC_DEFAULT"))
-#ifdef SQL_CC_DEFAULT
-	    return SQL_CC_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CC_DELETE"))
-#ifdef SQL_CC_DELETE
-	    return SQL_CC_DELETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CC_NO_RELEASE"))
-#ifdef SQL_CC_NO_RELEASE
-	    return SQL_CC_NO_RELEASE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CC_PRESERVE"))
-#ifdef SQL_CC_PRESERVE
-	    return SQL_CC_PRESERVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CC_RELEASE"))
-#ifdef SQL_CC_RELEASE
-	    return SQL_CC_RELEASE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_COLLATION"))
-#ifdef SQL_CDO_COLLATION
-	    return SQL_CDO_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_CONSTRAINT"))
-#ifdef SQL_CDO_CONSTRAINT
-	    return SQL_CDO_CONSTRAINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_CONSTRAINT_DEFERRABLE"))
-#ifdef SQL_CDO_CONSTRAINT_DEFERRABLE
-	    return SQL_CDO_CONSTRAINT_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_CONSTRAINT_INITIALLY_DEFERRED"))
-#ifdef SQL_CDO_CONSTRAINT_INITIALLY_DEFERRED
-	    return SQL_CDO_CONSTRAINT_INITIALLY_DEFERRED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_CONSTRAINT_INITIALLY_IMMEDIATE"))
-#ifdef SQL_CDO_CONSTRAINT_INITIALLY_IMMEDIATE
-	    return SQL_CDO_CONSTRAINT_INITIALLY_IMMEDIATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_CONSTRAINT_NAME_DEFINITION"))
-#ifdef SQL_CDO_CONSTRAINT_NAME_DEFINITION
-	    return SQL_CDO_CONSTRAINT_NAME_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_CONSTRAINT_NON_DEFERRABLE"))
-#ifdef SQL_CDO_CONSTRAINT_NON_DEFERRABLE
-	    return SQL_CDO_CONSTRAINT_NON_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_CREATE_DOMAIN"))
-#ifdef SQL_CDO_CREATE_DOMAIN
-	    return SQL_CDO_CREATE_DOMAIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CDO_DEFAULT"))
-#ifdef SQL_CDO_DEFAULT
-	    return SQL_CDO_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CD_FALSE"))
-#ifdef SQL_CD_FALSE
-	    return SQL_CD_FALSE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CD_TRUE"))
-#ifdef SQL_CD_TRUE
-	    return SQL_CD_TRUE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_CHAR"))
 #ifdef SQL_CHAR
 	    return SQL_CHAR;
@@ -2211,24 +826,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_CLOSE_BEHAVIOR"))
-#ifdef SQL_CLOSE_BEHAVIOR
-	    return SQL_CLOSE_BEHAVIOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CL_END"))
-#ifdef SQL_CL_END
-	    return SQL_CL_END;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CL_START"))
-#ifdef SQL_CL_START
-	    return SQL_CL_START;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_CN_ANY"))
 #ifdef SQL_CN_ANY
 	    return SQL_CN_ANY;
@@ -2244,120 +841,6 @@ int arg;
 	if (strEQ(name, "SQL_CN_NONE"))
 #ifdef SQL_CN_NONE
 	    return SQL_CN_NONE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_DATE"))
-#ifdef SQL_CODE_DATE
-	    return SQL_CODE_DATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_DAY"))
-#ifdef SQL_CODE_DAY
-	    return SQL_CODE_DAY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_DAY_TO_HOUR"))
-#ifdef SQL_CODE_DAY_TO_HOUR
-	    return SQL_CODE_DAY_TO_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_DAY_TO_MINUTE"))
-#ifdef SQL_CODE_DAY_TO_MINUTE
-	    return SQL_CODE_DAY_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_DAY_TO_SECOND"))
-#ifdef SQL_CODE_DAY_TO_SECOND
-	    return SQL_CODE_DAY_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_HOUR"))
-#ifdef SQL_CODE_HOUR
-	    return SQL_CODE_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_HOUR_TO_MINUTE"))
-#ifdef SQL_CODE_HOUR_TO_MINUTE
-	    return SQL_CODE_HOUR_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_HOUR_TO_SECOND"))
-#ifdef SQL_CODE_HOUR_TO_SECOND
-	    return SQL_CODE_HOUR_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_MINUTE"))
-#ifdef SQL_CODE_MINUTE
-	    return SQL_CODE_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_MINUTE_TO_SECOND"))
-#ifdef SQL_CODE_MINUTE_TO_SECOND
-	    return SQL_CODE_MINUTE_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_MONTH"))
-#ifdef SQL_CODE_MONTH
-	    return SQL_CODE_MONTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_SECOND"))
-#ifdef SQL_CODE_SECOND
-	    return SQL_CODE_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_TIME"))
-#ifdef SQL_CODE_TIME
-	    return SQL_CODE_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_TIMESTAMP"))
-#ifdef SQL_CODE_TIMESTAMP
-	    return SQL_CODE_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_YEAR"))
-#ifdef SQL_CODE_YEAR
-	    return SQL_CODE_YEAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CODE_YEAR_TO_MONTH"))
-#ifdef SQL_CODE_YEAR_TO_MONTH
-	    return SQL_CODE_YEAR_TO_MONTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_COLATT_OPT_MAX"))
-#ifdef SQL_COLATT_OPT_MAX
-	    return SQL_COLATT_OPT_MAX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_COLATT_OPT_MIN"))
-#ifdef SQL_COLATT_OPT_MIN
-	    return SQL_COLATT_OPT_MIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_COLLATION_SEQ"))
-#ifdef SQL_COLLATION_SEQ
-	    return SQL_COLLATION_SEQ;
 #else
 	    goto not_there;
 #endif
@@ -2403,18 +886,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_COLUMN_DRIVER_START"))
-#ifdef SQL_COLUMN_DRIVER_START
-	    return SQL_COLUMN_DRIVER_START;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_COLUMN_IGNORE"))
-#ifdef SQL_COLUMN_IGNORE
-	    return SQL_COLUMN_IGNORE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_COLUMN_LABEL"))
 #ifdef SQL_COLUMN_LABEL
 	    return SQL_COLUMN_LABEL;
@@ -2439,21 +910,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_COLUMN_NO_COLUMN_NUMBER"))
-#ifdef SQL_COLUMN_NO_COLUMN_NUMBER
-	    return SQL_COLUMN_NO_COLUMN_NUMBER;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_COLUMN_NULLABLE"))
 #ifdef SQL_COLUMN_NULLABLE
 	    return SQL_COLUMN_NULLABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_COLUMN_NUMBER_UNKNOWN"))
-#ifdef SQL_COLUMN_NUMBER_UNKNOWN
-	    return SQL_COLUMN_NUMBER_UNKNOWN;
 #else
 	    goto not_there;
 #endif
@@ -2472,12 +931,6 @@ int arg;
 	if (strEQ(name, "SQL_COLUMN_QUALIFIER_NAME"))
 #ifdef SQL_COLUMN_QUALIFIER_NAME
 	    return SQL_COLUMN_QUALIFIER_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_COLUMN_REFERENCE_TYPE"))
-#ifdef SQL_COLUMN_REFERENCE_TYPE
-	    return SQL_COLUMN_REFERENCE_TYPE;
 #else
 	    goto not_there;
 #endif
@@ -2529,18 +982,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_COL_PRED_BASIC"))
-#ifdef SQL_COL_PRED_BASIC
-	    return SQL_COL_PRED_BASIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_COL_PRED_CHAR"))
-#ifdef SQL_COL_PRED_CHAR
-	    return SQL_COL_PRED_CHAR;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_COMMIT"))
 #ifdef SQL_COMMIT
 	    return SQL_COMMIT;
@@ -2589,12 +1030,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_CONCUR_TIMESTAMP"))
-#ifdef SQL_CONCUR_TIMESTAMP
-	    return SQL_CONCUR_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_CONCUR_VALUES"))
 #ifdef SQL_CONCUR_VALUES
 	    return SQL_CONCUR_VALUES;
@@ -2616,24 +1051,6 @@ int arg;
 	if (strEQ(name, "SQL_CONNECT_OPT_DRVR_START"))
 #ifdef SQL_CONNECT_OPT_DRVR_START
 	    return SQL_CONNECT_OPT_DRVR_START;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CONN_CONTEXT"))
-#ifdef SQL_CONN_CONTEXT
-	    return SQL_CONN_CONTEXT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CONN_OPT_MAX"))
-#ifdef SQL_CONN_OPT_MAX
-	    return SQL_CONN_OPT_MAX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CONN_OPT_MIN"))
-#ifdef SQL_CONN_OPT_MIN
-	    return SQL_CONN_OPT_MIN;
 #else
 	    goto not_there;
 #endif
@@ -2697,18 +1114,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_CONVERT_INTERVAL_DAY_TIME"))
-#ifdef SQL_CONVERT_INTERVAL_DAY_TIME
-	    return SQL_CONVERT_INTERVAL_DAY_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CONVERT_INTERVAL_YEAR_MONTH"))
-#ifdef SQL_CONVERT_INTERVAL_YEAR_MONTH
-	    return SQL_CONVERT_INTERVAL_YEAR_MONTH;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_CONVERT_LONGVARBINARY"))
 #ifdef SQL_CONVERT_LONGVARBINARY
 	    return SQL_CONVERT_LONGVARBINARY;
@@ -2769,24 +1174,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_CONVERT_WCHAR"))
-#ifdef SQL_CONVERT_WCHAR
-	    return SQL_CONVERT_WCHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CONVERT_WLONGVARCHAR"))
-#ifdef SQL_CONVERT_WLONGVARCHAR
-	    return SQL_CONVERT_WLONGVARCHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CONVERT_WVARCHAR"))
-#ifdef SQL_CONVERT_WVARCHAR
-	    return SQL_CONVERT_WVARCHAR;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_COORDINATED_TRANS"))
 #ifdef SQL_COORDINATED_TRANS
 	    return SQL_COORDINATED_TRANS;
@@ -2796,222 +1183,6 @@ int arg;
 	if (strEQ(name, "SQL_CORRELATION_NAME"))
 #ifdef SQL_CORRELATION_NAME
 	    return SQL_CORRELATION_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CP_DEFAULT"))
-#ifdef SQL_CP_DEFAULT
-	    return SQL_CP_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CP_MATCH_DEFAULT"))
-#ifdef SQL_CP_MATCH_DEFAULT
-	    return SQL_CP_MATCH_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CP_OFF"))
-#ifdef SQL_CP_OFF
-	    return SQL_CP_OFF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CP_ONE_PER_DRIVER"))
-#ifdef SQL_CP_ONE_PER_DRIVER
-	    return SQL_CP_ONE_PER_DRIVER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CP_ONE_PER_HENV"))
-#ifdef SQL_CP_ONE_PER_HENV
-	    return SQL_CP_ONE_PER_HENV;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CP_RELAXED_MATCH"))
-#ifdef SQL_CP_RELAXED_MATCH
-	    return SQL_CP_RELAXED_MATCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CP_STRICT_MATCH"))
-#ifdef SQL_CP_STRICT_MATCH
-	    return SQL_CP_STRICT_MATCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_ASSERTION"))
-#ifdef SQL_CREATE_ASSERTION
-	    return SQL_CREATE_ASSERTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_CHARACTER_SET"))
-#ifdef SQL_CREATE_CHARACTER_SET
-	    return SQL_CREATE_CHARACTER_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_COLLATION"))
-#ifdef SQL_CREATE_COLLATION
-	    return SQL_CREATE_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_DOMAIN"))
-#ifdef SQL_CREATE_DOMAIN
-	    return SQL_CREATE_DOMAIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_SCHEMA"))
-#ifdef SQL_CREATE_SCHEMA
-	    return SQL_CREATE_SCHEMA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_TABLE"))
-#ifdef SQL_CREATE_TABLE
-	    return SQL_CREATE_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_TRANSLATION"))
-#ifdef SQL_CREATE_TRANSLATION
-	    return SQL_CREATE_TRANSLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CREATE_VIEW"))
-#ifdef SQL_CREATE_VIEW
-	    return SQL_CREATE_VIEW;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CR_CLOSE"))
-#ifdef SQL_CR_CLOSE
-	    return SQL_CR_CLOSE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CR_DELETE"))
-#ifdef SQL_CR_DELETE
-	    return SQL_CR_DELETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CR_PRESERVE"))
-#ifdef SQL_CR_PRESERVE
-	    return SQL_CR_PRESERVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CS_AUTHORIZATION"))
-#ifdef SQL_CS_AUTHORIZATION
-	    return SQL_CS_AUTHORIZATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CS_CREATE_SCHEMA"))
-#ifdef SQL_CS_CREATE_SCHEMA
-	    return SQL_CS_CREATE_SCHEMA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CS_DEFAULT_CHARACTER_SET"))
-#ifdef SQL_CS_DEFAULT_CHARACTER_SET
-	    return SQL_CS_DEFAULT_CHARACTER_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CTR_CREATE_TRANSLATION"))
-#ifdef SQL_CTR_CREATE_TRANSLATION
-	    return SQL_CTR_CREATE_TRANSLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_COLUMN_COLLATION"))
-#ifdef SQL_CT_COLUMN_COLLATION
-	    return SQL_CT_COLUMN_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_COLUMN_CONSTRAINT"))
-#ifdef SQL_CT_COLUMN_CONSTRAINT
-	    return SQL_CT_COLUMN_CONSTRAINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_COLUMN_DEFAULT"))
-#ifdef SQL_CT_COLUMN_DEFAULT
-	    return SQL_CT_COLUMN_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_COMMIT_DELETE"))
-#ifdef SQL_CT_COMMIT_DELETE
-	    return SQL_CT_COMMIT_DELETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_COMMIT_PRESERVE"))
-#ifdef SQL_CT_COMMIT_PRESERVE
-	    return SQL_CT_COMMIT_PRESERVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_CONSTRAINT_DEFERRABLE"))
-#ifdef SQL_CT_CONSTRAINT_DEFERRABLE
-	    return SQL_CT_CONSTRAINT_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_CONSTRAINT_INITIALLY_DEFERRED"))
-#ifdef SQL_CT_CONSTRAINT_INITIALLY_DEFERRED
-	    return SQL_CT_CONSTRAINT_INITIALLY_DEFERRED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_CONSTRAINT_INITIALLY_IMMEDIATE"))
-#ifdef SQL_CT_CONSTRAINT_INITIALLY_IMMEDIATE
-	    return SQL_CT_CONSTRAINT_INITIALLY_IMMEDIATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_CONSTRAINT_NAME_DEFINITION"))
-#ifdef SQL_CT_CONSTRAINT_NAME_DEFINITION
-	    return SQL_CT_CONSTRAINT_NAME_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_CONSTRAINT_NON_DEFERRABLE"))
-#ifdef SQL_CT_CONSTRAINT_NON_DEFERRABLE
-	    return SQL_CT_CONSTRAINT_NON_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_CREATE_TABLE"))
-#ifdef SQL_CT_CREATE_TABLE
-	    return SQL_CT_CREATE_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_GLOBAL_TEMPORARY"))
-#ifdef SQL_CT_GLOBAL_TEMPORARY
-	    return SQL_CT_GLOBAL_TEMPORARY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_LOCAL_TEMPORARY"))
-#ifdef SQL_CT_LOCAL_TEMPORARY
-	    return SQL_CT_LOCAL_TEMPORARY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CT_TABLE_CONSTRAINT"))
-#ifdef SQL_CT_TABLE_CONSTRAINT
-	    return SQL_CT_TABLE_CONSTRAINT;
 #else
 	    goto not_there;
 #endif
@@ -3081,12 +1252,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_CURSOR_SENSITIVITY"))
-#ifdef SQL_CURSOR_SENSITIVITY
-	    return SQL_CURSOR_SENSITIVITY;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_CURSOR_STATIC"))
 #ifdef SQL_CURSOR_STATIC
 	    return SQL_CURSOR_STATIC;
@@ -3102,60 +1267,6 @@ int arg;
 	if (strEQ(name, "SQL_CURSOR_TYPE_DEFAULT"))
 #ifdef SQL_CURSOR_TYPE_DEFAULT
 	    return SQL_CURSOR_TYPE_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CUR_DEFAULT"))
-#ifdef SQL_CUR_DEFAULT
-	    return SQL_CUR_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CUR_USE_DRIVER"))
-#ifdef SQL_CUR_USE_DRIVER
-	    return SQL_CUR_USE_DRIVER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CUR_USE_IF_NEEDED"))
-#ifdef SQL_CUR_USE_IF_NEEDED
-	    return SQL_CUR_USE_IF_NEEDED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CUR_USE_ODBC"))
-#ifdef SQL_CUR_USE_ODBC
-	    return SQL_CUR_USE_ODBC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CU_DML_STATEMENTS"))
-#ifdef SQL_CU_DML_STATEMENTS
-	    return SQL_CU_DML_STATEMENTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CU_INDEX_DEFINITION"))
-#ifdef SQL_CU_INDEX_DEFINITION
-	    return SQL_CU_INDEX_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CU_PRIVILEGE_DEFINITION"))
-#ifdef SQL_CU_PRIVILEGE_DEFINITION
-	    return SQL_CU_PRIVILEGE_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CU_PROCEDURE_INVOCATION"))
-#ifdef SQL_CU_PROCEDURE_INVOCATION
-	    return SQL_CU_PROCEDURE_INVOCATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CU_TABLE_DEFINITION"))
-#ifdef SQL_CU_TABLE_DEFINITION
-	    return SQL_CU_TABLE_DEFINITION;
 #else
 	    goto not_there;
 #endif
@@ -3210,18 +1321,6 @@ int arg;
 	if (strEQ(name, "SQL_CVT_INTEGER"))
 #ifdef SQL_CVT_INTEGER
 	    return SQL_CVT_INTEGER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CVT_INTERVAL_DAY_TIME"))
-#ifdef SQL_CVT_INTERVAL_DAY_TIME
-	    return SQL_CVT_INTERVAL_DAY_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CVT_INTERVAL_YEAR_MONTH"))
-#ifdef SQL_CVT_INTERVAL_YEAR_MONTH
-	    return SQL_CVT_INTERVAL_YEAR_MONTH;
 #else
 	    goto not_there;
 #endif
@@ -3285,48 +1384,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_CVT_WCHAR"))
-#ifdef SQL_CVT_WCHAR
-	    return SQL_CVT_WCHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CVT_WLONGVARCHAR"))
-#ifdef SQL_CVT_WLONGVARCHAR
-	    return SQL_CVT_WLONGVARCHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CVT_WVARCHAR"))
-#ifdef SQL_CVT_WVARCHAR
-	    return SQL_CVT_WVARCHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CV_CASCADED"))
-#ifdef SQL_CV_CASCADED
-	    return SQL_CV_CASCADED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CV_CHECK_OPTION"))
-#ifdef SQL_CV_CHECK_OPTION
-	    return SQL_CV_CHECK_OPTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CV_CREATE_VIEW"))
-#ifdef SQL_CV_CREATE_VIEW
-	    return SQL_CV_CREATE_VIEW;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_CV_LOCAL"))
-#ifdef SQL_CV_LOCAL
-	    return SQL_CV_LOCAL;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_C_BINARY"))
 #ifdef SQL_C_BINARY
 	    return SQL_C_BINARY;
@@ -3345,12 +1402,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_C_BOOKMARK"))
-#ifdef SQL_C_BOOKMARK
-	    return SQL_C_BOOKMARK;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_C_CHAR"))
 #ifdef SQL_C_CHAR
 	    return SQL_C_CHAR;
@@ -3360,12 +1411,6 @@ int arg;
 	if (strEQ(name, "SQL_C_CLOB_LOCATOR"))
 #ifdef SQL_C_CLOB_LOCATOR
 	    return SQL_C_CLOB_LOCATOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_DATALINK"))
-#ifdef SQL_C_DATALINK
-	    return SQL_C_DATALINK;
 #else
 	    goto not_there;
 #endif
@@ -3387,12 +1432,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_C_DECIMAL_IBM"))
-#ifdef SQL_C_DECIMAL_IBM
-	    return SQL_C_DECIMAL_IBM;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_C_DEFAULT"))
 #ifdef SQL_C_DEFAULT
 	    return SQL_C_DEFAULT;
@@ -3411,105 +1450,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_C_GUID"))
-#ifdef SQL_C_GUID
-	    return SQL_C_GUID;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_DAY"))
-#ifdef SQL_C_INTERVAL_DAY
-	    return SQL_C_INTERVAL_DAY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_DAY_TO_HOUR"))
-#ifdef SQL_C_INTERVAL_DAY_TO_HOUR
-	    return SQL_C_INTERVAL_DAY_TO_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_DAY_TO_MINUTE"))
-#ifdef SQL_C_INTERVAL_DAY_TO_MINUTE
-	    return SQL_C_INTERVAL_DAY_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_DAY_TO_SECOND"))
-#ifdef SQL_C_INTERVAL_DAY_TO_SECOND
-	    return SQL_C_INTERVAL_DAY_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_HOUR"))
-#ifdef SQL_C_INTERVAL_HOUR
-	    return SQL_C_INTERVAL_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_HOUR_TO_MINUTE"))
-#ifdef SQL_C_INTERVAL_HOUR_TO_MINUTE
-	    return SQL_C_INTERVAL_HOUR_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_HOUR_TO_SECOND"))
-#ifdef SQL_C_INTERVAL_HOUR_TO_SECOND
-	    return SQL_C_INTERVAL_HOUR_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_MINUTE"))
-#ifdef SQL_C_INTERVAL_MINUTE
-	    return SQL_C_INTERVAL_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_MINUTE_TO_SECOND"))
-#ifdef SQL_C_INTERVAL_MINUTE_TO_SECOND
-	    return SQL_C_INTERVAL_MINUTE_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_MONTH"))
-#ifdef SQL_C_INTERVAL_MONTH
-	    return SQL_C_INTERVAL_MONTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_SECOND"))
-#ifdef SQL_C_INTERVAL_SECOND
-	    return SQL_C_INTERVAL_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_YEAR"))
-#ifdef SQL_C_INTERVAL_YEAR
-	    return SQL_C_INTERVAL_YEAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_INTERVAL_YEAR_TO_MONTH"))
-#ifdef SQL_C_INTERVAL_YEAR_TO_MONTH
-	    return SQL_C_INTERVAL_YEAR_TO_MONTH;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_C_LONG"))
 #ifdef SQL_C_LONG
 	    return SQL_C_LONG;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_NUMERIC"))
-#ifdef SQL_C_NUMERIC
-	    return SQL_C_NUMERIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_SBIGINT"))
-#ifdef SQL_C_SBIGINT
-	    return SQL_C_SBIGINT;
 #else
 	    goto not_there;
 #endif
@@ -3555,30 +1498,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_C_TYPE_DATE"))
-#ifdef SQL_C_TYPE_DATE
-	    return SQL_C_TYPE_DATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_TYPE_TIME"))
-#ifdef SQL_C_TYPE_TIME
-	    return SQL_C_TYPE_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_TYPE_TIMESTAMP"))
-#ifdef SQL_C_TYPE_TIMESTAMP
-	    return SQL_C_TYPE_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_C_UBIGINT"))
-#ifdef SQL_C_UBIGINT
-	    return SQL_C_UBIGINT;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_C_ULONG"))
 #ifdef SQL_C_ULONG
 	    return SQL_C_ULONG;
@@ -3597,21 +1516,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_C_VARBOOKMARK"))
-#ifdef SQL_C_VARBOOKMARK
-	    return SQL_C_VARBOOKMARK;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_DATABASE_NAME"))
 #ifdef SQL_DATABASE_NAME
 	    return SQL_DATABASE_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DATALINK"))
-#ifdef SQL_DATALINK
-	    return SQL_DATALINK;
 #else
 	    goto not_there;
 #endif
@@ -3636,54 +1543,6 @@ int arg;
 	if (strEQ(name, "SQL_DATE"))
 #ifdef SQL_DATE
 	    return SQL_DATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DATETIME"))
-#ifdef SQL_DATETIME
-	    return SQL_DATETIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DATETIME_LITERALS"))
-#ifdef SQL_DATETIME_LITERALS
-	    return SQL_DATETIME_LITERALS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DATE_LEN"))
-#ifdef SQL_DATE_LEN
-	    return SQL_DATE_LEN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DAY"))
-#ifdef SQL_DAY
-	    return SQL_DAY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DAY_TO_HOUR"))
-#ifdef SQL_DAY_TO_HOUR
-	    return SQL_DAY_TO_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DAY_TO_MINUTE"))
-#ifdef SQL_DAY_TO_MINUTE
-	    return SQL_DAY_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DAY_TO_SECOND"))
-#ifdef SQL_DAY_TO_SECOND
-	    return SQL_DAY_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DA_DROP_ASSERTION"))
-#ifdef SQL_DA_DROP_ASSERTION
-	    return SQL_DA_DROP_ASSERTION;
 #else
 	    goto not_there;
 #endif
@@ -3723,12 +1582,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_DB2EXPLAIN_MODE_ON"))
-#ifdef SQL_DB2EXPLAIN_MODE_ON
-	    return SQL_DB2EXPLAIN_MODE_ON;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_DB2EXPLAIN_OFF"))
 #ifdef SQL_DB2EXPLAIN_OFF
 	    return SQL_DB2EXPLAIN_OFF;
@@ -3738,18 +1591,6 @@ int arg;
 	if (strEQ(name, "SQL_DB2EXPLAIN_ON"))
 #ifdef SQL_DB2EXPLAIN_ON
 	    return SQL_DB2EXPLAIN_ON;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DB2EXPLAIN_SNAPSHOT_MODE_ON"))
-#ifdef SQL_DB2EXPLAIN_SNAPSHOT_MODE_ON
-	    return SQL_DB2EXPLAIN_SNAPSHOT_MODE_ON;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DB2EXPLAIN_SNAPSHOT_ON"))
-#ifdef SQL_DB2EXPLAIN_SNAPSHOT_ON
-	    return SQL_DB2EXPLAIN_SNAPSHOT_ON;
 #else
 	    goto not_there;
 #endif
@@ -3777,69 +1618,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_DB_DEFAULT"))
-#ifdef SQL_DB_DEFAULT
-	    return SQL_DB_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DB_DISCONNECT"))
-#ifdef SQL_DB_DISCONNECT
-	    return SQL_DB_DISCONNECT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DB_RETURN_TO_POOL"))
-#ifdef SQL_DB_RETURN_TO_POOL
-	    return SQL_DB_RETURN_TO_POOL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DCS_DROP_CHARACTER_SET"))
-#ifdef SQL_DCS_DROP_CHARACTER_SET
-	    return SQL_DCS_DROP_CHARACTER_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DC_DROP_COLLATION"))
-#ifdef SQL_DC_DROP_COLLATION
-	    return SQL_DC_DROP_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DDL_INDEX"))
-#ifdef SQL_DDL_INDEX
-	    return SQL_DDL_INDEX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DD_CASCADE"))
-#ifdef SQL_DD_CASCADE
-	    return SQL_DD_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DD_DROP_DOMAIN"))
-#ifdef SQL_DD_DROP_DOMAIN
-	    return SQL_DD_DROP_DOMAIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DD_RESTRICT"))
-#ifdef SQL_DD_RESTRICT
-	    return SQL_DD_RESTRICT;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_DECIMAL"))
 #ifdef SQL_DECIMAL
 	    return SQL_DECIMAL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DEFAULT"))
-#ifdef SQL_DEFAULT
-	    return SQL_DEFAULT;
 #else
 	    goto not_there;
 #endif
@@ -3855,639 +1636,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_DEFERRED_PREPARE_DEFAULT"))
-#ifdef SQL_DEFERRED_PREPARE_DEFAULT
-	    return SQL_DEFERRED_PREPARE_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DEFERRED_PREPARE_OFF"))
-#ifdef SQL_DEFERRED_PREPARE_OFF
-	    return SQL_DEFERRED_PREPARE_OFF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DEFERRED_PREPARE_ON"))
-#ifdef SQL_DEFERRED_PREPARE_ON
-	    return SQL_DEFERRED_PREPARE_ON;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_DELETE"))
 #ifdef SQL_DELETE
 	    return SQL_DELETE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DELETE_BY_BOOKMARK"))
-#ifdef SQL_DELETE_BY_BOOKMARK
-	    return SQL_DELETE_BY_BOOKMARK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESCRIBE_PARAMETER"))
-#ifdef SQL_DESCRIBE_PARAMETER
-	    return SQL_DESCRIBE_PARAMETER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_ALLOC_AUTO"))
-#ifdef SQL_DESC_ALLOC_AUTO
-	    return SQL_DESC_ALLOC_AUTO;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_ALLOC_TYPE"))
-#ifdef SQL_DESC_ALLOC_TYPE
-	    return SQL_DESC_ALLOC_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_ALLOC_USER"))
-#ifdef SQL_DESC_ALLOC_USER
-	    return SQL_DESC_ALLOC_USER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_ARRAY_SIZE"))
-#ifdef SQL_DESC_ARRAY_SIZE
-	    return SQL_DESC_ARRAY_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_ARRAY_STATUS_PTR"))
-#ifdef SQL_DESC_ARRAY_STATUS_PTR
-	    return SQL_DESC_ARRAY_STATUS_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_AUTO_UNIQUE_VALUE"))
-#ifdef SQL_DESC_AUTO_UNIQUE_VALUE
-	    return SQL_DESC_AUTO_UNIQUE_VALUE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_BASE_COLUMN_NAME"))
-#ifdef SQL_DESC_BASE_COLUMN_NAME
-	    return SQL_DESC_BASE_COLUMN_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_BASE_TABLE_NAME"))
-#ifdef SQL_DESC_BASE_TABLE_NAME
-	    return SQL_DESC_BASE_TABLE_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_BIND_OFFSET_PTR"))
-#ifdef SQL_DESC_BIND_OFFSET_PTR
-	    return SQL_DESC_BIND_OFFSET_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_BIND_TYPE"))
-#ifdef SQL_DESC_BIND_TYPE
-	    return SQL_DESC_BIND_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_CASE_SENSITIVE"))
-#ifdef SQL_DESC_CASE_SENSITIVE
-	    return SQL_DESC_CASE_SENSITIVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_CATALOG_NAME"))
-#ifdef SQL_DESC_CATALOG_NAME
-	    return SQL_DESC_CATALOG_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_CONCISE_TYPE"))
-#ifdef SQL_DESC_CONCISE_TYPE
-	    return SQL_DESC_CONCISE_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_COUNT"))
-#ifdef SQL_DESC_COUNT
-	    return SQL_DESC_COUNT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_DATA_PTR"))
-#ifdef SQL_DESC_DATA_PTR
-	    return SQL_DESC_DATA_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_DATETIME_INTERVAL_CODE"))
-#ifdef SQL_DESC_DATETIME_INTERVAL_CODE
-	    return SQL_DESC_DATETIME_INTERVAL_CODE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_DATETIME_INTERVAL_PRECISION"))
-#ifdef SQL_DESC_DATETIME_INTERVAL_PRECISION
-	    return SQL_DESC_DATETIME_INTERVAL_PRECISION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_DESCRIPTOR_TYPE"))
-#ifdef SQL_DESC_DESCRIPTOR_TYPE
-	    return SQL_DESC_DESCRIPTOR_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_DISPLAY_SIZE"))
-#ifdef SQL_DESC_DISPLAY_SIZE
-	    return SQL_DESC_DISPLAY_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_DISTINCT_TYPE"))
-#ifdef SQL_DESC_DISTINCT_TYPE
-	    return SQL_DESC_DISTINCT_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_FIXED_PREC_SCALE"))
-#ifdef SQL_DESC_FIXED_PREC_SCALE
-	    return SQL_DESC_FIXED_PREC_SCALE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_INDICATOR_PTR"))
-#ifdef SQL_DESC_INDICATOR_PTR
-	    return SQL_DESC_INDICATOR_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_LABEL"))
-#ifdef SQL_DESC_LABEL
-	    return SQL_DESC_LABEL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_LENGTH"))
-#ifdef SQL_DESC_LENGTH
-	    return SQL_DESC_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_LITERAL_PREFIX"))
-#ifdef SQL_DESC_LITERAL_PREFIX
-	    return SQL_DESC_LITERAL_PREFIX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_LITERAL_SUFFIX"))
-#ifdef SQL_DESC_LITERAL_SUFFIX
-	    return SQL_DESC_LITERAL_SUFFIX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_LOCAL_TYPE_NAME"))
-#ifdef SQL_DESC_LOCAL_TYPE_NAME
-	    return SQL_DESC_LOCAL_TYPE_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_MAXIMUM_SCALE"))
-#ifdef SQL_DESC_MAXIMUM_SCALE
-	    return SQL_DESC_MAXIMUM_SCALE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_MINIMUM_SCALE"))
-#ifdef SQL_DESC_MINIMUM_SCALE
-	    return SQL_DESC_MINIMUM_SCALE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_NAME"))
-#ifdef SQL_DESC_NAME
-	    return SQL_DESC_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_NULLABLE"))
-#ifdef SQL_DESC_NULLABLE
-	    return SQL_DESC_NULLABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_NUM_PREC_RADIX"))
-#ifdef SQL_DESC_NUM_PREC_RADIX
-	    return SQL_DESC_NUM_PREC_RADIX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_OCTET_LENGTH"))
-#ifdef SQL_DESC_OCTET_LENGTH
-	    return SQL_DESC_OCTET_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_OCTET_LENGTH_PTR"))
-#ifdef SQL_DESC_OCTET_LENGTH_PTR
-	    return SQL_DESC_OCTET_LENGTH_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_PARAMETER_TYPE"))
-#ifdef SQL_DESC_PARAMETER_TYPE
-	    return SQL_DESC_PARAMETER_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_PRECISION"))
-#ifdef SQL_DESC_PRECISION
-	    return SQL_DESC_PRECISION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_REFERENCE_TYPE"))
-#ifdef SQL_DESC_REFERENCE_TYPE
-	    return SQL_DESC_REFERENCE_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_ROWS_PROCESSED_PTR"))
-#ifdef SQL_DESC_ROWS_PROCESSED_PTR
-	    return SQL_DESC_ROWS_PROCESSED_PTR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_ROWVER"))
-#ifdef SQL_DESC_ROWVER
-	    return SQL_DESC_ROWVER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_SCALE"))
-#ifdef SQL_DESC_SCALE
-	    return SQL_DESC_SCALE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_SCHEMA_NAME"))
-#ifdef SQL_DESC_SCHEMA_NAME
-	    return SQL_DESC_SCHEMA_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_SEARCHABLE"))
-#ifdef SQL_DESC_SEARCHABLE
-	    return SQL_DESC_SEARCHABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_TABLE_NAME"))
-#ifdef SQL_DESC_TABLE_NAME
-	    return SQL_DESC_TABLE_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_TYPE"))
-#ifdef SQL_DESC_TYPE
-	    return SQL_DESC_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_TYPE_NAME"))
-#ifdef SQL_DESC_TYPE_NAME
-	    return SQL_DESC_TYPE_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_UNNAMED"))
-#ifdef SQL_DESC_UNNAMED
-	    return SQL_DESC_UNNAMED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_UNSIGNED"))
-#ifdef SQL_DESC_UNSIGNED
-	    return SQL_DESC_UNSIGNED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DESC_UPDATABLE"))
-#ifdef SQL_DESC_UPDATABLE
-	    return SQL_DESC_UPDATABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_ALTER_TABLE"))
-#ifdef SQL_DIAG_ALTER_TABLE
-	    return SQL_DIAG_ALTER_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_CALL"))
-#ifdef SQL_DIAG_CALL
-	    return SQL_DIAG_CALL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_CLASS_ORIGIN"))
-#ifdef SQL_DIAG_CLASS_ORIGIN
-	    return SQL_DIAG_CLASS_ORIGIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_COLUMN_NUMBER"))
-#ifdef SQL_DIAG_COLUMN_NUMBER
-	    return SQL_DIAG_COLUMN_NUMBER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_CONNECTION_NAME"))
-#ifdef SQL_DIAG_CONNECTION_NAME
-	    return SQL_DIAG_CONNECTION_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_CREATE_INDEX"))
-#ifdef SQL_DIAG_CREATE_INDEX
-	    return SQL_DIAG_CREATE_INDEX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_CREATE_TABLE"))
-#ifdef SQL_DIAG_CREATE_TABLE
-	    return SQL_DIAG_CREATE_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_CREATE_VIEW"))
-#ifdef SQL_DIAG_CREATE_VIEW
-	    return SQL_DIAG_CREATE_VIEW;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_CURSOR_ROW_COUNT"))
-#ifdef SQL_DIAG_CURSOR_ROW_COUNT
-	    return SQL_DIAG_CURSOR_ROW_COUNT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DEFERRED_PREPARE_ERROR"))
-#ifdef SQL_DIAG_DEFERRED_PREPARE_ERROR
-	    return SQL_DIAG_DEFERRED_PREPARE_ERROR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DELETE_WHERE"))
-#ifdef SQL_DIAG_DELETE_WHERE
-	    return SQL_DIAG_DELETE_WHERE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DROP_INDEX"))
-#ifdef SQL_DIAG_DROP_INDEX
-	    return SQL_DIAG_DROP_INDEX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DROP_TABLE"))
-#ifdef SQL_DIAG_DROP_TABLE
-	    return SQL_DIAG_DROP_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DROP_VIEW"))
-#ifdef SQL_DIAG_DROP_VIEW
-	    return SQL_DIAG_DROP_VIEW;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DYNAMIC_DELETE_CURSOR"))
-#ifdef SQL_DIAG_DYNAMIC_DELETE_CURSOR
-	    return SQL_DIAG_DYNAMIC_DELETE_CURSOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DYNAMIC_FUNCTION"))
-#ifdef SQL_DIAG_DYNAMIC_FUNCTION
-	    return SQL_DIAG_DYNAMIC_FUNCTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DYNAMIC_FUNCTION_CODE"))
-#ifdef SQL_DIAG_DYNAMIC_FUNCTION_CODE
-	    return SQL_DIAG_DYNAMIC_FUNCTION_CODE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_DYNAMIC_UPDATE_CURSOR"))
-#ifdef SQL_DIAG_DYNAMIC_UPDATE_CURSOR
-	    return SQL_DIAG_DYNAMIC_UPDATE_CURSOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_GRANT"))
-#ifdef SQL_DIAG_GRANT
-	    return SQL_DIAG_GRANT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_INSERT"))
-#ifdef SQL_DIAG_INSERT
-	    return SQL_DIAG_INSERT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_MESSAGE_TEXT"))
-#ifdef SQL_DIAG_MESSAGE_TEXT
-	    return SQL_DIAG_MESSAGE_TEXT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_NATIVE"))
-#ifdef SQL_DIAG_NATIVE
-	    return SQL_DIAG_NATIVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_NUMBER"))
-#ifdef SQL_DIAG_NUMBER
-	    return SQL_DIAG_NUMBER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_RETURNCODE"))
-#ifdef SQL_DIAG_RETURNCODE
-	    return SQL_DIAG_RETURNCODE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_REVOKE"))
-#ifdef SQL_DIAG_REVOKE
-	    return SQL_DIAG_REVOKE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_ROW_COUNT"))
-#ifdef SQL_DIAG_ROW_COUNT
-	    return SQL_DIAG_ROW_COUNT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_ROW_NUMBER"))
-#ifdef SQL_DIAG_ROW_NUMBER
-	    return SQL_DIAG_ROW_NUMBER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_SELECT_CURSOR"))
-#ifdef SQL_DIAG_SELECT_CURSOR
-	    return SQL_DIAG_SELECT_CURSOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_SERVER_NAME"))
-#ifdef SQL_DIAG_SERVER_NAME
-	    return SQL_DIAG_SERVER_NAME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_SQLSTATE"))
-#ifdef SQL_DIAG_SQLSTATE
-	    return SQL_DIAG_SQLSTATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_SUBCLASS_ORIGIN"))
-#ifdef SQL_DIAG_SUBCLASS_ORIGIN
-	    return SQL_DIAG_SUBCLASS_ORIGIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_UNKNOWN_STATEMENT"))
-#ifdef SQL_DIAG_UNKNOWN_STATEMENT
-	    return SQL_DIAG_UNKNOWN_STATEMENT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DIAG_UPDATE_WHERE"))
-#ifdef SQL_DIAG_UPDATE_WHERE
-	    return SQL_DIAG_UPDATE_WHERE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DI_CREATE_INDEX"))
-#ifdef SQL_DI_CREATE_INDEX
-	    return SQL_DI_CREATE_INDEX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DI_DROP_INDEX"))
-#ifdef SQL_DI_DROP_INDEX
-	    return SQL_DI_DROP_INDEX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_DATE"))
-#ifdef SQL_DL_SQL92_DATE
-	    return SQL_DL_SQL92_DATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_DAY"))
-#ifdef SQL_DL_SQL92_INTERVAL_DAY
-	    return SQL_DL_SQL92_INTERVAL_DAY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_DAY_TO_HOUR"))
-#ifdef SQL_DL_SQL92_INTERVAL_DAY_TO_HOUR
-	    return SQL_DL_SQL92_INTERVAL_DAY_TO_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_DAY_TO_MINUTE"))
-#ifdef SQL_DL_SQL92_INTERVAL_DAY_TO_MINUTE
-	    return SQL_DL_SQL92_INTERVAL_DAY_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_DAY_TO_SECOND"))
-#ifdef SQL_DL_SQL92_INTERVAL_DAY_TO_SECOND
-	    return SQL_DL_SQL92_INTERVAL_DAY_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_HOUR"))
-#ifdef SQL_DL_SQL92_INTERVAL_HOUR
-	    return SQL_DL_SQL92_INTERVAL_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_HOUR_TO_MINUTE"))
-#ifdef SQL_DL_SQL92_INTERVAL_HOUR_TO_MINUTE
-	    return SQL_DL_SQL92_INTERVAL_HOUR_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_HOUR_TO_SECOND"))
-#ifdef SQL_DL_SQL92_INTERVAL_HOUR_TO_SECOND
-	    return SQL_DL_SQL92_INTERVAL_HOUR_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_MINUTE"))
-#ifdef SQL_DL_SQL92_INTERVAL_MINUTE
-	    return SQL_DL_SQL92_INTERVAL_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_MINUTE_TO_SECOND"))
-#ifdef SQL_DL_SQL92_INTERVAL_MINUTE_TO_SECOND
-	    return SQL_DL_SQL92_INTERVAL_MINUTE_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_MONTH"))
-#ifdef SQL_DL_SQL92_INTERVAL_MONTH
-	    return SQL_DL_SQL92_INTERVAL_MONTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_SECOND"))
-#ifdef SQL_DL_SQL92_INTERVAL_SECOND
-	    return SQL_DL_SQL92_INTERVAL_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_YEAR"))
-#ifdef SQL_DL_SQL92_INTERVAL_YEAR
-	    return SQL_DL_SQL92_INTERVAL_YEAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_INTERVAL_YEAR_TO_MONTH"))
-#ifdef SQL_DL_SQL92_INTERVAL_YEAR_TO_MONTH
-	    return SQL_DL_SQL92_INTERVAL_YEAR_TO_MONTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_TIME"))
-#ifdef SQL_DL_SQL92_TIME
-	    return SQL_DL_SQL92_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DL_SQL92_TIMESTAMP"))
-#ifdef SQL_DL_SQL92_TIMESTAMP
-	    return SQL_DL_SQL92_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DM_VER"))
-#ifdef SQL_DM_VER
-	    return SQL_DM_VER;
 #else
 	    goto not_there;
 #endif
@@ -4512,12 +1663,6 @@ int arg;
 	if (strEQ(name, "SQL_DRIVER_HDBC"))
 #ifdef SQL_DRIVER_HDBC
 	    return SQL_DRIVER_HDBC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DRIVER_HDESC"))
-#ifdef SQL_DRIVER_HDESC
-	    return SQL_DRIVER_HDESC;
 #else
 	    goto not_there;
 #endif
@@ -4575,168 +1720,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_DROP_ASSERTION"))
-#ifdef SQL_DROP_ASSERTION
-	    return SQL_DROP_ASSERTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DROP_CHARACTER_SET"))
-#ifdef SQL_DROP_CHARACTER_SET
-	    return SQL_DROP_CHARACTER_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DROP_COLLATION"))
-#ifdef SQL_DROP_COLLATION
-	    return SQL_DROP_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DROP_DOMAIN"))
-#ifdef SQL_DROP_DOMAIN
-	    return SQL_DROP_DOMAIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DROP_SCHEMA"))
-#ifdef SQL_DROP_SCHEMA
-	    return SQL_DROP_SCHEMA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DROP_TABLE"))
-#ifdef SQL_DROP_TABLE
-	    return SQL_DROP_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DROP_TRANSLATION"))
-#ifdef SQL_DROP_TRANSLATION
-	    return SQL_DROP_TRANSLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DROP_VIEW"))
-#ifdef SQL_DROP_VIEW
-	    return SQL_DROP_VIEW;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DS_CASCADE"))
-#ifdef SQL_DS_CASCADE
-	    return SQL_DS_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DS_DROP_SCHEMA"))
-#ifdef SQL_DS_DROP_SCHEMA
-	    return SQL_DS_DROP_SCHEMA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DS_RESTRICT"))
-#ifdef SQL_DS_RESTRICT
-	    return SQL_DS_RESTRICT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DTC_DONE"))
-#ifdef SQL_DTC_DONE
-	    return SQL_DTC_DONE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DTC_ENLIST_EXPENSIVE"))
-#ifdef SQL_DTC_ENLIST_EXPENSIVE
-	    return SQL_DTC_ENLIST_EXPENSIVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DTC_TRANSITION_COST"))
-#ifdef SQL_DTC_TRANSITION_COST
-	    return SQL_DTC_TRANSITION_COST;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DTC_UNENLIST_EXPENSIVE"))
-#ifdef SQL_DTC_UNENLIST_EXPENSIVE
-	    return SQL_DTC_UNENLIST_EXPENSIVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DTR_DROP_TRANSLATION"))
-#ifdef SQL_DTR_DROP_TRANSLATION
-	    return SQL_DTR_DROP_TRANSLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DT_CASCADE"))
-#ifdef SQL_DT_CASCADE
-	    return SQL_DT_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DT_DROP_TABLE"))
-#ifdef SQL_DT_DROP_TABLE
-	    return SQL_DT_DROP_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DT_RESTRICT"))
-#ifdef SQL_DT_RESTRICT
-	    return SQL_DT_RESTRICT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DV_CASCADE"))
-#ifdef SQL_DV_CASCADE
-	    return SQL_DV_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DV_DROP_VIEW"))
-#ifdef SQL_DV_DROP_VIEW
-	    return SQL_DV_DROP_VIEW;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DV_RESTRICT"))
-#ifdef SQL_DV_RESTRICT
-	    return SQL_DV_RESTRICT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DYNAMIC_CURSOR_ATTRIBUTES1"))
-#ifdef SQL_DYNAMIC_CURSOR_ATTRIBUTES1
-	    return SQL_DYNAMIC_CURSOR_ATTRIBUTES1;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_DYNAMIC_CURSOR_ATTRIBUTES2"))
-#ifdef SQL_DYNAMIC_CURSOR_ATTRIBUTES2
-	    return SQL_DYNAMIC_CURSOR_ATTRIBUTES2;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_EARLYCLOSE_DEFAULT"))
-#ifdef SQL_EARLYCLOSE_DEFAULT
-	    return SQL_EARLYCLOSE_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_EARLYCLOSE_OFF"))
-#ifdef SQL_EARLYCLOSE_OFF
-	    return SQL_EARLYCLOSE_OFF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_EARLYCLOSE_ON"))
-#ifdef SQL_EARLYCLOSE_ON
-	    return SQL_EARLYCLOSE_ON;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ENSURE"))
 #ifdef SQL_ENSURE
 	    return SQL_ENSURE;
@@ -4764,12 +1747,6 @@ int arg;
 	if (strEQ(name, "SQL_EXT_API_LAST"))
 #ifdef SQL_EXT_API_LAST
 	    return SQL_EXT_API_LAST;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_EXT_API_START"))
-#ifdef SQL_EXT_API_START
-	    return SQL_EXT_API_START;
 #else
 	    goto not_there;
 #endif
@@ -4815,12 +1792,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_FD_FETCH_PRIOR"))
-#ifdef SQL_FD_FETCH_PRIOR
-	    return SQL_FD_FETCH_PRIOR;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_FD_FETCH_RELATIVE"))
 #ifdef SQL_FD_FETCH_RELATIVE
 	    return SQL_FD_FETCH_RELATIVE;
@@ -4845,12 +1816,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_FETCH_BY_BOOKMARK"))
-#ifdef SQL_FETCH_BY_BOOKMARK
-	    return SQL_FETCH_BY_BOOKMARK;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_FETCH_DIRECTION"))
 #ifdef SQL_FETCH_DIRECTION
 	    return SQL_FETCH_DIRECTION;
@@ -4860,18 +1825,6 @@ int arg;
 	if (strEQ(name, "SQL_FETCH_FIRST"))
 #ifdef SQL_FETCH_FIRST
 	    return SQL_FETCH_FIRST;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FETCH_FIRST_SYSTEM"))
-#ifdef SQL_FETCH_FIRST_SYSTEM
-	    return SQL_FETCH_FIRST_SYSTEM;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FETCH_FIRST_USER"))
-#ifdef SQL_FETCH_FIRST_USER
-	    return SQL_FETCH_FIRST_USER;
 #else
 	    goto not_there;
 #endif
@@ -4887,12 +1840,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_FETCH_PREV"))
-#ifdef SQL_FETCH_PREV
-	    return SQL_FETCH_PREV;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_FETCH_PRIOR"))
 #ifdef SQL_FETCH_PRIOR
 	    return SQL_FETCH_PRIOR;
@@ -4905,21 +1852,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_FETCH_RESUME"))
-#ifdef SQL_FETCH_RESUME
-	    return SQL_FETCH_RESUME;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_FILE_APPEND"))
 #ifdef SQL_FILE_APPEND
 	    return SQL_FILE_APPEND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FILE_CATALOG"))
-#ifdef SQL_FILE_CATALOG
-	    return SQL_FILE_CATALOG;
 #else
 	    goto not_there;
 #endif
@@ -4968,12 +1903,6 @@ int arg;
 	if (strEQ(name, "SQL_FLOAT"))
 #ifdef SQL_FLOAT
 	    return SQL_FLOAT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_CVT_CAST"))
-#ifdef SQL_FN_CVT_CAST
-	    return SQL_FN_CVT_CAST;
 #else
 	    goto not_there;
 #endif
@@ -5133,27 +2062,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_FN_STR_BIT_LENGTH"))
-#ifdef SQL_FN_STR_BIT_LENGTH
-	    return SQL_FN_STR_BIT_LENGTH;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_FN_STR_CHAR"))
 #ifdef SQL_FN_STR_CHAR
 	    return SQL_FN_STR_CHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_STR_CHARACTER_LENGTH"))
-#ifdef SQL_FN_STR_CHARACTER_LENGTH
-	    return SQL_FN_STR_CHARACTER_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_STR_CHAR_LENGTH"))
-#ifdef SQL_FN_STR_CHAR_LENGTH
-	    return SQL_FN_STR_CHAR_LENGTH;
 #else
 	    goto not_there;
 #endif
@@ -5208,18 +2119,6 @@ int arg;
 	if (strEQ(name, "SQL_FN_STR_LTRIM"))
 #ifdef SQL_FN_STR_LTRIM
 	    return SQL_FN_STR_LTRIM;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_STR_OCTET_LENGTH"))
-#ifdef SQL_FN_STR_OCTET_LENGTH
-	    return SQL_FN_STR_OCTET_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_STR_POSITION"))
-#ifdef SQL_FN_STR_POSITION
-	    return SQL_FN_STR_POSITION;
 #else
 	    goto not_there;
 #endif
@@ -5295,24 +2194,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_FN_TD_CURRENT_DATE"))
-#ifdef SQL_FN_TD_CURRENT_DATE
-	    return SQL_FN_TD_CURRENT_DATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_TD_CURRENT_TIME"))
-#ifdef SQL_FN_TD_CURRENT_TIME
-	    return SQL_FN_TD_CURRENT_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_TD_CURRENT_TIMESTAMP"))
-#ifdef SQL_FN_TD_CURRENT_TIMESTAMP
-	    return SQL_FN_TD_CURRENT_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_FN_TD_CURTIME"))
 #ifdef SQL_FN_TD_CURTIME
 	    return SQL_FN_TD_CURTIME;
@@ -5340,12 +2221,6 @@ int arg;
 	if (strEQ(name, "SQL_FN_TD_DAYOFYEAR"))
 #ifdef SQL_FN_TD_DAYOFYEAR
 	    return SQL_FN_TD_DAYOFYEAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FN_TD_EXTRACT"))
-#ifdef SQL_FN_TD_EXTRACT
-	    return SQL_FN_TD_EXTRACT;
 #else
 	    goto not_there;
 #endif
@@ -5469,18 +2344,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1"))
-#ifdef SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1
-	    return SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2"))
-#ifdef SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2
-	    return SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_FROM_LITERAL"))
 #ifdef SQL_FROM_LITERAL
 	    return SQL_FROM_LITERAL;
@@ -5490,12 +2353,6 @@ int arg;
 	if (strEQ(name, "SQL_FROM_LOCATOR"))
 #ifdef SQL_FROM_LOCATOR
 	    return SQL_FROM_LOCATOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_GB_COLLATE"))
-#ifdef SQL_GB_COLLATE
-	    return SQL_GB_COLLATE;
 #else
 	    goto not_there;
 #endif
@@ -5571,63 +2428,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_GUID"))
-#ifdef SQL_GUID
-	    return SQL_GUID;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HANDLE_DBC"))
-#ifdef SQL_HANDLE_DBC
-	    return SQL_HANDLE_DBC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HANDLE_DESC"))
-#ifdef SQL_HANDLE_DESC
-	    return SQL_HANDLE_DESC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HANDLE_ENV"))
-#ifdef SQL_HANDLE_ENV
-	    return SQL_HANDLE_ENV;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HANDLE_SENV"))
-#ifdef SQL_HANDLE_SENV
-	    return SQL_HANDLE_SENV;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HANDLE_STMT"))
-#ifdef SQL_HANDLE_STMT
-	    return SQL_HANDLE_STMT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HOUR"))
-#ifdef SQL_HOUR
-	    return SQL_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HOUR_TO_MINUTE"))
-#ifdef SQL_HOUR_TO_MINUTE
-	    return SQL_HOUR_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_HOUR_TO_SECOND"))
-#ifdef SQL_HOUR_TO_SECOND
-	    return SQL_HOUR_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IBM_ALTERTABLEVARCHAR"))
-#ifdef SQL_IBM_ALTERTABLEVARCHAR
-	    return SQL_IBM_ALTERTABLEVARCHAR;
+	if (strEQ(name, "SQL_H_SQLCLI"))
+#ifdef SQL_H_SQLCLI
+	    return SQL_H_SQLCLI;
 #else
 	    goto not_there;
 #endif
@@ -5673,30 +2476,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_IK_ALL"))
-#ifdef SQL_IK_ALL
-	    return SQL_IK_ALL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IK_ASC"))
-#ifdef SQL_IK_ASC
-	    return SQL_IK_ASC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IK_DESC"))
-#ifdef SQL_IK_DESC
-	    return SQL_IK_DESC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IK_NONE"))
-#ifdef SQL_IK_NONE
-	    return SQL_IK_NONE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_INDEX_ALL"))
 #ifdef SQL_INDEX_ALL
 	    return SQL_INDEX_ALL;
@@ -5712,12 +2491,6 @@ int arg;
 	if (strEQ(name, "SQL_INDEX_HASHED"))
 #ifdef SQL_INDEX_HASHED
 	    return SQL_INDEX_HASHED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INDEX_KEYWORDS"))
-#ifdef SQL_INDEX_KEYWORDS
-	    return SQL_INDEX_KEYWORDS;
 #else
 	    goto not_there;
 #endif
@@ -5739,45 +2512,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_INFO_FIRST"))
-#ifdef SQL_INFO_FIRST
-	    return SQL_INFO_FIRST;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_INFO_LAST"))
 #ifdef SQL_INFO_LAST
 	    return SQL_INFO_LAST;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INFO_SCHEMA_VIEWS"))
-#ifdef SQL_INFO_SCHEMA_VIEWS
-	    return SQL_INFO_SCHEMA_VIEWS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INITIALLY_DEFERRED"))
-#ifdef SQL_INITIALLY_DEFERRED
-	    return SQL_INITIALLY_DEFERRED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INITIALLY_IMMEDIATE"))
-#ifdef SQL_INITIALLY_IMMEDIATE
-	    return SQL_INITIALLY_IMMEDIATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INSENSITIVE"))
-#ifdef SQL_INSENSITIVE
-	    return SQL_INSENSITIVE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INSERT_STATEMENT"))
-#ifdef SQL_INSERT_STATEMENT
-	    return SQL_INSERT_STATEMENT;
 #else
 	    goto not_there;
 #endif
@@ -5787,297 +2524,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_INTEGRITY"))
-#ifdef SQL_INTEGRITY
-	    return SQL_INTEGRITY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL"))
-#ifdef SQL_INTERVAL
-	    return SQL_INTERVAL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_DAY"))
-#ifdef SQL_INTERVAL_DAY
-	    return SQL_INTERVAL_DAY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_DAY_TO_HOUR"))
-#ifdef SQL_INTERVAL_DAY_TO_HOUR
-	    return SQL_INTERVAL_DAY_TO_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_DAY_TO_MINUTE"))
-#ifdef SQL_INTERVAL_DAY_TO_MINUTE
-	    return SQL_INTERVAL_DAY_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_DAY_TO_SECOND"))
-#ifdef SQL_INTERVAL_DAY_TO_SECOND
-	    return SQL_INTERVAL_DAY_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_HOUR"))
-#ifdef SQL_INTERVAL_HOUR
-	    return SQL_INTERVAL_HOUR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_HOUR_TO_MINUTE"))
-#ifdef SQL_INTERVAL_HOUR_TO_MINUTE
-	    return SQL_INTERVAL_HOUR_TO_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_HOUR_TO_SECOND"))
-#ifdef SQL_INTERVAL_HOUR_TO_SECOND
-	    return SQL_INTERVAL_HOUR_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_MINUTE"))
-#ifdef SQL_INTERVAL_MINUTE
-	    return SQL_INTERVAL_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_MINUTE_TO_SECOND"))
-#ifdef SQL_INTERVAL_MINUTE_TO_SECOND
-	    return SQL_INTERVAL_MINUTE_TO_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_MONTH"))
-#ifdef SQL_INTERVAL_MONTH
-	    return SQL_INTERVAL_MONTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_SECOND"))
-#ifdef SQL_INTERVAL_SECOND
-	    return SQL_INTERVAL_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_YEAR"))
-#ifdef SQL_INTERVAL_YEAR
-	    return SQL_INTERVAL_YEAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_INTERVAL_YEAR_TO_MONTH"))
-#ifdef SQL_INTERVAL_YEAR_TO_MONTH
-	    return SQL_INTERVAL_YEAR_TO_MONTH;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_INVALID_HANDLE"))
 #ifdef SQL_INVALID_HANDLE
 	    return SQL_INVALID_HANDLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_ASSERTIONS"))
-#ifdef SQL_ISV_ASSERTIONS
-	    return SQL_ISV_ASSERTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_CHARACTER_SETS"))
-#ifdef SQL_ISV_CHARACTER_SETS
-	    return SQL_ISV_CHARACTER_SETS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_CHECK_CONSTRAINTS"))
-#ifdef SQL_ISV_CHECK_CONSTRAINTS
-	    return SQL_ISV_CHECK_CONSTRAINTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_COLLATIONS"))
-#ifdef SQL_ISV_COLLATIONS
-	    return SQL_ISV_COLLATIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_COLUMNS"))
-#ifdef SQL_ISV_COLUMNS
-	    return SQL_ISV_COLUMNS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_COLUMN_DOMAIN_USAGE"))
-#ifdef SQL_ISV_COLUMN_DOMAIN_USAGE
-	    return SQL_ISV_COLUMN_DOMAIN_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_COLUMN_PRIVILEGES"))
-#ifdef SQL_ISV_COLUMN_PRIVILEGES
-	    return SQL_ISV_COLUMN_PRIVILEGES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_CONSTRAINT_COLUMN_USAGE"))
-#ifdef SQL_ISV_CONSTRAINT_COLUMN_USAGE
-	    return SQL_ISV_CONSTRAINT_COLUMN_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_CONSTRAINT_TABLE_USAGE"))
-#ifdef SQL_ISV_CONSTRAINT_TABLE_USAGE
-	    return SQL_ISV_CONSTRAINT_TABLE_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_DOMAINS"))
-#ifdef SQL_ISV_DOMAINS
-	    return SQL_ISV_DOMAINS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_DOMAIN_CONSTRAINTS"))
-#ifdef SQL_ISV_DOMAIN_CONSTRAINTS
-	    return SQL_ISV_DOMAIN_CONSTRAINTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_KEY_COLUMN_USAGE"))
-#ifdef SQL_ISV_KEY_COLUMN_USAGE
-	    return SQL_ISV_KEY_COLUMN_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_REFERENTIAL_CONSTRAINTS"))
-#ifdef SQL_ISV_REFERENTIAL_CONSTRAINTS
-	    return SQL_ISV_REFERENTIAL_CONSTRAINTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_SCHEMATA"))
-#ifdef SQL_ISV_SCHEMATA
-	    return SQL_ISV_SCHEMATA;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_SQL_LANGUAGES"))
-#ifdef SQL_ISV_SQL_LANGUAGES
-	    return SQL_ISV_SQL_LANGUAGES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_TABLES"))
-#ifdef SQL_ISV_TABLES
-	    return SQL_ISV_TABLES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_TABLE_CONSTRAINTS"))
-#ifdef SQL_ISV_TABLE_CONSTRAINTS
-	    return SQL_ISV_TABLE_CONSTRAINTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_TABLE_PRIVILEGES"))
-#ifdef SQL_ISV_TABLE_PRIVILEGES
-	    return SQL_ISV_TABLE_PRIVILEGES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_TRANSLATIONS"))
-#ifdef SQL_ISV_TRANSLATIONS
-	    return SQL_ISV_TRANSLATIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_USAGE_PRIVILEGES"))
-#ifdef SQL_ISV_USAGE_PRIVILEGES
-	    return SQL_ISV_USAGE_PRIVILEGES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_VIEWS"))
-#ifdef SQL_ISV_VIEWS
-	    return SQL_ISV_VIEWS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_VIEW_COLUMN_USAGE"))
-#ifdef SQL_ISV_VIEW_COLUMN_USAGE
-	    return SQL_ISV_VIEW_COLUMN_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ISV_VIEW_TABLE_USAGE"))
-#ifdef SQL_ISV_VIEW_TABLE_USAGE
-	    return SQL_ISV_VIEW_TABLE_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_INSERT_LITERALS"))
-#ifdef SQL_IS_INSERT_LITERALS
-	    return SQL_IS_INSERT_LITERALS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_INSERT_SEARCHED"))
-#ifdef SQL_IS_INSERT_SEARCHED
-	    return SQL_IS_INSERT_SEARCHED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_INTEGER"))
-#ifdef SQL_IS_INTEGER
-	    return SQL_IS_INTEGER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_POINTER"))
-#ifdef SQL_IS_POINTER
-	    return SQL_IS_POINTER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_SELECT_INTO"))
-#ifdef SQL_IS_SELECT_INTO
-	    return SQL_IS_SELECT_INTO;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_SMALLINT"))
-#ifdef SQL_IS_SMALLINT
-	    return SQL_IS_SMALLINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_UINTEGER"))
-#ifdef SQL_IS_UINTEGER
-	    return SQL_IS_UINTEGER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_IS_USMALLINT"))
-#ifdef SQL_IS_USMALLINT
-	    return SQL_IS_USMALLINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_KEYSET_CURSOR_ATTRIBUTES1"))
-#ifdef SQL_KEYSET_CURSOR_ATTRIBUTES1
-	    return SQL_KEYSET_CURSOR_ATTRIBUTES1;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_KEYSET_CURSOR_ATTRIBUTES2"))
-#ifdef SQL_KEYSET_CURSOR_ATTRIBUTES2
-	    return SQL_KEYSET_CURSOR_ATTRIBUTES2;
 #else
 	    goto not_there;
 #endif
@@ -6132,12 +2581,6 @@ int arg;
 	if (strEQ(name, "SQL_LD_COMPAT_YES"))
 #ifdef SQL_LD_COMPAT_YES
 	    return SQL_LD_COMPAT_YES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_LEN_BINARY_ATTR_OFFSET"))
-#ifdef SQL_LEN_BINARY_ATTR_OFFSET
-	    return SQL_LEN_BINARY_ATTR_OFFSET;
 #else
 	    goto not_there;
 #endif
@@ -6225,108 +2668,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_MAXIMUM_CATALOG_NAME_LENGTH"))
-#ifdef SQL_MAXIMUM_CATALOG_NAME_LENGTH
-	    return SQL_MAXIMUM_CATALOG_NAME_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_COLUMNS_IN_GROUP_BY"))
-#ifdef SQL_MAXIMUM_COLUMNS_IN_GROUP_BY
-	    return SQL_MAXIMUM_COLUMNS_IN_GROUP_BY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_COLUMNS_IN_INDEX"))
-#ifdef SQL_MAXIMUM_COLUMNS_IN_INDEX
-	    return SQL_MAXIMUM_COLUMNS_IN_INDEX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_COLUMNS_IN_ORDER_BY"))
-#ifdef SQL_MAXIMUM_COLUMNS_IN_ORDER_BY
-	    return SQL_MAXIMUM_COLUMNS_IN_ORDER_BY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_COLUMNS_IN_SELECT"))
-#ifdef SQL_MAXIMUM_COLUMNS_IN_SELECT
-	    return SQL_MAXIMUM_COLUMNS_IN_SELECT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_COLUMN_NAME_LENGTH"))
-#ifdef SQL_MAXIMUM_COLUMN_NAME_LENGTH
-	    return SQL_MAXIMUM_COLUMN_NAME_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_CONCURRENT_ACTIVITIES"))
-#ifdef SQL_MAXIMUM_CONCURRENT_ACTIVITIES
-	    return SQL_MAXIMUM_CONCURRENT_ACTIVITIES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_CURSOR_NAME_LENGTH"))
-#ifdef SQL_MAXIMUM_CURSOR_NAME_LENGTH
-	    return SQL_MAXIMUM_CURSOR_NAME_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_DRIVER_CONNECTIONS"))
-#ifdef SQL_MAXIMUM_DRIVER_CONNECTIONS
-	    return SQL_MAXIMUM_DRIVER_CONNECTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_IDENTIFIER_LENGTH"))
-#ifdef SQL_MAXIMUM_IDENTIFIER_LENGTH
-	    return SQL_MAXIMUM_IDENTIFIER_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_INDEX_SIZE"))
-#ifdef SQL_MAXIMUM_INDEX_SIZE
-	    return SQL_MAXIMUM_INDEX_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_ROW_SIZE"))
-#ifdef SQL_MAXIMUM_ROW_SIZE
-	    return SQL_MAXIMUM_ROW_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_SCHEMA_NAME_LENGTH"))
-#ifdef SQL_MAXIMUM_SCHEMA_NAME_LENGTH
-	    return SQL_MAXIMUM_SCHEMA_NAME_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_STATEMENT_LENGTH"))
-#ifdef SQL_MAXIMUM_STATEMENT_LENGTH
-	    return SQL_MAXIMUM_STATEMENT_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_TABLES_IN_SELECT"))
-#ifdef SQL_MAXIMUM_TABLES_IN_SELECT
-	    return SQL_MAXIMUM_TABLES_IN_SELECT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAXIMUM_USER_NAME_LENGTH"))
-#ifdef SQL_MAXIMUM_USER_NAME_LENGTH
-	    return SQL_MAXIMUM_USER_NAME_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAX_ASYNC_CONCURRENT_STATEMENTS"))
-#ifdef SQL_MAX_ASYNC_CONCURRENT_STATEMENTS
-	    return SQL_MAX_ASYNC_CONCURRENT_STATEMENTS;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_MAX_BINARY_LITERAL_LEN"))
 #ifdef SQL_MAX_BINARY_LITERAL_LEN
 	    return SQL_MAX_BINARY_LITERAL_LEN;
@@ -6381,33 +2722,15 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_MAX_CONCURRENT_ACTIVITIES"))
-#ifdef SQL_MAX_CONCURRENT_ACTIVITIES
-	    return SQL_MAX_CONCURRENT_ACTIVITIES;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_MAX_CURSOR_NAME_LEN"))
 #ifdef SQL_MAX_CURSOR_NAME_LEN
 	    return SQL_MAX_CURSOR_NAME_LEN;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_MAX_DRIVER_CONNECTIONS"))
-#ifdef SQL_MAX_DRIVER_CONNECTIONS
-	    return SQL_MAX_DRIVER_CONNECTIONS;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_MAX_DSN_LENGTH"))
 #ifdef SQL_MAX_DSN_LENGTH
 	    return SQL_MAX_DSN_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAX_IDENTIFIER_LEN"))
-#ifdef SQL_MAX_IDENTIFIER_LEN
-	    return SQL_MAX_IDENTIFIER_LEN;
 #else
 	    goto not_there;
 #endif
@@ -6438,12 +2761,6 @@ int arg;
 	if (strEQ(name, "SQL_MAX_MESSAGE_LENGTH"))
 #ifdef SQL_MAX_MESSAGE_LENGTH
 	    return SQL_MAX_MESSAGE_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MAX_NUMERIC_LEN"))
-#ifdef SQL_MAX_NUMERIC_LEN
-	    return SQL_MAX_NUMERIC_LEN;
 #else
 	    goto not_there;
 #endif
@@ -6525,24 +2842,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_MINMEMORY_USAGE"))
-#ifdef SQL_MINMEMORY_USAGE
-	    return SQL_MINMEMORY_USAGE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MINUTE"))
-#ifdef SQL_MINUTE
-	    return SQL_MINUTE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_MINUTE_TO_SECOND"))
-#ifdef SQL_MINUTE_TO_SECOND
-	    return SQL_MINUTE_TO_SECOND;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_MODE_DEFAULT"))
 #ifdef SQL_MODE_DEFAULT
 	    return SQL_MODE_DEFAULT;
@@ -6561,12 +2860,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_MONTH"))
-#ifdef SQL_MONTH
-	    return SQL_MONTH;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_MULTIPLE_ACTIVE_TXN"))
 #ifdef SQL_MULTIPLE_ACTIVE_TXN
 	    return SQL_MULTIPLE_ACTIVE_TXN;
@@ -6576,12 +2869,6 @@ int arg;
 	if (strEQ(name, "SQL_MULT_RESULT_SETS"))
 #ifdef SQL_MULT_RESULT_SETS
 	    return SQL_MULT_RESULT_SETS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NAMED"))
-#ifdef SQL_NAMED
-	    return SQL_NAMED;
 #else
 	    goto not_there;
 #endif
@@ -6645,12 +2932,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_NODESCRIBE_INPUT"))
-#ifdef SQL_NODESCRIBE_INPUT
-	    return SQL_NODESCRIBE_INPUT;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_NODESCRIBE_OFF"))
 #ifdef SQL_NODESCRIBE_OFF
 	    return SQL_NODESCRIBE_OFF;
@@ -6660,18 +2941,6 @@ int arg;
 	if (strEQ(name, "SQL_NODESCRIBE_ON"))
 #ifdef SQL_NODESCRIBE_ON
 	    return SQL_NODESCRIBE_ON;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NODESCRIBE_OUTPUT"))
-#ifdef SQL_NODESCRIBE_OUTPUT
-	    return SQL_NODESCRIBE_OUTPUT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NONSCROLLABLE"))
-#ifdef SQL_NONSCROLLABLE
-	    return SQL_NONSCROLLABLE;
 #else
 	    goto not_there;
 #endif
@@ -6705,21 +2974,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_NOT_DEFERRABLE"))
-#ifdef SQL_NOT_DEFERRABLE
-	    return SQL_NOT_DEFERRABLE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_NO_ACTION"))
 #ifdef SQL_NO_ACTION
 	    return SQL_NO_ACTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NO_COLUMN_NUMBER"))
-#ifdef SQL_NO_COLUMN_NUMBER
-	    return SQL_NO_COLUMN_NUMBER;
 #else
 	    goto not_there;
 #endif
@@ -6741,12 +2998,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_NO_ROW_NUMBER"))
-#ifdef SQL_NO_ROW_NUMBER
-	    return SQL_NO_ROW_NUMBER;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_NO_TOTAL"))
 #ifdef SQL_NO_TOTAL
 	    return SQL_NO_TOTAL;
@@ -6756,12 +3007,6 @@ int arg;
 	if (strEQ(name, "SQL_NTS"))
 #ifdef SQL_NTS
 	    return SQL_NTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NTSL"))
-#ifdef SQL_NTSL
-	    return SQL_NTSL;
 #else
 	    goto not_there;
 #endif
@@ -6789,21 +3034,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_NULL_HANDLE"))
-#ifdef SQL_NULL_HANDLE
-	    return SQL_NULL_HANDLE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_NULL_HDBC"))
 #ifdef SQL_NULL_HDBC
 	    return SQL_NULL_HDBC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NULL_HDESC"))
-#ifdef SQL_NULL_HDESC
-	    return SQL_NULL_HDESC;
 #else
 	    goto not_there;
 #endif
@@ -6828,18 +3061,6 @@ int arg;
 	if (strEQ(name, "SQL_NUMERIC_FUNCTIONS"))
 #ifdef SQL_NUMERIC_FUNCTIONS
 	    return SQL_NUMERIC_FUNCTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NUM_EXTENSIONS"))
-#ifdef SQL_NUM_EXTENSIONS
-	    return SQL_NUM_EXTENSIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_NUM_FUNCTIONS"))
-#ifdef SQL_NUM_FUNCTIONS
-	    return SQL_NUM_FUNCTIONS;
 #else
 	    goto not_there;
 #endif
@@ -6873,12 +3094,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ODBC_INTERFACE_CONFORMANCE"))
-#ifdef SQL_ODBC_INTERFACE_CONFORMANCE
-	    return SQL_ODBC_INTERFACE_CONFORMANCE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ODBC_SAG_CLI_CONFORMANCE"))
 #ifdef SQL_ODBC_SAG_CLI_CONFORMANCE
 	    return SQL_ODBC_SAG_CLI_CONFORMANCE;
@@ -6900,24 +3115,6 @@ int arg;
 	if (strEQ(name, "SQL_ODBC_VER"))
 #ifdef SQL_ODBC_VER
 	    return SQL_ODBC_VER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OIC_CORE"))
-#ifdef SQL_OIC_CORE
-	    return SQL_OIC_CORE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OIC_LEVEL1"))
-#ifdef SQL_OIC_LEVEL1
-	    return SQL_OIC_LEVEL1;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OIC_LEVEL2"))
-#ifdef SQL_OIC_LEVEL2
-	    return SQL_OIC_LEVEL2;
 #else
 	    goto not_there;
 #endif
@@ -6975,24 +3172,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_OPTIMIZE_SQLCOLUMNS_DEFAULT"))
-#ifdef SQL_OPTIMIZE_SQLCOLUMNS_DEFAULT
-	    return SQL_OPTIMIZE_SQLCOLUMNS_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OPTIMIZE_SQLCOLUMNS_OFF"))
-#ifdef SQL_OPTIMIZE_SQLCOLUMNS_OFF
-	    return SQL_OPTIMIZE_SQLCOLUMNS_OFF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OPTIMIZE_SQLCOLUMNS_ON"))
-#ifdef SQL_OPTIMIZE_SQLCOLUMNS_ON
-	    return SQL_OPTIMIZE_SQLCOLUMNS_ON;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_OPT_TRACE"))
 #ifdef SQL_OPT_TRACE
 	    return SQL_OPT_TRACE;
@@ -7002,24 +3181,6 @@ int arg;
 	if (strEQ(name, "SQL_OPT_TRACEFILE"))
 #ifdef SQL_OPT_TRACEFILE
 	    return SQL_OPT_TRACEFILE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OPT_TRACE_DEFAULT"))
-#ifdef SQL_OPT_TRACE_DEFAULT
-	    return SQL_OPT_TRACE_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OPT_TRACE_OFF"))
-#ifdef SQL_OPT_TRACE_OFF
-	    return SQL_OPT_TRACE_OFF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OPT_TRACE_ON"))
-#ifdef SQL_OPT_TRACE_ON
-	    return SQL_OPT_TRACE_ON;
 #else
 	    goto not_there;
 #endif
@@ -7065,12 +3226,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_OUTER_JOIN_CAPABILITIES"))
-#ifdef SQL_OUTER_JOIN_CAPABILITIES
-	    return SQL_OUTER_JOIN_CAPABILITIES;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_OU_DML_STATEMENTS"))
 #ifdef SQL_OU_DML_STATEMENTS
 	    return SQL_OU_DML_STATEMENTS;
@@ -7101,18 +3256,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_OV_ODBC2"))
-#ifdef SQL_OV_ODBC2
-	    return SQL_OV_ODBC2;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_OV_ODBC3"))
-#ifdef SQL_OV_ODBC3
-	    return SQL_OV_ODBC3;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_OWNER_TERM"))
 #ifdef SQL_OWNER_TERM
 	    return SQL_OWNER_TERM;
@@ -7137,48 +3280,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_PARAM_ARRAY_ROW_COUNTS"))
-#ifdef SQL_PARAM_ARRAY_ROW_COUNTS
-	    return SQL_PARAM_ARRAY_ROW_COUNTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_ARRAY_SELECTS"))
-#ifdef SQL_PARAM_ARRAY_SELECTS
-	    return SQL_PARAM_ARRAY_SELECTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_BIND_BY_COLUMN"))
-#ifdef SQL_PARAM_BIND_BY_COLUMN
-	    return SQL_PARAM_BIND_BY_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_BIND_TYPE_DEFAULT"))
-#ifdef SQL_PARAM_BIND_TYPE_DEFAULT
-	    return SQL_PARAM_BIND_TYPE_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_DIAG_UNAVAILABLE"))
-#ifdef SQL_PARAM_DIAG_UNAVAILABLE
-	    return SQL_PARAM_DIAG_UNAVAILABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_ERROR"))
-#ifdef SQL_PARAM_ERROR
-	    return SQL_PARAM_ERROR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_IGNORE"))
-#ifdef SQL_PARAM_IGNORE
-	    return SQL_PARAM_IGNORE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_PARAM_INPUT"))
 #ifdef SQL_PARAM_INPUT
 	    return SQL_PARAM_INPUT;
@@ -7197,24 +3298,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_PARAM_PROCEED"))
-#ifdef SQL_PARAM_PROCEED
-	    return SQL_PARAM_PROCEED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_SUCCESS"))
-#ifdef SQL_PARAM_SUCCESS
-	    return SQL_PARAM_SUCCESS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_SUCCESS_WITH_INFO"))
-#ifdef SQL_PARAM_SUCCESS_WITH_INFO
-	    return SQL_PARAM_SUCCESS_WITH_INFO;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_PARAM_TYPE_DEFAULT"))
 #ifdef SQL_PARAM_TYPE_DEFAULT
 	    return SQL_PARAM_TYPE_DEFAULT;
@@ -7224,48 +3307,6 @@ int arg;
 	if (strEQ(name, "SQL_PARAM_TYPE_UNKNOWN"))
 #ifdef SQL_PARAM_TYPE_UNKNOWN
 	    return SQL_PARAM_TYPE_UNKNOWN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARAM_UNUSED"))
-#ifdef SQL_PARAM_UNUSED
-	    return SQL_PARAM_UNUSED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARC_BATCH"))
-#ifdef SQL_PARC_BATCH
-	    return SQL_PARC_BATCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PARC_NO_BATCH"))
-#ifdef SQL_PARC_NO_BATCH
-	    return SQL_PARC_NO_BATCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PAS_BATCH"))
-#ifdef SQL_PAS_BATCH
-	    return SQL_PAS_BATCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PAS_NO_BATCH"))
-#ifdef SQL_PAS_NO_BATCH
-	    return SQL_PAS_NO_BATCH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PAS_NO_SELECT"))
-#ifdef SQL_PAS_NO_SELECT
-	    return SQL_PAS_NO_SELECT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PC_NON_PSEUDO"))
-#ifdef SQL_PC_NON_PSEUDO
-	    return SQL_PC_NON_PSEUDO;
 #else
 	    goto not_there;
 #endif
@@ -7335,48 +3376,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_PRED_BASIC"))
-#ifdef SQL_PRED_BASIC
-	    return SQL_PRED_BASIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PRED_CHAR"))
-#ifdef SQL_PRED_CHAR
-	    return SQL_PRED_CHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PRED_NONE"))
-#ifdef SQL_PRED_NONE
-	    return SQL_PRED_NONE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PRED_SEARCHABLE"))
-#ifdef SQL_PRED_SEARCHABLE
-	    return SQL_PRED_SEARCHABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PREFETCH_DEFAULT"))
-#ifdef SQL_PREFETCH_DEFAULT
-	    return SQL_PREFETCH_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PREFETCH_OFF"))
-#ifdef SQL_PREFETCH_OFF
-	    return SQL_PREFETCH_OFF;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PREFETCH_ON"))
-#ifdef SQL_PREFETCH_ON
-	    return SQL_PREFETCH_ON;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_PROCEDURES"))
 #ifdef SQL_PROCEDURES
 	    return SQL_PROCEDURES;
@@ -7386,18 +3385,6 @@ int arg;
 	if (strEQ(name, "SQL_PROCEDURE_TERM"))
 #ifdef SQL_PROCEDURE_TERM
 	    return SQL_PROCEDURE_TERM;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PROCESSCTL_NOFORK"))
-#ifdef SQL_PROCESSCTL_NOFORK
-	    return SQL_PROCESSCTL_NOFORK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_PROCESSCTL_NOTHREAD"))
-#ifdef SQL_PROCESSCTL_NOTHREAD
-	    return SQL_PROCESSCTL_NOTHREAD;
 #else
 	    goto not_there;
 #endif
@@ -7635,27 +3622,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ROW_IDENTIFIER"))
-#ifdef SQL_ROW_IDENTIFIER
-	    return SQL_ROW_IDENTIFIER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ROW_IGNORE"))
-#ifdef SQL_ROW_IGNORE
-	    return SQL_ROW_IGNORE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ROW_NOROW"))
 #ifdef SQL_ROW_NOROW
 	    return SQL_ROW_NOROW;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ROW_NO_ROW_NUMBER"))
-#ifdef SQL_ROW_NO_ROW_NUMBER
-	    return SQL_ROW_NO_ROW_NUMBER;
 #else
 	    goto not_there;
 #endif
@@ -7665,27 +3634,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_ROW_NUMBER_UNKNOWN"))
-#ifdef SQL_ROW_NUMBER_UNKNOWN
-	    return SQL_ROW_NUMBER_UNKNOWN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ROW_PROCEED"))
-#ifdef SQL_ROW_PROCEED
-	    return SQL_ROW_PROCEED;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_ROW_SUCCESS"))
 #ifdef SQL_ROW_SUCCESS
 	    return SQL_ROW_SUCCESS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_ROW_SUCCESS_WITH_INFO"))
-#ifdef SQL_ROW_SUCCESS_WITH_INFO
-	    return SQL_ROW_SUCCESS_WITH_INFO;
 #else
 	    goto not_there;
 #endif
@@ -7731,30 +3682,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_SCC_ISO92_CLI"))
-#ifdef SQL_SCC_ISO92_CLI
-	    return SQL_SCC_ISO92_CLI;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SCC_XOPEN_CLI_VERSION1"))
-#ifdef SQL_SCC_XOPEN_CLI_VERSION1
-	    return SQL_SCC_XOPEN_CLI_VERSION1;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SCHEMA_TERM"))
-#ifdef SQL_SCHEMA_TERM
-	    return SQL_SCHEMA_TERM;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SCHEMA_USAGE"))
-#ifdef SQL_SCHEMA_USAGE
-	    return SQL_SCHEMA_USAGE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_SCOPE_CURROW"))
 #ifdef SQL_SCOPE_CURROW
 	    return SQL_SCOPE_CURROW;
@@ -7773,33 +3700,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_SCROLLABLE"))
-#ifdef SQL_SCROLLABLE
-	    return SQL_SCROLLABLE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_SCROLL_CONCURRENCY"))
 #ifdef SQL_SCROLL_CONCURRENCY
 	    return SQL_SCROLL_CONCURRENCY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SCROLL_DYNAMIC"))
-#ifdef SQL_SCROLL_DYNAMIC
-	    return SQL_SCROLL_DYNAMIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SCROLL_FORWARD_ONLY"))
-#ifdef SQL_SCROLL_FORWARD_ONLY
-	    return SQL_SCROLL_FORWARD_ONLY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SCROLL_KEYSET_DRIVEN"))
-#ifdef SQL_SCROLL_KEYSET_DRIVEN
-	    return SQL_SCROLL_KEYSET_DRIVEN;
 #else
 	    goto not_there;
 #endif
@@ -7809,39 +3712,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_SCROLL_STATIC"))
-#ifdef SQL_SCROLL_STATIC
-	    return SQL_SCROLL_STATIC;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SC_FIPS127_2_TRANSITIONAL"))
-#ifdef SQL_SC_FIPS127_2_TRANSITIONAL
-	    return SQL_SC_FIPS127_2_TRANSITIONAL;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_SC_NON_UNIQUE"))
 #ifdef SQL_SC_NON_UNIQUE
 	    return SQL_SC_NON_UNIQUE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SC_SQL92_ENTRY"))
-#ifdef SQL_SC_SQL92_ENTRY
-	    return SQL_SC_SQL92_ENTRY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SC_SQL92_FULL"))
-#ifdef SQL_SC_SQL92_FULL
-	    return SQL_SC_SQL92_FULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SC_SQL92_INTERMEDIATE"))
-#ifdef SQL_SC_SQL92_INTERMEDIATE
-	    return SQL_SC_SQL92_INTERMEDIATE;
 #else
 	    goto not_there;
 #endif
@@ -7857,24 +3730,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_SDF_CURRENT_DATE"))
-#ifdef SQL_SDF_CURRENT_DATE
-	    return SQL_SDF_CURRENT_DATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SDF_CURRENT_TIME"))
-#ifdef SQL_SDF_CURRENT_TIME
-	    return SQL_SDF_CURRENT_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SDF_CURRENT_TIMESTAMP"))
-#ifdef SQL_SDF_CURRENT_TIMESTAMP
-	    return SQL_SDF_CURRENT_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_SEARCHABLE"))
 #ifdef SQL_SEARCHABLE
 	    return SQL_SEARCHABLE;
@@ -7884,18 +3739,6 @@ int arg;
 	if (strEQ(name, "SQL_SEARCH_PATTERN_ESCAPE"))
 #ifdef SQL_SEARCH_PATTERN_ESCAPE
 	    return SQL_SEARCH_PATTERN_ESCAPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SECOND"))
-#ifdef SQL_SECOND
-	    return SQL_SECOND;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SENSITIVE"))
-#ifdef SQL_SENSITIVE
-	    return SQL_SENSITIVE;
 #else
 	    goto not_there;
 #endif
@@ -7911,18 +3754,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_SETPOS_MAX_LOCK_VALUE"))
-#ifdef SQL_SETPOS_MAX_LOCK_VALUE
-	    return SQL_SETPOS_MAX_LOCK_VALUE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SETPOS_MAX_OPTION_VALUE"))
-#ifdef SQL_SETPOS_MAX_OPTION_VALUE
-	    return SQL_SETPOS_MAX_OPTION_VALUE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_SET_DEFAULT"))
 #ifdef SQL_SET_DEFAULT
 	    return SQL_SET_DEFAULT;
@@ -7932,132 +3763,6 @@ int arg;
 	if (strEQ(name, "SQL_SET_NULL"))
 #ifdef SQL_SET_NULL
 	    return SQL_SET_NULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKD_CASCADE"))
-#ifdef SQL_SFKD_CASCADE
-	    return SQL_SFKD_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKD_NO_ACTION"))
-#ifdef SQL_SFKD_NO_ACTION
-	    return SQL_SFKD_NO_ACTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKD_SET_DEFAULT"))
-#ifdef SQL_SFKD_SET_DEFAULT
-	    return SQL_SFKD_SET_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKD_SET_NULL"))
-#ifdef SQL_SFKD_SET_NULL
-	    return SQL_SFKD_SET_NULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKU_CASCADE"))
-#ifdef SQL_SFKU_CASCADE
-	    return SQL_SFKU_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKU_NO_ACTION"))
-#ifdef SQL_SFKU_NO_ACTION
-	    return SQL_SFKU_NO_ACTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKU_SET_DEFAULT"))
-#ifdef SQL_SFKU_SET_DEFAULT
-	    return SQL_SFKU_SET_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SFKU_SET_NULL"))
-#ifdef SQL_SFKU_SET_NULL
-	    return SQL_SFKU_SET_NULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_DELETE_TABLE"))
-#ifdef SQL_SG_DELETE_TABLE
-	    return SQL_SG_DELETE_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_INSERT_COLUMN"))
-#ifdef SQL_SG_INSERT_COLUMN
-	    return SQL_SG_INSERT_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_INSERT_TABLE"))
-#ifdef SQL_SG_INSERT_TABLE
-	    return SQL_SG_INSERT_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_REFERENCES_COLUMN"))
-#ifdef SQL_SG_REFERENCES_COLUMN
-	    return SQL_SG_REFERENCES_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_REFERENCES_TABLE"))
-#ifdef SQL_SG_REFERENCES_TABLE
-	    return SQL_SG_REFERENCES_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_SELECT_TABLE"))
-#ifdef SQL_SG_SELECT_TABLE
-	    return SQL_SG_SELECT_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_UPDATE_COLUMN"))
-#ifdef SQL_SG_UPDATE_COLUMN
-	    return SQL_SG_UPDATE_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_UPDATE_TABLE"))
-#ifdef SQL_SG_UPDATE_TABLE
-	    return SQL_SG_UPDATE_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_USAGE_ON_CHARACTER_SET"))
-#ifdef SQL_SG_USAGE_ON_CHARACTER_SET
-	    return SQL_SG_USAGE_ON_CHARACTER_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_USAGE_ON_COLLATION"))
-#ifdef SQL_SG_USAGE_ON_COLLATION
-	    return SQL_SG_USAGE_ON_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_USAGE_ON_DOMAIN"))
-#ifdef SQL_SG_USAGE_ON_DOMAIN
-	    return SQL_SG_USAGE_ON_DOMAIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_USAGE_ON_TRANSLATION"))
-#ifdef SQL_SG_USAGE_ON_TRANSLATION
-	    return SQL_SG_USAGE_ON_TRANSLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SG_WITH_GRANT_OPTION"))
-#ifdef SQL_SG_WITH_GRANT_OPTION
-	    return SQL_SG_WITH_GRANT_OPTION;
 #else
 	    goto not_there;
 #endif
@@ -8076,42 +3781,6 @@ int arg;
 	if (strEQ(name, "SQL_SMALLINT"))
 #ifdef SQL_SMALLINT
 	    return SQL_SMALLINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SNVF_BIT_LENGTH"))
-#ifdef SQL_SNVF_BIT_LENGTH
-	    return SQL_SNVF_BIT_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SNVF_CHARACTER_LENGTH"))
-#ifdef SQL_SNVF_CHARACTER_LENGTH
-	    return SQL_SNVF_CHARACTER_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SNVF_CHAR_LENGTH"))
-#ifdef SQL_SNVF_CHAR_LENGTH
-	    return SQL_SNVF_CHAR_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SNVF_EXTRACT"))
-#ifdef SQL_SNVF_EXTRACT
-	    return SQL_SNVF_EXTRACT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SNVF_OCTET_LENGTH"))
-#ifdef SQL_SNVF_OCTET_LENGTH
-	    return SQL_SNVF_OCTET_LENGTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SNVF_POSITION"))
-#ifdef SQL_SNVF_POSITION
-	    return SQL_SNVF_POSITION;
 #else
 	    goto not_there;
 #endif
@@ -8151,177 +3820,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_SPEC_MAJOR"))
-#ifdef SQL_SPEC_MAJOR
-	    return SQL_SPEC_MAJOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SPEC_MINOR"))
-#ifdef SQL_SPEC_MINOR
-	    return SQL_SPEC_MINOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_BETWEEN"))
-#ifdef SQL_SP_BETWEEN
-	    return SQL_SP_BETWEEN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_COMPARISON"))
-#ifdef SQL_SP_COMPARISON
-	    return SQL_SP_COMPARISON;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_EXISTS"))
-#ifdef SQL_SP_EXISTS
-	    return SQL_SP_EXISTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_IN"))
-#ifdef SQL_SP_IN
-	    return SQL_SP_IN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_ISNOTNULL"))
-#ifdef SQL_SP_ISNOTNULL
-	    return SQL_SP_ISNOTNULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_ISNULL"))
-#ifdef SQL_SP_ISNULL
-	    return SQL_SP_ISNULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_LIKE"))
-#ifdef SQL_SP_LIKE
-	    return SQL_SP_LIKE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_MATCH_FULL"))
-#ifdef SQL_SP_MATCH_FULL
-	    return SQL_SP_MATCH_FULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_MATCH_PARTIAL"))
-#ifdef SQL_SP_MATCH_PARTIAL
-	    return SQL_SP_MATCH_PARTIAL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_MATCH_UNIQUE_FULL"))
-#ifdef SQL_SP_MATCH_UNIQUE_FULL
-	    return SQL_SP_MATCH_UNIQUE_FULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_MATCH_UNIQUE_PARTIAL"))
-#ifdef SQL_SP_MATCH_UNIQUE_PARTIAL
-	    return SQL_SP_MATCH_UNIQUE_PARTIAL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_OVERLAPS"))
-#ifdef SQL_SP_OVERLAPS
-	    return SQL_SP_OVERLAPS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_QUANTIFIED_COMPARISON"))
-#ifdef SQL_SP_QUANTIFIED_COMPARISON
-	    return SQL_SP_QUANTIFIED_COMPARISON;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SP_UNIQUE"))
-#ifdef SQL_SP_UNIQUE
-	    return SQL_SP_UNIQUE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_DATETIME_FUNCTIONS"))
-#ifdef SQL_SQL92_DATETIME_FUNCTIONS
-	    return SQL_SQL92_DATETIME_FUNCTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_FOREIGN_KEY_DELETE_RULE"))
-#ifdef SQL_SQL92_FOREIGN_KEY_DELETE_RULE
-	    return SQL_SQL92_FOREIGN_KEY_DELETE_RULE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_FOREIGN_KEY_UPDATE_RULE"))
-#ifdef SQL_SQL92_FOREIGN_KEY_UPDATE_RULE
-	    return SQL_SQL92_FOREIGN_KEY_UPDATE_RULE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_GRANT"))
-#ifdef SQL_SQL92_GRANT
-	    return SQL_SQL92_GRANT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_NUMERIC_VALUE_FUNCTIONS"))
-#ifdef SQL_SQL92_NUMERIC_VALUE_FUNCTIONS
-	    return SQL_SQL92_NUMERIC_VALUE_FUNCTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_PREDICATES"))
-#ifdef SQL_SQL92_PREDICATES
-	    return SQL_SQL92_PREDICATES;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_RELATIONAL_JOIN_OPERATORS"))
-#ifdef SQL_SQL92_RELATIONAL_JOIN_OPERATORS
-	    return SQL_SQL92_RELATIONAL_JOIN_OPERATORS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_REVOKE"))
-#ifdef SQL_SQL92_REVOKE
-	    return SQL_SQL92_REVOKE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_ROW_VALUE_CONSTRUCTOR"))
-#ifdef SQL_SQL92_ROW_VALUE_CONSTRUCTOR
-	    return SQL_SQL92_ROW_VALUE_CONSTRUCTOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_STRING_FUNCTIONS"))
-#ifdef SQL_SQL92_STRING_FUNCTIONS
-	    return SQL_SQL92_STRING_FUNCTIONS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL92_VALUE_EXPRESSIONS"))
-#ifdef SQL_SQL92_VALUE_EXPRESSIONS
-	    return SQL_SQL92_VALUE_EXPRESSIONS;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_SQLSTATE_SIZE"))
 #ifdef SQL_SQLSTATE_SIZE
 	    return SQL_SQLSTATE_SIZE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SQL_CONFORMANCE"))
-#ifdef SQL_SQL_CONFORMANCE
-	    return SQL_SQL_CONFORMANCE;
 #else
 	    goto not_there;
 #endif
@@ -8355,228 +3856,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_SRJO_CORRESPONDING_CLAUSE"))
-#ifdef SQL_SRJO_CORRESPONDING_CLAUSE
-	    return SQL_SRJO_CORRESPONDING_CLAUSE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_CROSS_JOIN"))
-#ifdef SQL_SRJO_CROSS_JOIN
-	    return SQL_SRJO_CROSS_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_EXCEPT_JOIN"))
-#ifdef SQL_SRJO_EXCEPT_JOIN
-	    return SQL_SRJO_EXCEPT_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_FULL_OUTER_JOIN"))
-#ifdef SQL_SRJO_FULL_OUTER_JOIN
-	    return SQL_SRJO_FULL_OUTER_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_INNER_JOIN"))
-#ifdef SQL_SRJO_INNER_JOIN
-	    return SQL_SRJO_INNER_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_INTERSECT_JOIN"))
-#ifdef SQL_SRJO_INTERSECT_JOIN
-	    return SQL_SRJO_INTERSECT_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_LEFT_OUTER_JOIN"))
-#ifdef SQL_SRJO_LEFT_OUTER_JOIN
-	    return SQL_SRJO_LEFT_OUTER_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_NATURAL_JOIN"))
-#ifdef SQL_SRJO_NATURAL_JOIN
-	    return SQL_SRJO_NATURAL_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_RIGHT_OUTER_JOIN"))
-#ifdef SQL_SRJO_RIGHT_OUTER_JOIN
-	    return SQL_SRJO_RIGHT_OUTER_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRJO_UNION_JOIN"))
-#ifdef SQL_SRJO_UNION_JOIN
-	    return SQL_SRJO_UNION_JOIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRVC_DEFAULT"))
-#ifdef SQL_SRVC_DEFAULT
-	    return SQL_SRVC_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRVC_NULL"))
-#ifdef SQL_SRVC_NULL
-	    return SQL_SRVC_NULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRVC_ROW_SUBQUERY"))
-#ifdef SQL_SRVC_ROW_SUBQUERY
-	    return SQL_SRVC_ROW_SUBQUERY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SRVC_VALUE_EXPRESSION"))
-#ifdef SQL_SRVC_VALUE_EXPRESSION
-	    return SQL_SRVC_VALUE_EXPRESSION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_CASCADE"))
-#ifdef SQL_SR_CASCADE
-	    return SQL_SR_CASCADE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_DELETE_TABLE"))
-#ifdef SQL_SR_DELETE_TABLE
-	    return SQL_SR_DELETE_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_GRANT_OPTION_FOR"))
-#ifdef SQL_SR_GRANT_OPTION_FOR
-	    return SQL_SR_GRANT_OPTION_FOR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_INSERT_COLUMN"))
-#ifdef SQL_SR_INSERT_COLUMN
-	    return SQL_SR_INSERT_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_INSERT_TABLE"))
-#ifdef SQL_SR_INSERT_TABLE
-	    return SQL_SR_INSERT_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_REFERENCES_COLUMN"))
-#ifdef SQL_SR_REFERENCES_COLUMN
-	    return SQL_SR_REFERENCES_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_REFERENCES_TABLE"))
-#ifdef SQL_SR_REFERENCES_TABLE
-	    return SQL_SR_REFERENCES_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_RESTRICT"))
-#ifdef SQL_SR_RESTRICT
-	    return SQL_SR_RESTRICT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_SELECT_TABLE"))
-#ifdef SQL_SR_SELECT_TABLE
-	    return SQL_SR_SELECT_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_UPDATE_COLUMN"))
-#ifdef SQL_SR_UPDATE_COLUMN
-	    return SQL_SR_UPDATE_COLUMN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_UPDATE_TABLE"))
-#ifdef SQL_SR_UPDATE_TABLE
-	    return SQL_SR_UPDATE_TABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_USAGE_ON_CHARACTER_SET"))
-#ifdef SQL_SR_USAGE_ON_CHARACTER_SET
-	    return SQL_SR_USAGE_ON_CHARACTER_SET;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_USAGE_ON_COLLATION"))
-#ifdef SQL_SR_USAGE_ON_COLLATION
-	    return SQL_SR_USAGE_ON_COLLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_USAGE_ON_DOMAIN"))
-#ifdef SQL_SR_USAGE_ON_DOMAIN
-	    return SQL_SR_USAGE_ON_DOMAIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SR_USAGE_ON_TRANSLATION"))
-#ifdef SQL_SR_USAGE_ON_TRANSLATION
-	    return SQL_SR_USAGE_ON_TRANSLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_CONVERT"))
-#ifdef SQL_SSF_CONVERT
-	    return SQL_SSF_CONVERT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_LOWER"))
-#ifdef SQL_SSF_LOWER
-	    return SQL_SSF_LOWER;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_SUBSTRING"))
-#ifdef SQL_SSF_SUBSTRING
-	    return SQL_SSF_SUBSTRING;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_TRANSLATE"))
-#ifdef SQL_SSF_TRANSLATE
-	    return SQL_SSF_TRANSLATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_TRIM_BOTH"))
-#ifdef SQL_SSF_TRIM_BOTH
-	    return SQL_SSF_TRIM_BOTH;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_TRIM_LEADING"))
-#ifdef SQL_SSF_TRIM_LEADING
-	    return SQL_SSF_TRIM_LEADING;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_TRIM_TRAILING"))
-#ifdef SQL_SSF_TRIM_TRAILING
-	    return SQL_SSF_TRIM_TRAILING;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SSF_UPPER"))
-#ifdef SQL_SSF_UPPER
-	    return SQL_SSF_UPPER;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_SS_ADDITIONS"))
 #ifdef SQL_SS_ADDITIONS
 	    return SQL_SS_ADDITIONS;
@@ -8595,24 +3874,6 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_STANDARD_CLI_CONFORMANCE"))
-#ifdef SQL_STANDARD_CLI_CONFORMANCE
-	    return SQL_STANDARD_CLI_CONFORMANCE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_STATIC_CURSOR_ATTRIBUTES1"))
-#ifdef SQL_STATIC_CURSOR_ATTRIBUTES1
-	    return SQL_STATIC_CURSOR_ATTRIBUTES1;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_STATIC_CURSOR_ATTRIBUTES2"))
-#ifdef SQL_STATIC_CURSOR_ATTRIBUTES2
-	    return SQL_STATIC_CURSOR_ATTRIBUTES2;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_STATIC_SENSITIVITY"))
 #ifdef SQL_STATIC_SENSITIVITY
 	    return SQL_STATIC_SENSITIVITY;
@@ -8628,18 +3889,6 @@ int arg;
 	if (strEQ(name, "SQL_STMTTXN_ISOLATION"))
 #ifdef SQL_STMTTXN_ISOLATION
 	    return SQL_STMTTXN_ISOLATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_STMT_OPT_MAX"))
-#ifdef SQL_STMT_OPT_MAX
-	    return SQL_STMT_OPT_MAX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_STMT_OPT_MIN"))
-#ifdef SQL_STMT_OPT_MIN
-	    return SQL_STMT_OPT_MIN;
 #else
 	    goto not_there;
 #endif
@@ -8664,60 +3913,6 @@ int arg;
 	if (strEQ(name, "SQL_SUCCESS_WITH_INFO"))
 #ifdef SQL_SUCCESS_WITH_INFO
 	    return SQL_SUCCESS_WITH_INFO;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SU_DML_STATEMENTS"))
-#ifdef SQL_SU_DML_STATEMENTS
-	    return SQL_SU_DML_STATEMENTS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SU_INDEX_DEFINITION"))
-#ifdef SQL_SU_INDEX_DEFINITION
-	    return SQL_SU_INDEX_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SU_PRIVILEGE_DEFINITION"))
-#ifdef SQL_SU_PRIVILEGE_DEFINITION
-	    return SQL_SU_PRIVILEGE_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SU_PROCEDURE_INVOCATION"))
-#ifdef SQL_SU_PROCEDURE_INVOCATION
-	    return SQL_SU_PROCEDURE_INVOCATION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SU_TABLE_DEFINITION"))
-#ifdef SQL_SU_TABLE_DEFINITION
-	    return SQL_SU_TABLE_DEFINITION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SVE_CASE"))
-#ifdef SQL_SVE_CASE
-	    return SQL_SVE_CASE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SVE_CAST"))
-#ifdef SQL_SVE_CAST
-	    return SQL_SVE_CAST;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SVE_COALESCE"))
-#ifdef SQL_SVE_COALESCE
-	    return SQL_SVE_COALESCE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_SVE_NULLIF"))
-#ifdef SQL_SVE_NULLIF
-	    return SQL_SVE_NULLIF;
 #else
 	    goto not_there;
 #endif
@@ -8811,63 +4006,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_TIMESTAMP_LEN"))
-#ifdef SQL_TIMESTAMP_LEN
-	    return SQL_TIMESTAMP_LEN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TIME_LEN"))
-#ifdef SQL_TIME_LEN
-	    return SQL_TIME_LEN;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_TINYINT"))
 #ifdef SQL_TINYINT
 	    return SQL_TINYINT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TRANSACTION_CAPABLE"))
-#ifdef SQL_TRANSACTION_CAPABLE
-	    return SQL_TRANSACTION_CAPABLE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TRANSACTION_ISOLATION_OPTION"))
-#ifdef SQL_TRANSACTION_ISOLATION_OPTION
-	    return SQL_TRANSACTION_ISOLATION_OPTION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TRANSACTION_NOCOMMIT"))
-#ifdef SQL_TRANSACTION_NOCOMMIT
-	    return SQL_TRANSACTION_NOCOMMIT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TRANSACTION_READ_COMMITTED"))
-#ifdef SQL_TRANSACTION_READ_COMMITTED
-	    return SQL_TRANSACTION_READ_COMMITTED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TRANSACTION_READ_UNCOMMITTED"))
-#ifdef SQL_TRANSACTION_READ_UNCOMMITTED
-	    return SQL_TRANSACTION_READ_UNCOMMITTED;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TRANSACTION_REPEATABLE_READ"))
-#ifdef SQL_TRANSACTION_REPEATABLE_READ
-	    return SQL_TRANSACTION_REPEATABLE_READ;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TRANSACTION_SERIALIZABLE"))
-#ifdef SQL_TRANSACTION_SERIALIZABLE
-	    return SQL_TRANSACTION_SERIALIZABLE;
 #else
 	    goto not_there;
 #endif
@@ -8949,63 +4090,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_TYPE_DATE"))
-#ifdef SQL_TYPE_DATE
-	    return SQL_TYPE_DATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TYPE_DRIVER_END"))
-#ifdef SQL_TYPE_DRIVER_END
-	    return SQL_TYPE_DRIVER_END;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TYPE_DRIVER_START"))
-#ifdef SQL_TYPE_DRIVER_START
-	    return SQL_TYPE_DRIVER_START;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TYPE_MAX"))
-#ifdef SQL_TYPE_MAX
-	    return SQL_TYPE_MAX;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TYPE_MIN"))
-#ifdef SQL_TYPE_MIN
-	    return SQL_TYPE_MIN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TYPE_NULL"))
-#ifdef SQL_TYPE_NULL
-	    return SQL_TYPE_NULL;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TYPE_TIME"))
-#ifdef SQL_TYPE_TIME
-	    return SQL_TYPE_TIME;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_TYPE_TIMESTAMP"))
-#ifdef SQL_TYPE_TIMESTAMP
-	    return SQL_TYPE_TIMESTAMP;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_UB_DEFAULT"))
 #ifdef SQL_UB_DEFAULT
 	    return SQL_UB_DEFAULT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UB_FIXED"))
-#ifdef SQL_UB_FIXED
-	    return SQL_UB_FIXED;
 #else
 	    goto not_there;
 #endif
@@ -9021,63 +4108,15 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_UB_VARIABLE"))
-#ifdef SQL_UB_VARIABLE
-	    return SQL_UB_VARIABLE;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_UNBIND"))
 #ifdef SQL_UNBIND
 	    return SQL_UNBIND;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_UNICODE"))
-#ifdef SQL_UNICODE
-	    return SQL_UNICODE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UNICODE_CHAR"))
-#ifdef SQL_UNICODE_CHAR
-	    return SQL_UNICODE_CHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UNICODE_LONGVARCHAR"))
-#ifdef SQL_UNICODE_LONGVARCHAR
-	    return SQL_UNICODE_LONGVARCHAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UNICODE_VARCHAR"))
-#ifdef SQL_UNICODE_VARCHAR
-	    return SQL_UNICODE_VARCHAR;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_UNION"))
 #ifdef SQL_UNION
 	    return SQL_UNION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UNION_STATEMENT"))
-#ifdef SQL_UNION_STATEMENT
-	    return SQL_UNION_STATEMENT;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UNKNOWN_TYPE"))
-#ifdef SQL_UNKNOWN_TYPE
-	    return SQL_UNKNOWN_TYPE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UNNAMED"))
-#ifdef SQL_UNNAMED
-	    return SQL_UNNAMED;
 #else
 	    goto not_there;
 #endif
@@ -9093,39 +4132,9 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_UNSPECIFIED"))
-#ifdef SQL_UNSPECIFIED
-	    return SQL_UNSPECIFIED;
-#else
-	    goto not_there;
-#endif
 	if (strEQ(name, "SQL_UPDATE"))
 #ifdef SQL_UPDATE
 	    return SQL_UPDATE;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UPDATE_BY_BOOKMARK"))
-#ifdef SQL_UPDATE_BY_BOOKMARK
-	    return SQL_UPDATE_BY_BOOKMARK;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UPDT_READONLY"))
-#ifdef SQL_UPDT_READONLY
-	    return SQL_UPDT_READONLY;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UPDT_READWRITE_UNKNOWN"))
-#ifdef SQL_UPDT_READWRITE_UNKNOWN
-	    return SQL_UPDT_READWRITE_UNKNOWN;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_UPDT_WRITE"))
-#ifdef SQL_UPDT_WRITE
-	    return SQL_UPDT_WRITE;
 #else
 	    goto not_there;
 #endif
@@ -9138,18 +4147,6 @@ int arg;
 	if (strEQ(name, "SQL_USE_BOOKMARKS"))
 #ifdef SQL_USE_BOOKMARKS
 	    return SQL_USE_BOOKMARKS;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_US_UNION"))
-#ifdef SQL_US_UNION
-	    return SQL_US_UNION;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_US_UNION_ALL"))
-#ifdef SQL_US_UNION_ALL
-	    return SQL_US_UNION_ALL;
 #else
 	    goto not_there;
 #endif
@@ -9207,32 +4204,8 @@ int arg;
 #else
 	    goto not_there;
 #endif
-	if (strEQ(name, "SQL_XOPEN_CLI_YEAR"))
-#ifdef SQL_XOPEN_CLI_YEAR
-	    return SQL_XOPEN_CLI_YEAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_YEAR"))
-#ifdef SQL_YEAR
-	    return SQL_YEAR;
-#else
-	    goto not_there;
-#endif
-	if (strEQ(name, "SQL_YEAR_TO_MONTH"))
-#ifdef SQL_YEAR_TO_MONTH
-	    return SQL_YEAR_TO_MONTH;
-#else
-	    goto not_there;
-#endif
 	break;
     case 'T':
-	if (strEQ(name, "TRACE_VERSION"))
-#ifdef TRACE_VERSION
-	    return TRACE_VERSION;
-#else
-	    goto not_there;
-#endif
 	break;
     case 'U':
 	break;
@@ -9247,6 +4220,18 @@ int arg;
     case 'Z':
 	break;
     case '_':
+	if (strEQ(name, "__SQL"))
+#ifdef __SQL
+	    return __SQL;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "__SQLEXT"))
+#ifdef __SQLEXT
+	    return __SQLEXT;
+#else
+	    goto not_there;
+#endif
 	break;
     }
     errno = EINVAL;
@@ -9258,100 +4243,9 @@ not_there:
 }
 
 
-MODULE = DBD::DB2::Constants		PACKAGE = DBD::DB2::Constants		
+MODULE = DBD::DB2::Constants		PACKAGE = DBD::DB2::Constants
 
-char *
-SQL_ALL_CATALOGS()
-
-    CODE:
-#ifdef SQL_ALL_CATALOGS
-    RETVAL = SQL_ALL_CATALOGS;
-#else
-    croak("Your vendor has not defined the DBD::DB2::Constants macro SQL_ALL_CATALOGS");
-#endif
-
-    OUTPUT:
-    RETVAL
-
-char *
-SQL_ALL_SCHEMAS()
-
-    CODE:
-#ifdef SQL_ALL_SCHEMAS
-    RETVAL = SQL_ALL_SCHEMAS;
-#else
-    croak("Your vendor has not defined the DBD::DB2::Constants macro SQL_ALL_SCHEMAS");
-#endif
-
-    OUTPUT:
-    RETVAL
-
-char *
-SQL_ALL_TABLE_TYPES()
-
-    CODE:
-#ifdef SQL_ALL_TABLE_TYPES
-    RETVAL = SQL_ALL_TABLE_TYPES;
-#else
-    croak("Your vendor has not defined the DBD::DB2::Constants macro SQL_ALL_TABLE_TYPES");
-#endif
-
-    OUTPUT:
-    RETVAL
-
-char *
-SQL_DATALINK_URL()
-
-    CODE:
-#ifdef SQL_DATALINK_URL
-    RETVAL = SQL_DATALINK_URL;
-#else
-    croak("Your vendor has not defined the DBD::DB2::Constants macro SQL_DATALINK_URL");
-#endif
-
-    OUTPUT:
-    RETVAL
-
-char *
-SQL_ODBC_KEYWORDS()
-
-    CODE:
-#ifdef SQL_ODBC_KEYWORDS
-    RETVAL = SQL_ODBC_KEYWORDS;
-#else
-    croak("Your vendor has not defined the DBD::DB2::Constants macro SQL_ODBC_KEYWORDS");
-#endif
-
-    OUTPUT:
-    RETVAL
-
-char *
-SQL_OPT_TRACE_FILE_DEFAULT()
-
-    CODE:
-#ifdef SQL_OPT_TRACE_FILE_DEFAULT
-    RETVAL = SQL_OPT_TRACE_FILE_DEFAULT;
-#else
-    croak("Your vendor has not defined the DBD::DB2::Constants macro SQL_OPT_TRACE_FILE_DEFAULT");
-#endif
-
-    OUTPUT:
-    RETVAL
-
-char *
-SQL_SPEC_STRING()
-
-    CODE:
-#ifdef SQL_SPEC_STRING
-    RETVAL = SQL_SPEC_STRING;
-#else
-    croak("Your vendor has not defined the DBD::DB2::Constants macro SQL_SPEC_STRING");
-#endif
-
-    OUTPUT:
-    RETVAL
-
-PROTOTYPES:  DISABLE
+PROTOTYPES: DISABLE
 
 double
 constant(name,arg)
