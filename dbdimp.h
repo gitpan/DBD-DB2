@@ -1,7 +1,7 @@
 /*
-   $Id: dbdimp.h,v 0.10 1998/03/16 20:36:56 mhm Rel $
+   $Id: dbdimp.h,v 0.11 1998/05/21 03:58:27 mhm Rel $
 
-   Copyright (c) 1995,1996 International Business Machines Corp.
+   Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
 */
 
 /* these are (almost) random values ! */

@@ -1,7 +1,7 @@
 /*
-   $Id: DB2.h,v 0.9 1998/03/16 20:36:56 mhm Rel $
+   $Id: DB2.h,v 0.10 1998/05/21 03:58:27 mhm Rel $
 
-   Copyright (c) 1995  Mike Moran
+   Copyright (c) 1995,1996,1997,1998  Mike Moran
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README

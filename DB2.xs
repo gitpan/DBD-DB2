@@ -1,7 +1,7 @@
 /*
-   	$Id: DB2.xs,v 0.15 1998/04/03 05:31:17 mhm Rel $
+   	$Id: DB2.xs,v 0.16 1998/05/21 03:58:27 mhm Rel $
 
-	Copyright (c) 1995,1996 International Business Machines Corp.
+	Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
 
 */
 

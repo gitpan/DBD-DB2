@@ -1,3 +1,26 @@
+May 11, 1998
+
+DBD::DB2-0.67
+
+    Fixed a bug dealing with functions returning SUCCESS_WITH_INFO
+
+
+April 2, 1998
+
+DBD::DB2-0.66
+    Rewrote code to support multiple concurrent connections
+
+    Fixed a pair of bugs, dealing with nested error codes not
+    being properly returned.
+
+    Tested against DB2 version 5
+
+****
+    Added untested routines to SetConnectionOptions and to
+    SetStmtOptions ****  Experimental needs to be moved to
+    private_*
+****
+
 
 Dec 10, 1997
 

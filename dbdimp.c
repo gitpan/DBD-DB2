@@ -1,7 +1,7 @@
 /*
-   $Id: dbdimp.c,v 0.21 1998/04/03 05:30:45 mhm Rel $
+   $Id: dbdimp.c,v 0.24 1998/07/06 04:50:39 mhm Rel $
 
-   Copyright (c) 1995,1996 International Business Machines Corp.
+   Copyright (c) 1995,1996,1997,1998 International Business Machines Corp.
 
 */
 
@@ -322,7 +322,6 @@ dbd_db_disconnect(dbh,imp_dbh)
     ret = check_error(dbh,ret,msg);
     EOI(ret);
 
-	SQLFreeConnect(imp_dbh->hdbc);
     imp_dbh->hdbc = SQL_NULL_HDBC;
     imp_drh->connects--;
     if (imp_drh->connects == 0) {
@@ -564,7 +563,7 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
 
     if (dbis->debug >= 2)
 		fprintf(DBILOGFP, "bind %s <== '%s' (attribs: %s)\n",
-			name, SvPV(newvalue,na), SvPV(attribs,na) );
+			name, SvPV(newvalue,na), attribs ? SvPV(attribs,na) : "<no attribs>" );
 
     svp = hv_fetch(imp_sth->bind_names, (char *)name, name_len, 0);
     if (svp == NULL)
@@ -617,7 +616,7 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
 		fprintf(stderr,"phs->sv is not OK\n");
 	}	
 	ret = SQLBindParameter(imp_sth->phstmt,(SQLINTEGER)SvIV(ph_namesv),
-            param,ctype,stype,prec,scale,SvPVX(phs->sv),0,(phs->indp != 0 && nullok)?&phs->indp:NULL);
+		 param,ctype,stype,prec,scale,SvPVX(phs->sv),0,(phs->indp != 0 && nullok)?&phs->indp:NULL);
 	msg = ( ERRTYPE(ret) ? "Bind failed" : "Invalid Handle");
 	ret = check_error(sth,ret,msg);
 	EOI(ret);
@@ -797,7 +796,8 @@ dbd_st_fetch(sth)
 		return Nullav;
     }
     
-    if ((ret = SQLFetch(imp_sth->phstmt)) != SQL_SUCCESS ) {
+	ret = SQLFetch(imp_sth->phstmt);
+    if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
 		if (ret != SQL_NO_DATA_FOUND) {	/* was not just end-of-fetch	*/
 			msg = (ERRTYPE(ret) ? "Fetch failed" : "Invalid Handle");
         	check_error(sth,ret,msg);
@@ -827,6 +827,8 @@ dbd_st_fetch(sth)
 			fbh->rlen = 0; 
 			(void)SvOK_off(sv);
 		} 
+
+
 		if (debug >= 2)
 	    	fprintf(DBILOGFP, "\t%d: rc=%d '%s'\n", i, ret, SvPV(sv,na));
     }
@@ -1048,4 +1050,3 @@ dbd_st_FETCH(sth, keysv)
     }
     return sv_2mortal(retsv);
 }
-

@@ -1,18 +1,10 @@
-April 2, 1998
+July 5, 1998
 
-DBD::DB2-0.66
-    Rewrote code to support multiple concurrent connections
+DBD::DB2-0.68
 
-    Fixed a pair of bugs, dealing with nested error codes not
-    being properly returned.
+   Found and fixed a couple of bugs relating to the handling of
+      remote data 
 
-	Tested against DB2 version 5
-
-****
-	Added untested routines to SetConnectionOptions and to
-    SetStmtOptions ****  Experimental needs to be moved to 
-    private_*
-****
 
 Caveats:
     DBD::DB2 assumes the following:
