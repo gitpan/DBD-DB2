@@ -1,5 +1,5 @@
 /*
-   	$Id: DB2.xs,v 0.5 1996/05/16 16:21:11 mhm Rel $
+   	$Id: DB2.xs,v 0.6 1996/06/07 03:01:38 mhm Rel $
 
 	Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -120,8 +120,6 @@ disconnect(dbh)
     CODE:
     D_imp_dbh(dbh);
     if ( !DBIc_ACTIVE(imp_dbh) ) {
-	if (DBIc_WARN(imp_dbh) && !dirty)
-	    warn("disconnect: already logged off!");
 	XSRETURN_YES;
     }
     /* Check for disconnect() being called whilst refs to cursors	*/
@@ -141,17 +139,16 @@ DESTROY(dbh)
     D_imp_dbh(dbh);
     ST(0) = &sv_yes;
     if (!DBIc_IMPSET(imp_dbh)) {	/* was never fully set up	*/
-	if (DBIc_WARN(imp_dbh) && !dirty)
-	     warn("Database handle %s DESTROY ignored - never set up",
-		SvPV(dbh,na));
-	return;
-    }
-    if (DBIc_ACTIVE(imp_dbh)) {
-	if (DBIc_WARN(imp_dbh) && !dirty)
-	     warn("Database handle destroyed without explicit disconnect");
-	dbd_db_disconnect(dbh);
-    }
-    dbd_db_destroy(dbh);
+	if (DBIc_WARN(imp_dbh) && !dirty && dbis->debug >= 2)
+	     warn("Database handle %s DESTROY ignored - never set up", SvPV(dbh,na));
+    } else {
+    	if (DBIc_ACTIVE(imp_dbh)) {
+			if (DBIc_WARN(imp_dbh) && !dirty)
+	    		warn("Database handle destroyed without explicit disconnect");
+			dbd_db_disconnect(dbh);
+    	}
+    	dbd_db_destroy(dbh);
+	}
 
 
 
@@ -191,6 +188,7 @@ execute(sth, ...)
     SV *	sth
     CODE:
     D_imp_sth(sth);
+	int retval;
     if (items > 1) {
 	/* Handle binding supplied values to placeholders	*/
 	int i, error = 0;
@@ -200,7 +198,7 @@ execute(sth, ...)
 		    items-1, DBIc_NUM_PARAMS(imp_sth));
 	    XSRETURN_UNDEF;
 	}
-        idx = sv_2mortal(newSViv(0));
+	idx = sv_2mortal(newSViv(0));
 	for(i=1; i < items ; ++i) {
 	    sv_setiv(idx, i);
 	    if (!dbd_bind_ph(sth, idx, ST(i), Nullsv))
@@ -210,7 +208,13 @@ execute(sth, ...)
 	    XSRETURN_UNDEF;	/* dbd_bind_ph already registered error	*/
 	}
     }
-    ST(0) = dbd_st_execute(sth) ? &sv_yes : &sv_no;
+   	retval = dbd_st_execute(sth);
+	if (retval < 0)
+		XST_mUNDEF(0);		/* error */
+	else if (retval == 0)
+		XST_mPV(0,"0E0");		/* true but zero */
+	else
+		XST_mIV(0,retval); 	/* 1 or row count */
 
 
 void
@@ -218,12 +222,8 @@ fetch(sth)
     SV *	sth
     CODE:
     AV *    av = dbd_st_fetch(sth);
-    if (av == Nullav) {
-      ST (0) = &sv_undef;
-    } else {
-      ST(0) = sv_2mortal(newRV((SV *)av));
-    }
-
+    
+	ST(0) = (av) ? sv_2mortal(newRV((SV *)av)) : &sv_undef;
 
 void
 fetchrow(sth)
@@ -310,22 +310,17 @@ finish(sth)
 void
 DESTROY(sth)
     SV *	sth
-    CODE:
+    PPCODE:
     D_imp_sth(sth);
     ST(0) = &sv_yes;
     if (!DBIc_IMPSET(imp_sth)) {	/* was never fully set up	*/
-	if (DBIc_WARN(imp_sth) && !dirty)
-	     warn("Statement handle %s DESTROY ignored - never set up",
-		SvPV(sth,na));
-	return;
+	if (DBIc_WARN(imp_sth) && !dirty && dbis->debug >=2 )
+	     warn("Statement handle %s DESTROY ignored - never set up", SvPV(sth,na));
+    } else {
+    	if (DBIc_ACTIVE(imp_sth)) 
+			dbd_st_finish(sth);
+    	dbd_st_destroy(sth);
     }
-    if (DBIc_ACTIVE(imp_sth)) {
-	if (DBIc_WARN(imp_sth) && !dirty)
-	    warn("Statement handle %s destroyed without finish()",
-		SvPV(sth,na));
-	dbd_st_finish(sth);
-    }
-    dbd_st_destroy(sth);
 
 
 

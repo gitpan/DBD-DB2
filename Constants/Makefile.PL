@@ -4,7 +4,7 @@
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
-%opts = (    'NAME'      => 'DB2::Constants',
+%opts = (    'NAME'      => 'DBD::DB2::Constants',
     'VERSION'   => '0.1',
     'LIBS'      => [''],   # e.g., '-lm'
     'DEFINE'    => '',     # e.g., '-DHAVE_SOMETHING'

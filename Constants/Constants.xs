@@ -4240,7 +4240,7 @@ not_there:
 }
 
 
-MODULE = DB2::Constants		PACKAGE = DB2::Constants
+MODULE = DBD::DB2::Constants		PACKAGE = DBD::DB2::Constants
 
 
 double

@@ -1,4 +1,4 @@
-#   $Id: DB2.pm,v 0.8 1996/05/16 16:21:11 mhm Rel $
+#   $Id: DB2.pm,v 0.9 1996/06/07 03:01:38 mhm Rel $
 #
 #   Copyright (c) 1995,1996 International Business Machines Corp. 
 #
@@ -6,17 +6,18 @@
 {
     package DBD::DB2;
 
-    require DBI;
+    use DBI;
 
-    require DynaLoader;
+    use DynaLoader;
     @ISA = qw(Exporter DynaLoader);
 	
 	@EXPORT_OK = qw($attrib_int $attrib_char $attrib_float 
 				 $attrib_date $attrib_ts $attrib_dec
 				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok);
 
-    $VERSION = '0.55';
-	my $revision = substr(q$Revision: 0.8 $, 10);
+    $VERSION = '0.57';
+	my $revision = substr(q$Revision: 0.9 $, 10);
+	require_version DBI 0.69 ;
 
     bootstrap DBD::DB2;
 

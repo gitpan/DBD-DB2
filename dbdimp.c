@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.c,v 0.7 1996/05/16 16:21:11 mhm Rel $
+   $Id: dbdimp.c,v 0.9 1996/06/07 03:01:38 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -695,14 +695,14 @@ dbd_st_fetch(sth)
 		check_error(sth, -3 , NHENV,NHDBC,NHSTMT, "no statement executing");
 		return Nullav;
     }
-    /* This will become ofen() once the buffer management is reworked.	*/
+    
     if ((ret = SQLFetch(imp_sth->phstmt)) != SQL_SUCCESS ) {
 		if (ret != SQL_NO_DATA_FOUND) {	/* was not just end-of-fetch	*/
 			msg = (ERRTYPE(ret) ? "Fetch failed" : "Invalid Handle");
         	check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
 			EOI(ret);
 		}
-		if (debug >= 2)
+		if (debug >= 3)
 	    	fprintf(DBILOGFP, "    dbd_st_fetch failed, rc=%d",ret);
 		return Nullav;
     }
@@ -710,7 +710,7 @@ dbd_st_fetch(sth)
     av = DBIS->get_fbav(imp_sth);
     num_fields = AvFILL(av)+1;
 
-    if (debug >= 2)
+    if (debug >= 3)
 	fprintf(DBILOGFP, "    dbd_st_fetch %d fields\n", num_fields);
 
     for(i=0; i < num_fields; ++i) {
@@ -923,7 +923,9 @@ dbd_st_FETCH(sth, keysv)
 		}
 	}
     if (cacheit) { /* cache for next time (via DBI quick_FETCH)	*/
-		hv_store((HV*)SvRV(sth), key, kl, retsv, 0);
+	 	SV **svp = hv_fetch((HV*)SvRV(sth), key, kl, 1);
+ 		sv_free(*svp);
+ 		*svp = retsv;
 		(void)SvREFCNT_inc(retsv);	/* so sv_2mortal won't free it	*/
     }
     return sv_2mortal(retsv);

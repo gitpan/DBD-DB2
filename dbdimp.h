@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.h,v 0.5 1996/05/16 16:21:11 mhm Rel $
+   $Id: dbdimp.h,v 0.6 1996/06/07 03:01:38 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 */
