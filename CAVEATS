@@ -1,19 +1,40 @@
 Building DBD::DB2
 -----------------
-1.  The DBD::DB2 driver is supported by DB2 UDB V5.2.
-    For existing DB2 UDB V5.0 customers, FixPak 6
+1.  The DBD::DB2 driver is supported by DB2 UDB V5.2 and
+    later.  For existing DB2 UDB V5.0 customers, FixPak 6
     is required.  The actual FixPak 6 numbers for the
     supported operating system platforms are as follows:
-    	AIX - U459852
-	HP V10 - U459854
-	HP V11 - U459872
-	Solaris - U459853
-	Windows NT - 9074
-    See http://www.software.ibm.com/data/db2/perl for
-    more information on supported environments.
+        AIX - U459852
+        HP V10 - U459854
+        HP V11 - U459872
+        Solaris - U459853
+        Windows NT - 9074
+    See http://www.software.ibm.com/data/db2/perl for more
+    information on supported environments.
 2.  The DB2 UDB Developer's Edition is required.
 3.  The DB2_HOME environment variable must point to the
     installed location of DB2 UDB.
+
+Special Notes re: Perl Object abstraction/ActivePerl
+----------------------------------------------------
+1.  If your version of Perl is built with Perl Object
+    abstraction (ActivePerl always has this enabled),
+    DBD::DB2 you must specify CAPI=TRUE in the first build
+    step:
+        perl Makefile.PL CAPI=TRUE
+2.  DBI 1.13 has a bug that causes DBD builds to fail, do
+    not use this version of DBI if Perl Object abstraction
+    is enabled.  DBI 1.12 is OK.
+
+Special Notes re: Linux
+-----------------------
+Some compilers get into an infinite (or near infinite) loop
+when building Constants.c.  If this occurs, edit the
+Makefile (after running perl Makefile.PL) and change:
+
+        OPTIMIZE = -O2
+          to
+        OPTIMIZE = -O0
 
 Special Notes re: HP-UX
 -----------------------
@@ -22,15 +43,15 @@ Special Notes re: HP-UX
     additional libraries, -lpthread and -lcl, MUST be
     specified when building perl.  If this is not done,
     errors will occur during the DBD::DB2 "make test" phase.
-2.  In order to avoid some warnings when building perl,
-    DBI, and DBD::DB2, you may want to add the compile
-    option, +DAportable.  This compile option is used
-    to generate code that is compatible across both
-    PA_RISC 1.1 and 2.0 workstations and servers.
+2.  In order to avoid some warnings when building perl, DBI,
+    and DBD::DB2, you may want to add the compile option,
+    +DAportable.  This compile option is used to generate
+    code that is compatible across both PA_RISC 1.1 and 2.0
+    workstations and servers.
 3.  If an "out of memory" error is returned when compiling
     the file Constants.c during the DBD::DB2 build process,
-    remove the "+Onolimit" compile option from the file,
-    Makefile.PL, in the Constants subdirectory and restart
+    remove the "+Onolimit" compile option from the file
+    Makefile.PL in the Constants subdirectory and restart
     the build process.  Removing this compile option will
     result in a warning like "Exceeding compiler resource
     limits in constants; some optimizations skipped", but
@@ -39,24 +60,23 @@ Special Notes re: HP-UX
 Using DBD::DB2
 --------------
 1.  In order to execute a statement with parameter markers
-    against a host DBMS (i.e. DB2 for OS/390), you must call
-    bind_param() to bind values to the parameter markers.
-2.  If you are using $sth->bind_param(index, value, type_hash_ref) 
-    to bind values to parameter markers, then it must be called
-    immediately prior to calling execute().  Note that a minimal
-    set of type_hash_refs are provided in DB2.pm and they may
-    be used to create new type_hash_refs
+    against a host DBMS (i.e.  DB2 for OS/390), you must
+    call bind_param() to bind values to the parameter
+    markers.
+2.  If you are using $sth->bind_param(index, value,
+    type_hash_ref) to bind values to parameter markers, then
+    it must be called immediately prior to calling
+    execute().  Note that a minimal set of type_hash_refs
+    are provided in DB2.pm and they may be used to create
+    new type_hash_refs
         $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
-3.  Note that as of DB2 UDB CLI V5.0, deferred prepare is on by
-    default (DBD::DB2 is a CLI application).  To change this 
-    behaviour, the value of the DEFERREDPREPARE keyword in
-    db2cli.ini must be changed.  Support is not yet available  
+3.  Note that as of DB2 UDB CLI V5.0, deferred prepare is on
+    by default (DBD::DB2 is a CLI application).  To change
+    this behaviour, the value of the DEFERREDPREPARE keyword
+    in db2cli.ini must be changed.  Support is not yet
     available to change this value at the statement level
     (via a statement attribute).
 
 Unsupported Features (wrt DBI 0.93)
 -----------------------------------
-1.  The following attributes are not yet supported:
-        ChopBlanks, LongReadLen, LongTruncOk
-2.  Fetching any type of LOB directly to a file.
-3.  Writing/inserting of LOBs.
+1.  Fetching any type of LOB directly to a file.

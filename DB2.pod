@@ -24,95 +24,239 @@ See L<DBI> for more information.
 =head1 EXAMPLE
 
   #!/usr/local/bin/perl
-  
+
   use DBI;
   use DBD::DB2::Constants;
   use DBD::DB2 qw($attrib_int $attrib_char $attrib_float
                   $attrib_date $attrib_ts);
-  
+
   # an extraneous example of the syntax for creating a new
   # attribute type
   $attrib_dec = { %$attrib_int, 'Stype' => SQL_DECIMAL, 'Scale' => 2,
-  							'Prec' => 31 };
+                                                        'Prec' => 31 };
 
   #$DBI::dbi_debug=9; # increase the debug output
-  
-  $dbh = DBI->connect("dbi:DB2:sample");
+
+  # Open a connection and set LongReadLen to maximum size of column
+  $dbh = DBI->connect("dbi:DB2:sample","","", { LongReadLen => 102400 } );
   if (!defined($dbh)) { exit; }
-  
+
   # Note in the following sequence, that the statement contains
   # no parameter markers, which makes the execution sequence
   # just prepare and execute.
-  $stmt = "select empno, photo_format from inv.emp_photo where 
-            photo_format ='gif';"; 
+  $stmt = "SELECT empno, photo_format FROM emp_photo WHERE
+            photo_format = 'gif';";
   $sth = $dbh->prepare($stmt);
-  
+
   $sth->execute();
-  
+
   # $row[0] is the empno from the database and $row[1] is the
   # image type.  In this case, the type will always be "gif".
-  while ((@row = $sth->fetchrow())) {
+  $stmt = "SELECT picture FROM emp_photo WHERE empno = ? AND
+              photo_format = ? ;" ;
+  # prepare statement, which contains two parameter markers
+  $pict_sth = $dbh->prepare($stmt);
+  while( @row = $sth->fetchrow ) {
     # create an output file named empno.type in the current directory
-    open(OUTPUT,">$row[0].$row[1]") || die "Can't open $row[0].$row[1]"; 
-    $stmt = "select picture from inv.emp_photo where empno = ? and 	
-  		photo_format = ? ;" ; 
-    # prepare statement, which contains two parameter markers
-    $pict_sth = $dbh->prepare($stmt);
-    
+    open(OUTPUT,">$row[0].$row[1]") || die "Can't open $row[0].$row[1]";
+    binmode OUTPUT;
+
     # use bind_param to tell the DB2 code where to find the variables
     # containing the values for the parameters.  Additionally,
     # tell DB2 how to convert a perl value to a DB2 value based
     # on the contents of the $attrib_* hash.  One bind_param
-    # call per parameter per execution. 
-    $pict_sth->bind_param(1,$row[0],$attrib_char);
-    $pict_sth->bind_param(2,$row[1],$attrib_char);
+    # call per parameter per execution.
+    $pict_sth->bind_param(1,$row[0]);
+    $pict_sth->bind_param(2,$row[1]);
     $pict_sth->execute();
 
-    # do a fetch to get the blob locator variable loaded.
-    $pict_sth->fetch();
-  
-    # read the contents of the blob pointed to by field
-    # one of the statement using a zero offset, reading
-    # a chunk of 4096 bytes each time.
-    while ($buff = $pict_sth->blob_read(1,0,4096)) { 
-        print OUTPUT $buff;
-       $buff = "";
-    }
+    # do a fetch to get the blob
+    @row = $pict_sth->fetchrow;
+
+    print OUTPUT $row[0];
+    @row = "";
+
     close(OUTPUT);
     # close the blob cursor
     $pict_sth->finish();
   }
-  # redundantly close the blob cursor -- should be harmless 
+  # redundantly close the blob cursor -- should be harmless
   $pict_sth->finish();
   # close selection criteria cursor
   $sth->finish();
+  $dbh->disconnect();
 
-=head1  Attribute Hashes
+=head1 BINDING PARAMETERS
 
-The version of DB2 that this driver was originally built on did not
-support SQLDescribeParameter (a function which returns everything
-the database knows about a particular parameter).  Without this 
-function, the enduser would have been required to build the @bind_values
-array with eight pieces of information pertaining to the internal
-database usage and structure of the parameter in question.
+DBD::DB2 supports the following methods of binding parameters:
 
-This, of course, was deemed to be too radical a departure from the
-DBD::Oracle reference implementation.  An attribute hash is simply
+  For input-only parameters:
+  $rc = $sth->bind_param($p_num, $bind_value);
+  $rc = $sth->bind_param($p_num, $bind_value, $bind_type);
+  $rc = $sth->bind_param($p_num, $bind_value, \%attr);
+
+  For input/output, output or input by reference:
+  $rc = $sth->bind_param_inout($p_num, \$bind_value, $max_len);
+  $rc = $sth->bind_param_inout($p_num, \$bind_value, $max_len, $bind_type);
+  $rc = $sth->bind_param_inout($p_num, \$bind_value, $max_len, \%attr)
+
+=head2 Attributes
+
+An attribute hash is
 a collection of information about particular types of data.  Each
-attribute can be determined at compile time (see DB2.pm for list
-of predefined attribute hashes), created at run time, or modified 
+attribute can be determined at compile time (see DB2.pm for a list
+of predefined attribute hashes), created at run time, or modified
 at run time.
 
-The easiest method of creating a new attribute hash is to simply
+The following attributes are supported by DBD::DB2:
+
+  ParamT        SQL_PARAM_INPUT, SQL_PARAM_OUTPUT etc.
+  Ctype         SQL_C_CHAR or SQL_C_BINARY
+  Type          SQL_CHAR, SQL_BINARY, SQL_INTEGER etc.
+  Stype         Synonym for Type
+  Prec          Size of column
+  Scale         Decimal digits
+
+The easiest method of creating a new attribute hash is to
 change an existing hash:
 
   $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
 
-or simple create a complete new type:
+or you can create a complete new type:
 
   $attrib_char = { 'ParamT' => SQL_PARAM_INPUT,
-                   'Ctype' => SQL_C_CHAR,
-                   'Stype' => SQL_CHAR,
-                   'Prec'  => 254,
-                   'Scale' => 0,
+                   'Ctype'  => SQL_C_CHAR,
+                   'Stype'  => SQL_CHAR,
+                   'Prec'   => 254,
+                   'Scale'  => 0,
                  };
+
+Attributes are not generally required as the statement will be
+"described" and appropriate values will be used.  However, attributes
+are required under the
+following conditions:
+
+  - Database server does not support SQLDescribeParam:
+      - DB2 for MVS, versions earlier than 5.1.2
+      - DB2 for VM
+      - DB2 for AS/400
+  - Statement is a CALL to an unregistered stored procedure
+  - You desire non-default behaviour such as:
+      - binding a file directly to a LOB parameter
+      - binding an output-only parameter
+
+Even though attributes are not always required, providing them can
+improve performance as it may make the "describe" step unnecessary.
+Specifically, 'Stype' and 'Scale' must either
+be provided in the attributes or must be obtained automatically
+via SQLDescribeParam.
+
+=head2 Parameter Type (Input, Ouput and Input/Output)
+
+bind_param() can only be used for input-only parameters and therefore
+the ParamT attribute is ignored.  bind_param_inout() assumes
+input/output but a parameter can be designated as input-only or
+output-only via ParamT in the attribute hash:
+
+  ParamT => SQL_PARAM_INPUT
+
+or
+
+  ParamT => SQL_PARAM_OUTPUT
+
+Note that
+the 'maxlen' value provided to bind_param_inout() must be large
+enough for all possible input values as well as output values.
+
+=head2 Binding Input Values By Reference using bind_param_inout()
+
+This function - despite its name - can also be used to bind an
+input parameter variable once to allow repeated execution without
+rebinding.  Consider the following example using bind_param():
+
+  $sth->prepare( "INSERT INTO MYTABLE (INTCOL) VALUES(?)" );
+  for(...)
+  {
+    $int = ...;                  # get a new value
+    $sth->bind_param( 1, $int ); # value set at bind time
+    $sth->execute();
+  }
+
+Each iteration binds a new value.  This can be made more
+efficient as follows:
+
+  $sth->prepare( "INSERT INTO MYTABLE (INTCOL) VALUES(?)" );
+  $sth->bind_param_inout( 1,
+                          \$input,
+                          20, # 20 bytes is enough for any integer
+                          { ParamT => SQL_PARAM_INPUT } );
+  for(...)
+  {
+    $input = ...     # set a new value
+    $sth->execute(); # new value read at execution time
+  }
+
+Note that since the variable is bound by reference, the input value
+is deferred until execute time unlike bind_param() where the value
+is copied at bind time.  The 'maxlen' value must be big enough for
+all expected input values.
+
+=head2 Binding a File to an Input LOB Parameter
+
+A file can be bound directly to a LOB parameter by specifying the
+attribute:
+
+  File => 1
+
+In this case the value passed to bind_param() is the file name.
+
+This is only valid for input and only for LOB parameters.  The
+following predefined attribute hashes have been provided for
+convenience:
+
+  $attrib_blobfile
+  $attrib_clobfile
+  $attrib_dbclobfile
+
+=head1 LongReadLen
+
+The default value for LongReadLen is 32700, equivalent to the maximum
+size for SQL_LONG types.  It only applies to fetched columns; it does
+not apply to output parameters.
+This option applies to the following column types:
+
+  SQL_LONGVARBINARY
+  SQL_LONGVARCHAR
+  SQL_LONGVARGRAPHIC
+  SQL_BLOB
+  SQL_CLOB
+  SQL_DBCLOB
+
+To change the value, provide it in the connection attributes:
+
+  $dbh = DBI->connect( $db, $user, $pw, { LongReadLen => 100 } );
+
+or set it at any time after connecting:
+
+  $dbh->{LongReadLen} = 100;
+
+=head1 FETCHING LOB DATA IN PIECES
+
+While LOB colums are fully supported by the normal methods of
+retrieving data, it can take a lot of memory as the whole LOB
+is retrieved at once (subject to the LongReadLen setting).  An
+alternate method is to use:
+
+  $buf = $sth->blob_read( $field, $offset, $len );
+
+This will return up to $len bytes from the given LOB field.
+'undef' is returned when no more data is left to read.
+Despite the name this function works for all LOB types
+(BLOB, CLOB and DBCLOB).  For maximum efficiency, set
+LongReadLen to 0 prior to execution so no LOB data is
+retrieved at all on the initial fetch (but remember that
+LongReadLen will affect all long fields).
+
+The $offset parameter is currently ignored by DB2.  Note that
+this function isn't officially documented in DBI yet so it is
+subject to change.

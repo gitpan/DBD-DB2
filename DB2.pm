@@ -1,7 +1,7 @@
 #
-#   engn/perldb2/DB2.pm, engn_perldb2, db2_v6, 1.3 99/01/12 13:48:03
+#   DB2.pm, engn_perldb2, db2_v71, 1.4 00/04/14 14:55:45
 #
-#   Copyright (c) 1995,1996,1997,1998,1999  International Business Machines Corp. 
+#   Copyright (c) 1995,1996,1997,1998,1999,2000  International Business Machines Corp.
 #
 
 {
@@ -11,107 +11,114 @@
 
     use DynaLoader;
     @ISA = qw(Exporter DynaLoader);
-	
-	@EXPORT_OK = qw($attrib_int $attrib_char $attrib_float 
-				 $attrib_date $attrib_ts $attrib_dec
-				 $attrib_ts_nullok $attrib_int_nullok 
-				 $attrib_char_nullok $attrib_blobin);
 
-    $VERSION = '0.71a';
-	require_version DBI 0.93;
+    @EXPORT_OK = qw( $attrib_dec
+                     $attrib_int
+                     $attrib_char
+                     $attrib_float
+                     $attrib_date
+                     $attrib_ts
+                     $attrib_binary
+                     $attrib_blobfile
+                     $attrib_clobfile
+                     $attrib_dbclobfile );
+
+    $VERSION = '0.72';
+        require_version DBI 0.93;
 
     bootstrap DBD::DB2;
 
-	use DBD::DB2::Constants;
+    use DBD::DB2::Constants;
 
-    $err = 0;		# holds error code   for DBI::err
-    $errstr = "";	# holds error string for DBI::errstr
-    $drh = undef;	# holds driver handle once initialised
+    $err = 0;           # holds error code   for DBI::err
+    $errstr = "";       # holds error string for DBI::errstr
+    $drh = undef;       # holds driver handle once initialised
 
     $warn_success = $ENV{'WARNING_OK'};
-#print $warn_success,"\n";
 
-    $attrib_dec = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-                    'Stype' => SQL_DECIMAL,
-                    'Prec'  => 31,
-                    'Scale' => 4,
+    $attrib_dec = {
+                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_DECIMAL,
+                    'Prec'    => 31,
+                    'Scale'   => 4,
                   };
-    $attrib_int = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-                    'Stype' => SQL_INTEGER,
-                    'Prec'  => 10,
-                    'Scale' => 4,
+    $attrib_int = {
+                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_INTEGER,
+                    'Prec'    => 10,
+                    'Scale'   => 4,
                   };
-    $attrib_int_nullok = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-					'Snullok' => 1,
-                    'Stype' => SQL_INTEGER,
-                    'Prec'  => 10,
-                    'Scale' => 4,
+    $attrib_char = {
+                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_CHAR,
+                    'Prec'    => 0,
                   };
-    $attrib_char = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-                    'Stype' => SQL_CHAR,
-                    'Prec'  => 254,
-                    'Scale' => 0,
+    $attrib_float = {
+                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_FLOAT,
+                    'Prec'    => 15,
+                    'Scale'   => 6,
                   };
-    $attrib_char_nullok = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-					'Snullok' => 1,
-                    'Stype' => SQL_CHAR,
-                    'Prec'  => 254,
-                    'Scale' => 0,
+    $attrib_date = {
+                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_DATE,
+                    'Prec'    => 10,
+                    'Scale'   => 9,
                   };
-#	print "<",$attrib_char->{'Ctype'},">\n";
-    $attrib_float = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-                    'Stype' => SQL_FLOAT,
-                    'Prec'  => 15,
-                    'Scale' => 6,
+    $attrib_ts = {
+                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_TIMESTAMP,
+                    'Prec'    => 26,
+                    'Scale'   => 11,
                   };
-    $attrib_date = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-                    'Stype' => SQL_DATE,
-                    'Prec'  => 10,
-                    'Scale' => 9,
+    $attrib_binary = {
+                    'ParamT'  => SQL_PARAM_INPUT_OUTPUT,
+                    'Ctype'   => SQL_C_BINARY,
+                    'Stype'   => SQL_BINARY,
+                    'Prec'    => 0,
                   };
-    $attrib_ts = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-                    'Stype' => SQL_TIMESTAMP,
-                    'Prec'  => 26,
-                    'Scale' => 11,
+    $attrib_blobfile = {
+                    'ParamT'  => SQL_PARAM_INPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_BLOB,
+                    'File'    => 1,
                   };
-    $attrib_ts_nullok = { 'ParamT' => SQL_PARAM_INPUT_OUTPUT,
-                    'Ctype' => SQL_C_CHAR,
-					'Snullok' => 1,
-                    'Stype' => SQL_TIMESTAMP,
-                    'Prec'  => 26,
-                    'Scale' => 11,
-					};
-	$attrib_blobin = { 'FNlen'	=> NULL,
-					'FOpts' => SQL_FILE_READ,
-					'Maxfn'	=> 255,
-					'Stype' => SQL_BLOB,
-					};
- 
+    $attrib_clobfile = {
+                    'ParamT'  => SQL_PARAM_INPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_CLOB,
+                    'File'    => 1,
+                  };
+    $attrib_dbclobfile = {
+                    'ParamT'  => SQL_PARAM_INPUT,
+                    'Ctype'   => SQL_C_CHAR,
+                    'Stype'   => SQL_DBCLOB,
+                    'File'    => 1,
+                  };
+
     sub driver{
-	return $drh if $drh;
-	my($class, $attr) = @_;
+        return $drh if $drh;
+        my($class, $attr) = @_;
 
-	$class .= "::dr";
+        $class .= "::dr";
 
-	# not a 'my' since we use it above to prevent multiple drivers
+        # not a 'my' since we use it above to prevent multiple drivers
 
-	$drh = DBI::_new_drh($class, {
-	    'Name' => 'DB2',
-	    'Version' => $VERSION,
-	    'Err'    => \$DBD::DB2::err,
-	    'Errstr' => \$DBD::DB2::errstr,
-	    'Attribution' => 'DB2 DBD by IBM',
-	    });
+        $drh = DBI::_new_drh($class, {
+            'Name' => 'DB2',
+            'Version' => $VERSION,
+            'Err'    => \$DBD::DB2::err,
+            'Errstr' => \$DBD::DB2::errstr,
+            'Attribution' => 'DB2 DBD by IBM',
+            });
 
-	$drh;
+        $drh;
     }
 
     1;
@@ -122,26 +129,34 @@
     use strict;
 
     sub errstr {
-	DBD::DB2::errstr(@_);
+        DBD::DB2::errstr(@_);
     }
 
     sub connect {
-	my($drh, $dbname, $user, $auth)= @_;
+        my($drh, $dbname, $user, $auth, $attr)= @_;
 
-	if ($dbname){	# application is asking for specific database
-	}
+        # create a 'blank' dbh
 
-	# create a 'blank' dbh
+        my $this = DBI::_new_dbh($drh, {
+            'Name' => $dbname,
+            'USER' => $user, 'CURRENT_USER' => $user
+            });
 
-	my $this = DBI::_new_dbh($drh, {
-	    'Name' => $dbname,
-	    'USER' => $user, 'CURRENT_USER' => $user,
-	    });
+        if( ref($attr) == "HASH" )
+        {
+          my %a = %$attr;
 
-	DBD::DB2::db::_login($this, $dbname, $user, $auth)
-	    or return undef;
+          if( $a{LongReadLen} == '' )
+          {
+            # LongReadLen not specified, set it to default value
+            $this->{LongReadLen} = 32700;
+          }
+        }
 
-	$this;
+        DBD::DB2::db::_login($this, $dbname, $user, $auth)
+            or return undef;
+
+        $this;
     }
 
 }
@@ -151,22 +166,22 @@
     use strict;
 
     sub errstr {
-	DBD::DB2::errstr(@_);
+        DBD::DB2::errstr(@_);
     }
 
     sub prepare {
-	my($dbh, $statement)= @_;
+        my($dbh, $statement)= @_;
 
-	# create a 'blank' dbh
+        # create a 'blank' dbh
 
-	my $sth = DBI::_new_sth($dbh, {
-	    'Statement' => $statement,
-	    });
+        my $sth = DBI::_new_sth($dbh, {
+            'Statement' => $statement,
+            });
 
-	DBD::DB2::st::_prepare($sth, $statement)
-	    or return undef;
+        DBD::DB2::st::_prepare($sth, $statement)
+            or return undef;
 
-	$sth;
+        $sth;
     }
 
 }
@@ -176,7 +191,7 @@
     use strict;
 
     sub errstr {
-	DBD::DB2::errstr(@_);
+        DBD::DB2::errstr(@_);
     }
 
 }

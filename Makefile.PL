@@ -1,7 +1,7 @@
 #
-#   engn/perldb2/Makefile.PL, engn_perldb2, db2_v6, 1.3 99/01/12 13:48:04
+#   engn/perldb2/Makefile.PL, engn_perldb2, db2_v71, 1.4 00/04/14 16:11:51
 #
-#   Copyright (c) 1995,1996,1998,1999 International Business Machines Corp.
+#   Copyright (c) 1995,1996,1997,1998,1999,2000 International Business Machines Corp.
 #
 #!/usr/local/bin/perl -sw
 
@@ -10,7 +10,7 @@ use Getopt::Std;
 use Config;
 require 'flush.pl';
 
-use DBI;	# The DBI must be installed before we can build a DBD
+use DBI;        # The DBI must be installed before we can build a DBD
 
 %opts = (
     'NAME'    => 'DBD::DB2',
@@ -28,8 +28,8 @@ my $os = $^O;
 # --- Where is DB2 installed...
 
 my $DB2 = $ENV{'DB2_HOME'};
-$DB2 =~ s:\\:/:g	if $os eq 'MSWin32';
-die "DB2_HOME environment variable must be set to installed location of DB2.\n" 
+$DB2 =~ s:\\:/:g        if $os eq 'MSWin32';
+die "DB2_HOME environment variable must be set to installed location of DB2.\n"
     unless $DB2;
 die "DB2_HOME environment variable ($DB2) not valid.\n" unless -d $DB2;
 
@@ -65,10 +65,10 @@ $opts{LIBS} = [ $sysliblist ];
 # log key platform information to help me help you quickly
 print "System: perl$] @Config{qw(myuname archname dlsrc)}\n";
 print "Compiler: @Config{qw(cc optimize ccflags)}\n";
-print "  CC:       $MK{CC}\n"		if $MK{CC};
-print "  CFLAGS:   $MK{CFLAGS}\n"	if $MK{CFLAGS};
-print "  LDFLAGS:  $MK{LDFLAGS}\n"	if $MK{LDFLAGS};
-print "  LDSTRING: $MK{LDSTRING}\n"	if $MK{LDSTRING};
+print "  CC:       $MK{CC}\n"           if $MK{CC};
+print "  CFLAGS:   $MK{CFLAGS}\n"       if $MK{CFLAGS};
+print "  LDFLAGS:  $MK{LDFLAGS}\n"      if $MK{LDFLAGS};
+print "  LDSTRING: $MK{LDSTRING}\n"     if $MK{LDSTRING};
 
 print "\n";
 
