@@ -486,6 +486,7 @@ dbd_st_prepare(sth, statement, attribs)
 
     /* initialize sth pointers */
     imp_sth->RowCount = -1;                                       
+	imp_sth->has_inouts = 0;
 
     DBIc_IMPSET_on(imp_sth);
     return 1;
@@ -551,6 +552,7 @@ dbd_preparse(imp_sth, statement)
     if (imp_sth->bind_names == NULL)
         imp_sth->bind_names = newHV();
     phs_tpl.sv = &sv_undef;
+	phs_tpl.is_inout = 0;
     phs_sv = newSVpv((char *)&phs_tpl, sizeof(phs_tpl));
     hv_store(imp_sth->bind_names, (char *)start, 
                              (STRLEN)(dest-start), phs_sv, 0);
@@ -607,7 +609,6 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
     phs = (phs_t*)((void*)SvPVX(*svp));        /* placeholder struct    */
 
     if (phs->sv == &sv_undef) {     /* first bind for this placeholder    */
-    phs->sv = newSV(0);
     phs->ftype = 1;
     }
 
@@ -636,16 +637,53 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
     /* Later we may optimise this so that more often we can    */
     /* just copy the value & length over and not rebind.    */
 
-    if (SvOK(newvalue)) {
-        sv_setsv(phs->sv, newvalue);
-        value_ptr = SvPV(phs->sv, value_len);
-        phs->indp = 0;
-    } else {
-        sv_setsv(phs->sv,0); 
-        value_ptr = "";
-        value_len = 0;
-        phs->indp = SQL_NULL_DATA;
-    }
+	{
+	  bool is_inout = !(param == SQL_PARAM_INPUT);
+
+	  if ((!is_inout && phs->is_inout) ||
+		  (is_inout && !phs->is_inout && phs->sv != &sv_undef)) {
+		(void)SvREFCNT_dec(phs->sv);
+		phs->sv = &sv_undef;
+	  }
+	  phs->is_inout = is_inout;
+
+	  if (phs->sv == &sv_undef && !is_inout) {     /* first bind for this placeholder    */
+		phs->sv = newSV(0);
+	  }
+
+	  if (is_inout) {
+		int newlen;
+
+		imp_sth->has_inouts = 1;
+
+        if (SvREADONLY(newvalue))
+		  croak("Cannot modify readonly SV");
+        (void)SvUPGRADE(newvalue, SVt_PVNV);
+		newlen = (prec < 28) ? 28 : prec+1;
+        SvGROW(newvalue, newlen);
+
+		if (SvOK(newvalue)) {
+		  phs->sv = newvalue;
+		  SvREFCNT_inc(phs->sv);
+		  value_ptr = SvPV(phs->sv, value_len);
+		  value_len = newlen;
+		  phs->indp = 0;
+		} else {
+		  croak("Can't bind non-scalar in inout position");
+		}
+	  } else {
+		if (SvOK(newvalue)) {
+		  sv_setsv(phs->sv, newvalue);
+		  value_ptr = SvPV(phs->sv, value_len);
+		  phs->indp = 0;
+		} else {
+		  sv_setsv(phs->sv,0); 
+		  value_ptr = "";
+		  value_len = 0;
+		  phs->indp = SQL_NULL_DATA;
+		}
+	  }
+	}
 
     if (!nullok && !SvOK(phs->sv)) {
         fprintf(stderr,"phs->sv is not OK\n");
@@ -656,12 +694,17 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
 	        "  bind %s: ParmType=%d, Ctype=%d, SQLtype=%d, Prec=%d, Scale=%d\n",
 		name, param, ctype, stype, prec, scale);         
 
+	{
+	  char *cptr = (phs->indp == 0)?SvPVX(phs->sv):NULL;
+
     ret = SQLBindParameter(imp_sth->phstmt,(SQLINTEGER)SvIV(ph_namesv),
                            param,ctype,stype,
-			   (prec > 0 ? prec : value_len), scale,  
-                           (phs->indp == 0)?SvPVX(phs->sv):NULL,  
-			   value_len,                             
-	                   (phs->indp != 0 && nullok)?&phs->indp:NULL);
+						   (prec > 0 ? prec : value_len),
+						   scale,  
+                           cptr,  
+						   value_len,                             
+	                   (phs->is_inout || (phs->indp != 0 && nullok))?&phs->indp:NULL);
+	}
     msg = ( ERRTYPE(ret) ? "Bind failed" : "Invalid Handle");
     ret = check_error(sth,ret,msg);
     EOI(ret);
@@ -804,16 +847,42 @@ dbd_st_execute(sth)	/* error : <=(-2), ok row count : >=0, unknown count : (-1) 
     char *msg;
     SQLINTEGER ret;
  
-    /* describe and allocate storage for results        */
-    if (!imp_sth->done_desc && !dbd_describe(sth, imp_sth)) {
-        /* dbd_describe has already called check_error()        */
-        return -2;                                                
-    }
     ret = SQLExecute(imp_sth->phstmt);
     msg = "SQLExecute failed";
     ret = check_error(sth,ret,msg);
     if (ret < 0)                                                 
     	return(-2);
+
+    if (imp_sth->bind_names && imp_sth->has_inouts) {
+	  HV *hv = imp_sth->bind_names;
+	  SV *sv;
+	  char *key;
+	  I32 retlen;
+	  hv_iterinit(hv);
+	  while( (sv = hv_iternextsv(hv, &key, &retlen)) != NULL ) {
+        phs_t *phs;
+        if (sv != &sv_undef) {
+		  phs = (phs_t*)SvPVX(sv);
+		  if (phs->is_inout) {
+			if (phs->indp == SQL_NULL_DATA) {
+			  SvCUR_set(phs->sv,0);
+			} else if (phs->indp == SQL_NO_TOTAL) {
+			  warn("inout parameter length was not determinable after statement execution");
+			} else if (phs->indp <= SvLEN(phs->sv)) {
+			  SvCUR_set(phs->sv,phs->indp);
+			} else {
+			  warn("inout parameter length was too long -- possible memory corruption");
+			}
+		  }
+        }
+	  }
+    }
+
+    /* describe and allocate storage for results        */
+    if (!imp_sth->done_desc && !dbd_describe(sth, imp_sth)) {
+        /* dbd_describe has already called check_error()        */
+        return -2;                                                
+    }
 
     ret = SQLRowCount(imp_sth->phstmt, &imp_sth->RowCount);
     msg = "SQLRowCount failed";
@@ -845,7 +914,13 @@ dbd_st_fetch(sth)
         check_error(sth, -3,"no statement executing");
         return Nullav;
     }
-    
+
+	/*
+	if (imp_sth->RowCount == -1) {
+	  warn("no row-set from preceding statement");
+	  return Nullav;
+	}
+    */
     ret = SQLFetch(imp_sth->phstmt);
     if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
         if (ret != SQL_NO_DATA_FOUND) {    /* was not just end-of-fetch    */

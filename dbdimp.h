@@ -45,6 +45,7 @@ struct imp_sth_st {
     SQLCHAR 	long_trunc_ok;    	/* is truncating a long an error	*/
     SQLINTEGER  RowCount;		/* Rows affected by insert, update,	*/
 					/* delete (unreliable for SELECT)	*/
+    bool has_inouts;
 };
 #define IMP_STH_EXECUTING	0x0001
 
@@ -80,6 +81,7 @@ struct phs_st {	/* scalar placeholder EXPERIMENTAL	*/
     SV	*sv;		/* the scalar holding the value		*/
     short ftype;	/* external OCI field type		*/
     SQLINTEGER indp;		/* null indicator or length indicator */
+    bool is_inout;
 };
 
 SQLCHAR sql_state[6];

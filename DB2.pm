@@ -17,7 +17,7 @@
 				 $attrib_ts_nullok $attrib_int_nullok 
 				 $attrib_char_nullok $attrib_blobin);
 
-    $VERSION = '0.71';
+    $VERSION = '0.71a';
 	require_version DBI 0.93;
 
     bootstrap DBD::DB2;

@@ -1,3 +1,10 @@
+February 5, 2000
+
+DBD::DB2-0.71a (Unofficial Patch)
+
+  This release fixes several majors problems with INOUT parameters
+  and with the handling of result sets.
+
 January 12, 1999
 
 DBD::DB2-0.71
