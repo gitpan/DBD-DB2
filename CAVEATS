@@ -1,11 +1,13 @@
-Aug 16, 1996
+Oct 7, 1996
 
-Fixed the following:
+Added access to the SetStmtOption call, which in conjunction with
+DB2 v 2.1.1 NLV2 will allow asynchronous database access among other
+things.  SEE the DB2 CLI manual for details.
 
-    1. Prototype warnings from xsub.
+NOTE:  I don't have any sufficiently large database to tell if
+asynchronous access is working properly.  Other options appear to
+be working.....so I'm assuming that asynchronous access is.
 
-    2. Invalidated cursor messages when exiting after finishing the
-       cursors.
 
 Caveats:
     DBD::DB2 assumes the following:

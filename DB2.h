@@ -1,5 +1,5 @@
 /*
-   $Id: DB2.h,v 0.5 1996/08/16 19:44:58 mhm Rel $
+   $Id: DB2.h,v 0.6 1996/10/07 18:00:05 mhm Rel $
 
    Copyright (c) 1995  Mike Moran
 

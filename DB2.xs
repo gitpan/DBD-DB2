@@ -1,5 +1,5 @@
 /*
-   	$Id: DB2.xs,v 0.8 1996/08/16 20:33:09 mhm Rel $
+   	$Id: DB2.xs,v 0.9 1996/10/07 18:00:05 mhm Rel $
 
 	Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -185,6 +185,14 @@ bind_param(sth, param, value, attribs=Nullsv)
     ST(0) = dbd_bind_ph(sth, param, value, attribs) ? &sv_yes : &sv_no;
 
 
+void
+set_st_options(sth, opt, value)
+	SV *	sth
+	IV 		opt
+	IV		value
+	CODE:
+	ST(0) = dbd_st_opts(sth, opt, value) ? &sv_yes : &sv_no;
+	
 void
 execute(sth, ...)
     SV *	sth
