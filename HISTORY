@@ -1,3 +1,22 @@
+May 12, 2000
+
+DBD::DB2 0.73
+
+  Automatically set CAPI=TRUE in Makefile.PL when Perl Object
+  abtraction is enabled.
+
+  Fixed incorrect usage of '==' for Perl string comparison in DB2.pm.
+
+  Added support for $dbh->tables and $dbh->table_info.
+
+  Fixed build failure when using Perl 5.004_04: Undeclared
+  identifier PL_sv_undef.
+
+  Fixed problem with InactiveDestroy for statement handles, DB2
+  statement handle was being freed even when $sth->{InactiveDestroy}
+  was turned on.
+
+
 April 14, 2000
 
 DBD::DB2-0.72
@@ -19,6 +38,7 @@ DBD::DB2-0.72
   but rather results in 2 bytes of data 0xabcd).
 
   General performance improvements.
+
 
 January 12, 1999
 

@@ -15,22 +15,24 @@ Building DBD::DB2
 3.  The DB2_HOME environment variable must point to the
     installed location of DB2 UDB.
 
-Special Notes re: Perl Object abstraction/ActivePerl
-----------------------------------------------------
-1.  If your version of Perl is built with Perl Object
-    abstraction (ActivePerl always has this enabled),
-    DBD::DB2 you must specify CAPI=TRUE in the first build
-    step:
-        perl Makefile.PL CAPI=TRUE
-2.  DBI 1.13 has a bug that causes DBD builds to fail, do
+Special Notes re: Perl Object abstraction/ActivePerl 5.005
+----------------------------------------------------------
+1.  DBI 1.13 has a bug that causes DBD builds to fail, do
     not use this version of DBI if Perl Object abstraction
-    is enabled.  DBI 1.12 is OK.
+    is enabled (ActivePerl 5.005 always has this enabled).
+    DBI 1.12 is OK.  The DBI PPM package 1.13.1 is also OK,
+    it has the necessary patch. ActivePerl 5.6 does not
+    use Perl Object abstraction.
 
 Special Notes re: Linux
 -----------------------
-Some compilers get into an infinite (or near infinite) loop
-when building Constants.c.  If this occurs, edit the
-Makefile (after running perl Makefile.PL) and change:
+Some versions of gcc have problems with optimization.  This
+can cause Contants.C to take a long time to compile.  Please
+be patient, it will probably finish eventually.  If it
+doesn't, or the resulting build causes a 'Total
+Environment allocation failure!' error when you try to
+connect, you will have to edit the Makefile (after running
+perl Makefile.PL) and change:
 
         OPTIMIZE = -O2
           to
@@ -59,24 +61,20 @@ Special Notes re: HP-UX
 
 Using DBD::DB2
 --------------
-1.  In order to execute a statement with parameter markers
-    against a host DBMS (i.e.  DB2 for OS/390), you must
-    call bind_param() to bind values to the parameter
-    markers.
-2.  If you are using $sth->bind_param(index, value,
-    type_hash_ref) to bind values to parameter markers, then
-    it must be called immediately prior to calling
-    execute().  Note that a minimal set of type_hash_refs
-    are provided in DB2.pm and they may be used to create
-    new type_hash_refs
-        $new_type = { %$existing_type, 'Stype' => SQL_"NewTYPE" };
-3.  Note that as of DB2 UDB CLI V5.0, deferred prepare is on
+1.  Note that as of DB2 UDB CLI V5.0, deferred prepare is on
     by default (DBD::DB2 is a CLI application).  To change
     this behaviour, the value of the DEFERREDPREPARE keyword
     in db2cli.ini must be changed.  Support is not yet
     available to change this value at the statement level
     (via a statement attribute).
 
-Unsupported Features (wrt DBI 0.93)
------------------------------------
+Unsupported Features
+--------------------
 1.  Fetching any type of LOB directly to a file.
+2.  $dbh->type_info
+3.  $dbh->type_info_all
+4.  Multiple result sets returned from stored procedures.  Only
+    the first one is available to the application.
+5.  The child process of a fork cannot use the DB2 Perl driver
+    whatsoever.  In addition the child process must turn on the
+    InactiveDestroy flag for any DBI handles inherited.

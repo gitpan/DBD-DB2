@@ -15,6 +15,13 @@ use DBI;        # The DBI must be installed before we can build a DBD
 %opts = (
     'NAME'    => 'DBD::DB2',
     'VERSION_FROM' => 'DB2.pm',
+    ($] ge '5.005')
+       ? ( 'AUTHOR' => 'DB2 Perl (db2perl@ca.ibm.com)',
+           'ABSTRACT' => 'Perl driver for IBM DB2 Universal Database', )
+       : (),
+    ( $Config{archname} =~ /-object\b/i )
+       ? ( 'CAPI' => 'TRUE', )
+       : (),
 );
 
 # --- Introduction

@@ -99,6 +99,8 @@ SQLCHAR sql_state[6];
 #define dbd_db_destroy      db2_db_destroy
 #define dbd_db_STORE_attrib db2_db_STORE_attrib
 #define dbd_db_FETCH_attrib db2_db_FETCH_attrib
+#define dbd_db_tables       db2_db_tables
+#define dbd_db_table_info   db2_db_table_info
 #define dbd_st_prepare      db2_st_prepare
 #define dbd_st_rows         db2_st_rows
 #define dbd_st_execute      db2_st_execute
@@ -111,11 +113,13 @@ SQLCHAR sql_state[6];
 #define dbd_describe        db2_describe
 #define dbd_bind_ph         db2_bind_ph
 
-void    do_error _((SV *h,SQLINTEGER rc, SQLHENV henv, SQLHDBC hconn,
-                                        SQLHSTMT hstmt, char *what));
-void    fbh_dump _((imp_fbh_t *fbh, int i));
+void do_error _((SV *h,SQLINTEGER rc, SQLHENV henv, SQLHDBC hconn,
+                                     SQLHSTMT hstmt, char *what));
+void fbh_dump _((imp_fbh_t *fbh, int i));
 
-void    dbd_init _((dbistate_t *dbistate));
-void    dbd_preparse _((imp_sth_t *imp_sth, char *statement));
-int     dbd_describe _((SV *h, imp_sth_t *imp_sth));
+void dbd_init _((dbistate_t *dbistate));
+void dbd_preparse _((imp_sth_t *imp_sth, char *statement));
+int  dbd_describe _((SV *h, imp_sth_t *imp_sth));
+AV*  dbd_db_tables _((SV *dbh));
+int  dbd_db_table_info _((SV *dbh, SV *sth));
 /* end */

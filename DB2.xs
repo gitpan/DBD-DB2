@@ -58,14 +58,20 @@ disconnect_all(drh)
 MODULE = DBD::DB2    PACKAGE = DBD::DB2::db
 
 void
-_login(dbh, dbname, uid, pwd)
+_login(dbh, dbname, username, password, attribs=Nullsv)
     SV *        dbh
     char *      dbname
-    char *      uid
-    char *      pwd
+    SV *        username
+    SV *        password
+    SV *        attribs
     CODE:
-        D_imp_dbh(dbh);
-    ST(0) = dbd_db_login(dbh, imp_dbh, dbname, uid, pwd) ? &sv_yes : &sv_no;
+    {
+    STRLEN lna;
+    D_imp_dbh(dbh);
+    char *u = (SvOK(username)) ? SvPV(username,lna) : "";
+    char *p = (SvOK(password)) ? SvPV(password,lna) : "";
+    ST(0) = dbd_db_login(dbh, imp_dbh, dbname, u, p, attribs) ? &sv_yes : &sv_no;
+    }
 
 
 void
@@ -186,9 +192,22 @@ DESTROY(dbh)
     }
 
 
+void
+_tables(dbh)
+    SV *        dbh
+    CODE:
+    AV *tables = dbd_db_tables( dbh );
+    ST(0) = newRV_noinc( (SV*)tables );
+
+void
+_table_info(dbh, sth)
+    SV *        dbh
+    SV *        sth
+    CODE:
+    ST(0) = dbd_db_table_info( dbh, sth ) ? &sv_yes : &sv_no;
+
 
 MODULE = DBD::DB2    PACKAGE = DBD::DB2::st
-
 
 void
 _prepare(sth, statement, attribs=Nullsv)
@@ -328,8 +347,7 @@ fetch(sth)
     SV *        sth
     CODE:
     AV *    av = dbd_st_fetch(sth);
-
-        ST(0) = (av) ? sv_2mortal(newRV((SV *)av)) : &sv_undef;
+    ST(0) = (av) ? sv_2mortal(newRV((SV *)av)) : &sv_undef;
 
 void
 fetchrow(sth)

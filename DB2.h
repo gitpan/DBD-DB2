@@ -18,7 +18,7 @@
 
 void dbd_init _((dbistate_t *dbistate));
 
-int  dbd_db_login _((SV *dbh, imp_dbh_t *imp_dbh, char *dbname, char *uid, char *pwd));
+int  dbd_db_login _((SV *dbh, imp_dbh_t *imp_dbh, char *dbname, char *uid, char *pwd, SV *attr));
 int  dbd_db_do _((SV *sv, char *statement));
 int  dbd_db_commit _((SV *dbh, imp_dbh_t *imp_dbh));
 int  dbd_db_rollback _((SV *dbh, imp_dbh_t *imp_dbh));

@@ -23,7 +23,7 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '0.72';
+    $VERSION = '0.73';
         require_version DBI 0.93;
 
     bootstrap DBD::DB2;
@@ -142,18 +142,7 @@
             'USER' => $user, 'CURRENT_USER' => $user
             });
 
-        if( ref($attr) == "HASH" )
-        {
-          my %a = %$attr;
-
-          if( $a{LongReadLen} == '' )
-          {
-            # LongReadLen not specified, set it to default value
-            $this->{LongReadLen} = 32700;
-          }
-        }
-
-        DBD::DB2::db::_login($this, $dbname, $user, $auth)
+        DBD::DB2::db::_login($this, $dbname, $user, $auth, $attr)
             or return undef;
 
         $this;
@@ -184,6 +173,26 @@
         $sth;
     }
 
+    sub tables {
+        my ($dbh) = @_;
+        my $tablesref = DBD::DB2::db::_tables($dbh);
+        if( defined( $tablesref ) &&
+            ref( $tablesref ) eq "ARRAY" )
+        {
+          return @$tablesref;
+        }
+        undef;
+    }
+
+    sub table_info {
+        my ($dbh) = @_;
+        my $sth = DBI::_new_sth($dbh, {});
+
+        DBD::DB2::db::_table_info($dbh, $sth)
+           or return undef;
+
+        $sth;
+    }
 }
 
 
