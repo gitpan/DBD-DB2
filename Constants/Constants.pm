@@ -1,7 +1,7 @@
 #
 #   engn/perldb2/Constants/Constants.pm, engn_perldb2, db2_v6, 1.2 99/01/12 13:51:45
 #
-#   Copyright (c) 1995,1996,1999 International Business Machines Corp.
+#   Copyright (c) 1995,1996,1999,2004 International Business Machines Corp.
 #
 package DBD::DB2::Constants;
 
@@ -1555,7 +1555,7 @@ require AutoLoader;
 	SQL_YEAR_TO_MONTH
 	TRACE_VERSION
 );
-$VERSION = '0.20';
+$VERSION = '0.22';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

@@ -22,10 +22,19 @@
 
 *** BUILDING:
 
+    On UNIX:
+
     perl Makefile.PL            # use a perl that's in your PATH
     make
     make test
     make install (if the tests look okay)
+
+    On Windows:
+
+    perl Makefile.PL
+    nmake
+    nmake test
+    nmake install
 
 
 *** IF YOU HAVE PROBLEMS:
