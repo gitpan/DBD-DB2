@@ -1,52 +1,80 @@
-Unzip DBD-DB2-0.70.OS390.tar.gz and get DBD-DB2-0.70.OS390.tar.
-Use the following command to unpax the file:
-   pax -o to=IBM-1047,from=ISO8859-1 -r < DBD-DB2-0.70.OS390.tar
-After the unpax, you will get the directory named "DBD-DB2-0.70.OS390"
-From this directory, you should read the README and CAVEATS file first.
-You should delete Perl and DBI that were previously installed and
-reinstall PERL, DBI and DBD::DB2 using the instruction in the CAVEATS file.
-For better control of the build process, you should build perl into
-the private directory and use this perl to install DBI and DBD::DB2 driver
-You should use "GNU make" instead of the system make during installation.
+*** *BEFORE* BUILDING, TESTING AND INSTALLING this you will need to:
 
-SUPPORT INFORMATION:
+    Build, test and install Perl 5 (IBM officially supports
+    version 5.004_04 or later).
+    It is very important to TEST it and INSTALL it!
 
-DBD::DB2 is now available from your local CPAN site.
+    Build, test and install the DBI module (at least DBI 0.93).
+    It is very important to TEST it and INSTALL it!
 
-As a user or maintainer of a local copy of DBD::DB2 you need
-to be aware of the following addresses:
+    Remember to *read* the DBI README file and this one CAREFULLY!
 
-The DBI mailing lists located at
+    Ensure one of the following DB2 products is installed.
 
-dbi-announce@fugue.com			for announcements
-dbi-dev@fugue.com			for developer/maintainer discussions
-dbi-users@fugue.com			for end user level discussion and help
+        DB2 Software Developer's Kit v5.2
+            Included with the DB2 Application Developer's Kit
 
-To subscribe or unsubscribe to each individual list you may use the
-WWW at
-
-	http://www.fugue.com/dbi
-
-or email at the following addresses
-
-	dbi-announce-request@fugue.com
-	dbi-dev-request@fugue.com
-	dbi-users-request@fugue.com
-
-with your request in the body of the message.
+        DB2 Application Development Client v6 or later
+            Included with the DB2 Personal Developer's Edition and the
+            DB2 Universal Developer's Edition
 
 
-Technical support for the DBD::DB2 driver is provided by IBM through
-its service agreements for DB2 UDB.  Information on DB2 UDB service
-agreements and support can be found on the Web at
+*** BUILDING:
 
-	http://www.software.ibm.com/data/db2/db2tech
+    perl Makefile.PL            # use a perl that's in your PATH
+    make
+    make test
+    make install (if the tests look okay)
 
-For other DBD::DB2 information, please see
 
-	http://www.software.ibm.com/data/db2/perl
+*** IF YOU HAVE PROBLEMS:
 
-Please see the following files for more information:
-	CAVEATS - important build/usage information
-	DB2.pod - an example perl script
-	        - an explanation of attribute hashes
+    Please read the CAVEATS files which includes important
+    information, including tips and workarounds for various
+    platform-specific problems.
+
+
+*** SUPPORT INFORMATION:
+
+    Technical support for the DBD::DB2 driver is provided by IBM through
+    its service agreements for DB2 UDB.  Information on DB2 UDB service
+    agreements and support can be found on the Web at
+
+        http://www.software.ibm.com/data/db2/db2tech
+
+    For other DBD::DB2 information, please see
+
+        http://www.software.ibm.com/data/db2/perl
+
+    Comments/suggestions/enhancement requests may be sent to
+
+        db2perl@ca.ibm.com
+
+    Please see the following files for more information:
+        CAVEATS - important build/usage information
+        DB2.pod - an example perl script
+                - an explanation of attribute hashes
+
+*** MAILING LISTS
+
+    As a user or maintainer of a local copy of DBD::DB2, you need
+    to be aware of the following addresses:
+
+    The DBI mailing lists located at
+
+        dbi-announce@fugue.com          for announcements
+        dbi-dev@fugue.com               for developer/maintainer discussions
+        dbi-users@fugue.com             for end user level discussion and help
+
+    To subscribe or unsubscribe to each individual list you may use the
+    WWW at
+
+        http://www.fugue.com/dbi
+
+    or email at the following addresses
+
+        dbi-announce-request@fugue.com
+        dbi-dev-request@fugue.com
+        dbi-users-request@fugue.com
+
+    with your request in the body of the message.
