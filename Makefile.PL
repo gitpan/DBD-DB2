@@ -81,6 +81,7 @@ sub ask {
 sub MY::dist {		# new name with 5.001e
     '
 DISTFILES=RCS/*
+DISTNAME=DBD-DB2
 
 ci:
 	-ci -u $(DISTFILES) 2>&1 | grep -v "no lock set by "
@@ -94,7 +95,7 @@ dist:  ci clean
 	co -q -u     $(DISTFILES)
 	rm -f Makefile *~ t/*~
 	cd ..; tar cvFf $(DISTNAME)-$(VERSION).tar \
-		`sed -e "s:^:$(BASEEXT)/:" < $(BASEEXT)/MANIFEST`
+		`sed -e "s:^:$(DISTNAME)-$(VERSION)/:" < $(DISTNAME)-$(VERSION)/MANIFEST`
 	cd ..; gzip -9 $(DISTNAME)-$(VERSION).tar;
 	@chmod -w ../$(DISTNAME)-$(VERSION).tar.gz
 	mv ../$(DISTNAME)-$(VERSION).tar.gz /usr/misc/ftp/pub/perl/db/DBD/DB2/
