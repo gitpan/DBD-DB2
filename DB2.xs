@@ -1,5 +1,5 @@
 /*
-   	$Id: DB2.xs,v 0.13 1997/12/11 04:46:18 mhm Rel $
+   	$Id: DB2.xs,v 0.15 1998/04/03 05:31:17 mhm Rel $
 
 	Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -65,7 +65,8 @@ _login(dbh, dbname, uid, pwd)
     char *	uid
     char *	pwd
     CODE:
-    ST(0) = dbd_db_login(dbh, dbname, uid, pwd) ? &sv_yes : &sv_no;
+	D_imp_dbh(dbh);
+    ST(0) = dbd_db_login(dbh, imp_dbh, dbname, uid, pwd) ? &sv_yes : &sv_no;
 
 
 void
@@ -85,13 +86,15 @@ void
 commit(dbh)
     SV *	dbh
     CODE:
-    ST(0) = dbd_db_commit(dbh) ? &sv_yes : &sv_no;
+	D_imp_dbh(dbh);
+    ST(0) = dbd_db_commit(dbh,imp_dbh) ? &sv_yes : &sv_no;
 
 void
 rollback(dbh)
     SV *	dbh
     CODE:
-    ST(0) = dbd_db_rollback(dbh) ? &sv_yes : &sv_no;
+	D_imp_dbh(dbh);
+    ST(0) = dbd_db_rollback(dbh,imp_dbh) ? &sv_yes : &sv_no;
 
 
 void
@@ -131,7 +134,7 @@ disconnect(dbh)
 	warn("disconnect(%s) invalidates %d associated cursor(s)",
 	    SvPV(dbh,na), (int)DBIc_ACTIVE_KIDS(imp_dbh));
     }
-    ST(0) = dbd_db_disconnect(dbh) ? &sv_yes : &sv_no;
+    ST(0) = dbd_db_disconnect(dbh,imp_dbh) ? &sv_yes : &sv_no;
 
 
 void
@@ -147,7 +150,7 @@ DESTROY(dbh)
     	if (DBIc_ACTIVE(imp_dbh)) {
 			if (DBIc_WARN(imp_dbh) && !dirty)
 	    		warn("Database handle destroyed without explicit disconnect");
-			dbd_db_disconnect(dbh);
+			dbd_db_disconnect(dbh,imp_dbh);
     	}
     	dbd_db_destroy(dbh);
     	DBIc_IMPSET_off(imp_dbh);
@@ -187,6 +190,14 @@ bind_param(sth, param, value, attribs=Nullsv)
     ST(0) = dbd_bind_ph(sth, param, value, attribs) ? &sv_yes : &sv_no;
 
 
+void
+set_conn_options(sth, opt, value)
+	SV *	sth
+	IV 		opt
+	IV		value
+	CODE:
+	ST(0) = dbd_conn_opt(sth, opt, value) ? &sv_yes : &sv_no;
+	
 void
 set_st_options(sth, opt, value)
 	SV *	sth
@@ -272,9 +283,9 @@ blob_read(sth, field, offset, len, destrv=Nullsv, destoffset=0)
     if (!destrv)
 	destrv = sv_2mortal(newRV(newSV(0)));
     if (dbd_st_blob_read(sth, field, offset, len, destrv, destoffset))
-	    ST(0) = SvRV(destrv);
+	ST(0) = SvRV(destrv);
     else 
-		ST(0) = &sv_undef;
+	ST(0) = &sv_undef;
 
 
 void

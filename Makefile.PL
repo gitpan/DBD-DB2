@@ -19,7 +19,7 @@ print "Remember to actually read the CAVEATS file!\n\n";
 
 # --- Where is DB2 installed...
 
-my $DB2 = $ENV{DB2_HOME} || '/usr/lpp/db2_02_01';
+my $DB2 = $ENV{DB2_HOME} || '/usr/lpp/db2_05_00';
 
 print "Using DB2 in $DB2\n";
 

@@ -1,4 +1,4 @@
-#   $Id: DB2.pm,v 0.24 1997/12/11 04:46:18 mhm Rel $
+#   $Id: DB2.pm,v 0.25 1998/03/16 20:36:56 mhm Rel $
 #
 #   Copyright (c) 1995,1996 International Business Machines Corp. 
 #
@@ -16,9 +16,9 @@
 				 $attrib_ts_nullok $attrib_int_nullok $attrib_char_nullok
 				 $attrib_blobin $attrib_blobout);
 
-    $VERSION = '0.65';
-	my $revision = substr(q$Revision: 0.24 $, 10);
-	require_version DBI 0.90 ;
+    $VERSION = '0.66';
+	my $revision = substr(q$Revision: 0.25 $, 10);
+	require_version DBI 0.93 ;
 
     bootstrap DBD::DB2;
 
@@ -100,7 +100,7 @@
 	my($class, $attr) = @_;
 
 	unless ($ENV{'DB2_HOME'}){
-		$ENV{DB2_HOME} = "/usr/lpp/db2_02_01";
+		$ENV{DB2_HOME} = "/usr/lpp/db2_05_00";
 	    my $msg = "set to $ENV{DB2_HOME}"; 
 	    warn "DB2_HOME $msg\n";
 	}

@@ -1,5 +1,5 @@
 /*
-   $Id: DB2.h,v 0.8 1997/12/11 04:46:18 mhm Rel $
+   $Id: DB2.h,v 0.9 1998/03/16 20:36:56 mhm Rel $
 
    Copyright (c) 1995  Mike Moran
 
@@ -23,11 +23,11 @@
 
 void dbd_init _((dbistate_t *dbistate));
 
-int  dbd_db_login _((SV *dbh, char *dbname, char *uid, char *pwd));
+int  dbd_db_login _((SV *dbh, imp_dbh_t *imp_dbh, char *dbname, char *uid, char *pwd));
 int  dbd_db_do _((SV *sv, char *statement));
-int  dbd_db_commit _((SV *dbh));
-int  dbd_db_rollback _((SV *dbh));
-int  dbd_db_disconnect _((SV *dbh));
+int  dbd_db_commit _((SV *dbh, imp_dbh_t *imp_dbh));
+int  dbd_db_rollback _((SV *dbh, imp_dbh_t *imp_dbh));
+int  dbd_db_disconnect _((SV *dbh, imp_dbh_t *imp_dbh));
 void dbd_db_destroy _((SV *dbh));
 int  dbd_db_STORE _((SV *dbh, SV *keysv, SV *valuesv));
 SV  *dbd_db_FETCH _((SV *dbh, SV *keysv));

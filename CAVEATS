@@ -1,56 +1,25 @@
-Dec 10, 1997
+April 2, 1998
 
-    Fixed a pair of errors which resulted in the infamous
-      "DBI Handle has uncleared implementors data" on finishing
-      statements prior to disconnect.
+DBD::DB2-0.66
+    Rewrote code to support multiple concurrent connections
 
-NOTE:  For UDB EEE users ************************************ 
+    Fixed a pair of bugs, dealing with nested error codes not
+    being properly returned.
 
-In DB2 CLI Version 5, deferred prepare is on by default. This is
-the EXACT opposite of DB2 CLI Version 2. The PREPARE request is 
-not sent to the server until the corresponding execute request 
-is issued. The two requests are then combined into one command/reply 
-flow (instead of two) to minimize network flow and to improve 
-performance. This is of greatest benefit when the application 
-generates queries where the answer set is very small, and the 
-overhead of separate requests and replies is not spread across 
-multiple blocks of query data. In an environment where a 
-DB2 Connect or DDCS gateway is used, there is a greater opportunity 
-for cost reduction because four request and reply combinations are
-reduced to two. 
-     
-DB2 CLI Version 2 applications that expect the PREPARE to be 
-executed as soon as it requested may not operate as expected. (An 
-application may, for instance, rely on the row and cost estimates 
-that are normally returned in the SQLERRD(3) and SQLERRD(4) of the 
-SQLCA of a prepare statement; with deferred prepare, these values 
-may become zeros.) To ensure these programs work as they did with 
-Version 2, the DB2 CLI/ODBC configuration keyword DEFERREDPREPARE 
-can be set to disable deferred prepare. See "DEFERREDPREPARE"
-for more information. 
-     
-The statement attribute SQL_ATTR_DEFERRED_PREPARE can also be used 
-to force DB2 CLI to prepare the statement as soon as it is issued. 
-See the attribute in SQLSetStmtAttr - Set Options Related to a 
-Statement for more information. 
-     
-In version 2, a DB2 CLI application could use the function
-SQLSetColAttributes() to reduce network traffic by describing
-the result descriptor information for every column in the result 
-set. With deferred prepare this is no longer of any benefit,
-and the SQLSetColAttributes() function has been deprecated. If your
-application does call this function it will ignore all arguments, 
-and will always return SQL_SUCCESS. 
+	Tested against DB2 version 5
 
-With Thanks to "Colin Ruthven"<colin_ruthven@smb.com> for the
-research on UDB EEE     
-****************************************************************************
+****
+	Added untested routines to SetConnectionOptions and to
+    SetStmtOptions ****  Experimental needs to be moved to 
+    private_*
+****
+
 Caveats:
     DBD::DB2 assumes the following:
         1.  That the DBD::DB2 is built against
             DB2 v2.1.0 or higher (AIX/UNIX, OS/2 versions)
 
-        2.  DB2 is installed in /usr/lpp/db2_02_01
+        2.  DB2 is installed in /usr/lpp/db2_05_00
             or DB2_HOME points to the installed location
 
         3.  That the following have been exported in the current

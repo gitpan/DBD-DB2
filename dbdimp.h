@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.h,v 0.9 1997/12/11 04:46:18 mhm Rel $
+   $Id: dbdimp.h,v 0.10 1998/03/16 20:36:56 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 */
@@ -14,11 +14,14 @@ typedef struct imp_fbh_st imp_fbh_t;
 
 struct imp_drh_st {
     dbih_drc_t com;				/* MUST be first element in structure	*/
+	SQLHENV	henv;
+	int 	connects;
 };
 
 /* Define dbh implementor data structure */
 struct imp_dbh_st {
     dbih_dbc_t com;				/* MUST be first element in structure	*/
+	SQLHENV	henv;
 	SQLHDBC	hdbc;
 };
 
@@ -26,6 +29,9 @@ struct imp_dbh_st {
 /* Define sth implementor data structure */
 struct imp_sth_st {
     dbih_stc_t com;				/* MUST be first element in structure	*/
+	SQLHENV	henv;
+	SQLHDBC	hdbc;
+
 	SQLHSTMT	phstmt;
     /* Input Details	*/
     SQLCHAR	*statement;  		/* sql (see sth_scan)		*/

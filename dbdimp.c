@@ -1,5 +1,5 @@
 /*
-   $Id: dbdimp.c,v 0.17 1997/12/11 04:46:18 mhm Rel $
+   $Id: dbdimp.c,v 0.21 1998/04/03 05:30:45 mhm Rel $
 
    Copyright (c) 1995,1996 International Business Machines Corp.
 
@@ -13,9 +13,6 @@
 #define NHDBC   SQL_NULL_HDBC
 #define NHSTMT  SQL_NULL_HDBC
 #define ERRTYPE(x)	((x < 0) && (x == SQL_ERROR))
-
-
-SQLHENV henv;
 
 DBISTATE_DECLARE;
 
@@ -61,24 +58,47 @@ do_error(SV *h, SQLINTEGER rc, SQLHENV h_env, SQLHDBC h_conn, SQLHSTMT h_stmt,
 }
 
 int
-check_error(h, rc, h_env, h_conn, h_stmt,what)
+check_error(h, rc, what)
 SV *h;
-IV  rc, h_env, h_conn, h_stmt;
+IV rc;
 char *what;
 {
+	D_imp_xxh(h);
+    struct imp_dbh_st *imp_dbh = NULL;
+    struct imp_sth_st *imp_sth = NULL;
+    SQLHENV h_env = SQL_NULL_HENV;
+    SQLHDBC h_conn = SQL_NULL_HDBC;
+    SQLHSTMT h_stmt = SQL_NULL_HSTMT;
+
     IV rrc;
 
-    if (rc != SQL_SUCCESS && rc != SQL_NO_DATA) {
-        if (h_env == NHENV) {
-            do_error(h,rc,NHENV,NHDBC,NHSTMT,what);
-        } else {
-			if (rc == SQL_SUCCESS_WITH_INFO) {
-				if (dbis->debug > 2) {
-            		do_error(h,rc,h_env,h_conn,h_stmt,what);
-				}
-			} else {
-				do_error(h,rc,h_env,h_conn,h_stmt,what);
+	if (rc == SQL_SUCCESS || rc == SQL_NO_DATA) {
+		return(rc);
+	}
+    switch(DBIc_TYPE(imp_xxh)) {
+    	case DBIt_ST:
+    		imp_sth = (struct imp_sth_st *)(imp_xxh);
+    		imp_dbh = (struct imp_dbh_st *)(DBIc_PARENT_COM(imp_sth));
+    		h_stmt = imp_sth->phstmt;
+    		break;
+    	case DBIt_DB:
+    		imp_dbh = (struct imp_dbh_st *)(imp_xxh);
+    		break;
+    	default:
+    		croak("panic dbd_error on bad handle type");
+    }
+    h_conn = imp_dbh->hdbc;
+    h_env = imp_dbh->henv;
+
+    if (h_env == NHENV) {
+    	do_error(h,rc,NHENV,NHDBC,NHSTMT,what);
+    } else {
+		if (rc == SQL_SUCCESS_WITH_INFO) {
+			if (dbis->debug > 2) {
+           		do_error(h,rc,h_env,h_conn,h_stmt,what);
 			}
+		} else {
+			do_error(h,rc,h_env,h_conn,h_stmt,what);
         }
     }
     return((rc == SQL_SUCCESS_WITH_INFO ? SQL_SUCCESS : rc));
@@ -137,57 +157,83 @@ dbtype_is_string(dbtype)	/* 'can we use SvPV to pass buffer?'	*/
 /* ================================================================== */
 
 int
-dbd_db_connect(dbh,henv,dbname,uid,pwd)
+dbd_db_connect(dbh,imp_dbh,dbname,uid,pwd)
     SV *dbh;
-    IV  henv;
+    imp_dbh_t *imp_dbh; 
     SQLCHAR  *dbname,*uid,*pwd;
 {
-    D_imp_dbh(dbh);
+    D_imp_drh_from_dbh;
     char *msg;
     SQLINTEGER ret;
-
-    ret = SQLAllocConnect(henv,&imp_dbh->hdbc);
+    
+    ret = SQLAllocConnect(imp_drh->henv,&imp_dbh->hdbc);
     msg = (ERRTYPE(ret) ? "Connect allocation failed" :
                                 "Invalid Handle");
-    ret = check_error(dbh,ret,henv,NHDBC,NHSTMT,msg);
+    ret = check_error(dbh,ret,msg);
    	if (ret != SQL_SUCCESS) { 
-		return(ret);			/* Must return SQL codes not perl/DBD/DBI */
-	}						 	/* otherwise failure is not caught  */
-								
+		if (imp_drh->connects == 0) {
+			SQLFreeEnv(imp_drh->henv);
+			imp_drh->henv = NHENV;
+		}
+		return(ret);		/* Must return SQL codes not perl/DBD/DBI */
+	}						/* otherwise failure is not caught  */
+
+    if (dbis->debug >= 2)
+    	fprintf(DBILOGFP, "connect '%s', '%s', '%s'", dbname, uid, pwd);
+									
     ret = SQLConnect(imp_dbh->hdbc,dbname,SQL_NTS,uid,SQL_NTS,pwd,SQL_NTS);
     msg = ( ERRTYPE(ret) ? "Connect failed" : "Invalid handle");
-    ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    ret = check_error(dbh,ret,msg);
    	if (ret != SQL_SUCCESS) {	
+    	SQLFreeConnect(imp_dbh->hdbc);
+    	if (imp_drh->connects == 0) {
+        	SQLFreeEnv(imp_drh->henv);
+        	imp_drh->henv = SQL_NULL_HENV;
+    	}
 		return(ret);			/* Must return SQL codes not perl/DBD/DBI */
 	} 							/* otherwise failure is not caught  */
+    /* DBI spec requires AutoCommit on */
+    ret = SQLSetConnectOption(imp_dbh->hdbc, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_ON);
+	msg = (ERRTYPE(ret) ? "SetConnectOption Failed" : "Invaild handle");
+	ret = check_error(dbh,ret,msg);
+	if (ret != SQL_SUCCESS) {
+		SQLFreeConnect(imp_dbh->hdbc);
+        if (imp_drh->connects == 0) {
+            SQLFreeEnv(imp_drh->henv);
+            imp_drh->henv = NHENV;
+        }
+        return(ret);        /* Must return SQL codes not perl/DBD/DBI */
+    }                       /* otherwise failure is not caught  */
+
+    DBIc_set(imp_dbh,DBIcf_AutoCommit, 1);
+
     return 1;
 }
 
 int
-dbd_db_login(dbh, dbname, uid, pwd)
+dbd_db_login(dbh, imp_dbh, dbname, uid, pwd)
     SV *dbh;
+	imp_dbh_t *imp_dbh;
     char  *dbname;
     char  *uid;
     char  *pwd;
 {
-    D_imp_dbh(dbh);
+    D_imp_drh_from_dbh;
     SQLINTEGER ret;
     char *msg;
 
-    if (henv == NHENV) {
-        ret = SQLAllocEnv(&henv);
-        msg = (henv == NHENV ?
+    if (! imp_drh->connects) {
+        ret = SQLAllocEnv(&imp_drh->henv);
+        msg = (imp_drh->henv == NHENV ?
                 "Total Environment allocation failure!" :
                 "Environment allocation failed");
-        ret = check_error(dbh,ret,henv,NHDBC,NHSTMT,msg);
+        ret = check_error(dbh,ret,msg);
         EOI(ret);
-    } else {
-        msg = "Current limitation is ONE connection per process";
-        ret = check_error(dbh,~SQL_SUCCESS,NHENV,NHDBC, NHSTMT,msg);
-        return(0);
-    }
-    ret = dbd_db_connect(dbh,henv,dbname, uid, pwd);
+    } 
+	imp_dbh->henv = imp_drh->henv;
+    ret = dbd_db_connect(dbh,imp_dbh,dbname, uid, pwd);
     EOI(ret);
+    imp_drh->connects++;
 
     DBIc_IMPSET_on(imp_dbh);	/* imp_dbh set up now			*/
     DBIc_ACTIVE_on(imp_dbh);	/* call disconnect before freeing	*/
@@ -207,15 +253,14 @@ dbd_db_do(dbh, statement)	/* return 1 else 0 on failure		*/
 
     ret = SQLAllocStmt(imp_dbh->hdbc,&stmt);
     msg = "Statement allocation error";
-    ret = check_error(NULL,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    ret = check_error(dbh,ret,msg);
 
     EOI(ret);
 
     ret = SQLExecDirect(stmt,(SQLCHAR *)statement,SQL_NTS);
-    ret = check_error(NULL,ret,henv,imp_dbh->hdbc,stmt,
-                    "Execute immediate failed");
-    (void)check_error(NULL, SQLFreeStmt(stmt, SQL_DROP),
-    		henv,imp_dbh->hdbc,NHSTMT, "Statement destruction error");
+    ret = check_error(dbh,ret, "Execute immediate failed");
+    (void)check_error(dbh, SQLFreeStmt(stmt, SQL_DROP), 
+									"Statement destruction error");
     EOI(ret);
 
     return 1;
@@ -223,31 +268,31 @@ dbd_db_do(dbh, statement)	/* return 1 else 0 on failure		*/
 
 
 int
-dbd_db_commit(dbh)
+dbd_db_commit(dbh,imp_dbh)
     SV *dbh;
+	imp_dbh_t	*imp_dbh;
 {
-    D_imp_dbh(dbh);
     SQLINTEGER ret;
     char *msg;
 
-    ret = SQLTransact(henv,imp_dbh->hdbc,SQL_COMMIT);
+    ret = SQLTransact(imp_dbh->henv,imp_dbh->hdbc,SQL_COMMIT);
     msg = (ERRTYPE(ret)  ? "Commit failed" : "Invalid handle");
-    ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    ret = check_error(dbh,ret,msg);
     EOI(ret);
     return 1;
 }
 
 int
-dbd_db_rollback(dbh)
+dbd_db_rollback(dbh,imp_dbh)
     SV *dbh;
+	imp_dbh_t	*imp_dbh;
 {
-    D_imp_dbh(dbh);
     SQLINTEGER ret;
     char *msg;
 
-    ret = SQLTransact(henv,imp_dbh->hdbc,SQL_ROLLBACK);
+    ret = SQLTransact(imp_dbh->henv,imp_dbh->hdbc,SQL_ROLLBACK);
     msg = (ERRTYPE(ret)  ? "Rollback failed" : "Invalid handle");
-    ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    ret = check_error(dbh,ret,msg);
     EOI(ret);
 
     return 1;
@@ -255,10 +300,11 @@ dbd_db_rollback(dbh)
 
 
 int
-dbd_db_disconnect(dbh)
+dbd_db_disconnect(dbh,imp_dbh)
     SV *dbh;
+	imp_dbh_t *imp_dbh;
 {
-    D_imp_dbh(dbh);
+    D_imp_drh_from_dbh;
 	SQLINTEGER ret;
 	char *msg;
 
@@ -268,21 +314,24 @@ dbd_db_disconnect(dbh)
 
     ret = SQLDisconnect(imp_dbh->hdbc);
     msg = (ERRTYPE(ret)  ? "Disconnect failed" : "Invalid handle");
-    ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    ret = check_error(dbh,ret,msg);
     EOI(ret);
 
     ret = SQLFreeConnect(imp_dbh->hdbc);
     msg = (ERRTYPE(ret)  ? "Free connect failed" : "Invalid handle");
-    ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    ret = check_error(dbh,ret,msg);
     EOI(ret);
 
-    ret = SQLFreeEnv(henv);
-    msg = (ERRTYPE(ret)  ? "Free henv failed" : "Invalid handle");
-    ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
-    EOI(ret);
+	SQLFreeConnect(imp_dbh->hdbc);
+    imp_dbh->hdbc = SQL_NULL_HDBC;
+    imp_drh->connects--;
+    if (imp_drh->connects == 0) {
+    	ret = SQLFreeEnv(imp_drh->henv);
+    	msg = (ERRTYPE(ret)  ? "Free henv failed" : "Invalid handle");
+    	ret = check_error(dbh,ret,msg);
+    	EOI(ret);
+    }
 
-	henv = NHENV;  /* null out henv, so that we can open another
-                      database                                  */
     /* We don't free imp_dbh since a reference still exists	*/
     /* The DESTROY method is the only one to 'free' memory.	*/
     /* Note that statement objects may still exists for this dbh!	*/
@@ -296,7 +345,7 @@ dbd_db_destroy(dbh)
 {
     D_imp_dbh(dbh);
     if (DBIc_ACTIVE(imp_dbh))
-		dbd_db_disconnect(dbh);
+		dbd_db_disconnect(dbh,imp_dbh);
     /* Nothing in imp_dbh to be freed	*/
     DBIc_IMPSET_off(imp_dbh);
 }
@@ -322,7 +371,7 @@ dbd_db_STORE(dbh, keysv, valuesv)
 		if ( ret ) {
 			msg = (ERRTYPE(ret) ? "Change of AUTOCOMMIT failed" :
 								  "Invaild Handle");
-    		ret = check_error(dbh,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    		ret = check_error(dbh,ret,msg);
 			cachesv = &sv_undef;
 		} else {
 	    	cachesv = (on) ? &sv_yes : &sv_no;	/* cache new state */
@@ -379,19 +428,19 @@ dbd_st_prepare(sth, statement, attribs)
 
     ret = SQLAllocStmt(imp_dbh->hdbc,&imp_sth->phstmt);
     msg = "Statement allocation error";
-    ret = check_error(sth,ret,henv,imp_dbh->hdbc,NHSTMT,msg);
+    ret = check_error(sth,ret,msg);
 
     EOI(ret);
 
     ret = SQLPrepare(imp_sth->phstmt,(SQLCHAR *)statement,SQL_NTS);
     msg = "Statement preparation error";
-    ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+    ret = check_error(sth,ret,msg);
 
     EOI(ret);
 
 	ret = SQLNumParams(imp_sth->phstmt,&params);
 	msg = "Unable to determine number of parameters";
-	ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+	ret = check_error(sth,ret,msg);
 	EOI(ret);
 	
 	DBIc_NUM_PARAMS(imp_sth) = params;
@@ -570,7 +619,7 @@ dbd_bind_ph(sth, ph_namesv, newvalue, attribs)
 	ret = SQLBindParameter(imp_sth->phstmt,(SQLINTEGER)SvIV(ph_namesv),
             param,ctype,stype,prec,scale,SvPVX(phs->sv),0,(phs->indp != 0 && nullok)?&phs->indp:NULL);
 	msg = ( ERRTYPE(ret) ? "Bind failed" : "Invalid Handle");
-	ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+	ret = check_error(sth,ret,msg);
 	EOI(ret);
 
     return 1;
@@ -595,7 +644,7 @@ dbd_describe(h, imp_sth)
 
 	ret = SQLNumResultCols(imp_sth->phstmt,&num_fields);
     msg = ( ERRTYPE(ret) ? "SQLNumResultCols failed" : "Invalid Handle");
-    ret = check_error(h,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+    ret = check_error(h,ret,msg);
     EOI(ret);
     DBIc_NUM_FIELDS(imp_sth) = num_fields;
 
@@ -616,17 +665,17 @@ dbd_describe(h, imp_sth)
 		ret = SQLDescribeCol(imp_sth->phstmt,i+1,cbuf_ptr,MAX_COL_NAME_LEN,
 				&f_cbufl[i],&fbh->dbtype,&fbh->prec,&fbh->scale,&fbh->nullok);
 		msg	= (ERRTYPE(ret) ? "DescribeCol failed" : "Invalid Handle");
-		ret = check_error(imp_sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+		ret = check_error(h,ret,msg);
 		EOI(ret);
 		ret = SQLColAttributes(imp_sth->phstmt,i+1,SQL_COLUMN_LENGTH,
 				NULL, 0, NULL ,&fbh->dbsize);
 		msg	= (ERRTYPE(ret) ? "ColAttributes failed" : "Invalid Handle");
-		ret = check_error(imp_sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+		ret = check_error(h,ret,msg);
 		EOI(ret);
 		ret = SQLColAttributes(imp_sth->phstmt,i+1,SQL_COLUMN_DISPLAY_SIZE,
 				NULL, 0, NULL ,&fbh->dsize);
 		msg	= (ERRTYPE(ret) ? "ColAttributes failed" : "Invalid Handle");
-		ret = check_error(imp_sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+		ret = check_error(h,ret,msg);
 		EOI(ret);
 
 		fbh->imp_sth = imp_sth;
@@ -654,14 +703,32 @@ dbd_describe(h, imp_sth)
 			warn("BindCol error on %s: %d", fbh->cbuf);
 		} else {
 			msg = (ERRTYPE(ret) ? "BindCol failed" : "Invalid Handle");
-			ret = check_error(imp_sth,ret,henv,imp_dbh->hdbc,
-								imp_sth->phstmt,msg);
+			ret = check_error(h,ret,msg);
     		EOI(ret);
 		}
 
 		if (dbis->debug >= 2)
 		    fbh_dump(fbh, i);
     }
+    return 1;
+}
+
+int
+dbd_conn_opt(sth, opt, value)
+    SV *sth;
+    IV  opt;
+    IV  value;
+{
+	D_imp_sth(sth);
+    D_imp_dbh_from_sth;
+    char *msg;
+    SQLINTEGER ret ;
+
+    ret = SQLSetConnectOption(imp_dbh->hdbc,opt, value);
+    msg = "SQLSetConnectOption failed";
+    ret = check_error(sth,ret,msg);
+    EOI(ret);
+
     return 1;
 }
 
@@ -678,7 +745,7 @@ dbd_st_opts(sth, opt, value)
 
 	ret = SQLSetStmtOption(imp_sth->phstmt,opt, value);
 	msg = "SQLSetStmtOption failed";
-	ret = check_error(sth,ret,henv, imp_dbh->hdbc, imp_sth->phstmt,msg);
+	ret = check_error(sth,ret,msg);
 	EOI(ret);
 
 	return 1;
@@ -700,8 +767,8 @@ dbd_st_execute(sth)
     }
 	ret = SQLExecute(imp_sth->phstmt);
 	msg = "SQLExecute failed";
-    ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
-	EOI(ret);
+    ret = check_error(sth,ret,msg);
+	if (ret < 0) return(ret);
 
     DBIc_ACTIVE_on(imp_sth);
     return 1;
@@ -726,14 +793,14 @@ dbd_st_fetch(sth)
     /* that dbd_describe() executed sucessfuly so the memory buffers	*/
     /* are allocated and bound.						*/
     if ( !DBIc_ACTIVE(imp_sth) ) {
-		check_error(sth, -3 , NHENV,NHDBC,NHSTMT, "no statement executing");
+		check_error(sth, -3,"no statement executing");
 		return Nullav;
     }
     
     if ((ret = SQLFetch(imp_sth->phstmt)) != SQL_SUCCESS ) {
 		if (ret != SQL_NO_DATA_FOUND) {	/* was not just end-of-fetch	*/
 			msg = (ERRTYPE(ret) ? "Fetch failed" : "Invalid Handle");
-        	check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+        	check_error(sth,ret,msg);
 			EOI(ret);
 		}
 		if (debug >= 3)
@@ -787,12 +854,21 @@ dbd_st_blob_read(sth, field, offset, len, destrv, destoffset)
     SvGROW(bufsv, len+destoffset+1);	/* SvGROW doesn't do +1	*/
 
 	rtval = SQLGetData(imp_sth->phstmt,field,SQL_C_BINARY,
-				 SvPVX(bufsv),len+destoffset,&retl);
+				 SvPVX(bufsv)+destoffset,len,&retl);
+
+    if (rtval == SQL_SUCCESS_WITH_INFO) {	/* XXX should check for 01004 */
+	retl = len;
+    }
+
+	if (retl == SQL_NULL_DATA) {	/* field is null	*/
+	(void)SvOK_off(bufsv);
+	return 1;
+    }
     msg = (ERRTYPE(rtval) ? "GetData failed to read blob":"Invalid Handle");
-	rtval = check_error(sth,rtval,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+	rtval = check_error(sth,rtval,msg);
 	EOI(rtval);
 	
-    SvCUR_set(bufsv, len );
+    SvCUR_set(bufsv, destoffset+retl );
     *SvEND(bufsv) = '\0'; /* consistent with perl sv_setpvn etc	*/
 
     return 1;
@@ -810,7 +886,7 @@ dbd_st_rows(sth, imp_sth)
 
 	ret = SQLRowCount(imp_sth->phstmt,&rows);
 	msg = (ERRTYPE(ret) ? "SQLRowCount failed" : "Invaild Handle");
-    ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+    ret = check_error(sth,ret,msg);
 	EOI(ret);
     return(rows);
 }
@@ -828,7 +904,7 @@ dbd_st_finish(sth,imp_sth)
 	if (DBIc_ACTIVE(imp_sth) ) {
 		ret = SQLFreeStmt(imp_sth->phstmt,SQL_CLOSE);
 		msg = (ERRTYPE(ret) ? "SQLCancel failed" : "Invaild Handle");
-    	ret = check_error(sth,ret,henv,imp_dbh->hdbc,imp_sth->phstmt,msg);
+    	ret = check_error(sth,ret,msg);
 		EOI(ret);
 	}
     DBIc_ACTIVE_off(imp_sth);
@@ -876,8 +952,7 @@ dbd_st_destroy(sth)
  */
     i = SQLFreeStmt (imp_sth->phstmt, SQL_DROP);
 	if (i != SQL_SUCCESS && i != SQL_INVALID_HANDLE) {
-    	i = check_error(NULL,i,henv,imp_dbh->hdbc,NHSTMT,
-				   				"Statement destruction error");
+    	i = check_error(NULL,i, "Statement destruction error");
 	}
 /* End Chet */
 	DBIc_IMPSET_off(imp_sth);		/*  let DBI know we've done it	*/

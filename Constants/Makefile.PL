@@ -5,12 +5,12 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 %opts = (    'NAME'      => 'DBD::DB2::Constants',
-    'VERSION'   => '0.12',
+    'VERSION'   => '0.13',
     'LIBS'      => [''],   # e.g., '-lm'
     'DEFINE'    => '',     # e.g., '-DHAVE_SOMETHING'
 );
 
-$DB2 = $ENV{DB2_HOME} || "/usr/lpp/db2_02_01";
+$DB2 = $ENV{DB2_HOME} || "/usr/lpp/db2_05_00";
 
 $OCIINCLUDE = $MK{INCLUDE} || "-I$DB2/include";
 
