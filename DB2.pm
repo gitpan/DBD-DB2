@@ -1,7 +1,7 @@
 #
-#   %W%, %I% %E% %U%
+#   engn/perldb2/DB2.pm, engn_perldb2, db2_v82fp9, 1.10 04/09/13 17:17:44
 #
-#   Copyright (c) 1995,1996,1997,1998,1999,2000,2001  International Business Machines Corp.
+#   Copyright (c) 1995-2004  International Business Machines Corp.
 #
 
 {
@@ -23,8 +23,8 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '0.76';
-        require_version DBI 0.93;
+    $VERSION = '0.77';
+    require_version DBI 1.21;
 
     bootstrap DBD::DB2;
 
@@ -212,6 +212,106 @@
 
         $sth;
     }
+
+    sub primary_key_info
+    {
+       my( $dbh, $catalog, $schema, $table ) = @_;
+       my $sth = DBI::_new_sth( $dbh, {} );
+       DBD::DB2::st::_primary_key_info( $sth, $catalog, $schema, $table )
+          or return undef;
+
+       $sth;
+    }
+
+    sub foreign_key_info
+    {
+       my( $dbh, $pkcat, $pkschema, $pktable, $fkcat, $fkschema, $fktable ) = @_;
+       my $sth = DBI::_new_sth( $dbh, {} );
+       DBD::DB2::st::_foreign_key_info( $sth, $pkcat, $pkschema, $pktable,
+                                              $fkcat, $fkschema, $fktable )
+          or return undef;
+
+       $sth;
+    }
+
+    sub column_info
+    {
+       my( $dbh, $cat, $schema, $table, $column ) = @_;
+       my $sth = DBI::_new_sth( $dbh, {} );
+
+       # Applications can use undef instead of NULL, and they are not the same
+       # We have to map undef to "match all" here before going into C code
+
+       if( !defined($cat) )
+       {
+          $cat = "";
+       }
+
+       if( !defined($schema) )
+       {
+          $schema = "%";
+       }
+
+       if( !defined($table) )
+       {
+          $table = "%";
+       }
+
+       if( !defined($column) )
+       {
+          $column = "%";
+       }
+
+       DBD::DB2::st::_column_info( $sth, $cat, $schema, $table, $column )
+          or return undef;
+
+       $sth;
+    }
+
+    sub type_info_all
+    {
+       my( $dbh ) = @_;
+
+       my $cols =
+       {
+          TYPE_NAME          => 0,
+          DATA_TYPE          => 1,
+          COLUMN_SIZE        => 2,
+          LITERAL_PREFIX     => 3,
+          LITERAL_SUFFIX     => 4,
+          CREATE_PARAMS      => 5,
+          NULLABLE           => 6,
+          CASE_SENSITIVE     => 7,
+          SEARCHABLE         => 8,
+          UNSIGNED_ATTRIBUTE => 9,
+          FIXED_PREC_SCALE   => 10,
+          AUTO_UNIQUE_VALUE  => 11,
+          LOCAL_TYPE_NAME    => 12,
+          MINIMUM_SCALE      => 13,
+          MAXIMUM_SCALE      => 14,
+          SQL_DATA_TYPE      => 15,
+          SQL_DATETIME_SUB   => 16,
+          NUM_PREC_RADIX     => 17,
+          INTERVAL_PRECISION => 18
+       };
+
+       my $type_info_all = [ $cols ];
+
+       my $sth = DBI::_new_sth( $dbh, {} );
+       DBD::DB2::st::_type_info_all( $sth ) or return undef;
+       push( @$type_info_all, @{$sth->fetchall_arrayref} );
+       $sth->finish;
+
+       return $type_info_all;
+    }
+
+    sub get_info
+    {
+      my( $dbh, $infotype ) = @_;
+      my $v = DBD::DB2::db::_get_info( $dbh, $infotype );
+      return $v;
+    }
+
 }
 
 

@@ -1,5 +1,5 @@
 #
-#   %W%, %I% %E% %U%
+#   engn/perldb2/Constants/Makefile.PL, engn_perldb2, db2_v82fp9, 1.6 01/10/03 11:26:28
 #
 #   Copyright (c) 1995,1996,1998,1999 International Business Machines Corp.
 #

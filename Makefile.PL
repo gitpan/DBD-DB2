@@ -1,7 +1,7 @@
 #
-#   %W%, %I% %E% %U%
+#   engn/perldb2/Makefile.PL, engn_perldb2, db2_v82fp9, 1.10 04/09/13 17:21:10
 #
-#   Copyright (c) 1995,1996,1997,1998,1999,2000,2001 International Business Machines Corp.
+#   Copyright (c) 1995-2004 International Business Machines Corp.
 #
 #!/usr/local/bin/perl -sw
 
@@ -75,6 +75,7 @@ print qq(Using DB2 in "$DB2"\n);
 # --- Setup include paths and libraries
 
 $opts{INC} .= qq(-I"$DB2/include" -I$Config{sitearch}/auto/DBI);
+$opts{INC} .= qq(-I$Config{vendorarch}/auto/DBI) if $Config{vendorarch};
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 
 # libraries required to build DBD::DB2 driver

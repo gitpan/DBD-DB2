@@ -1,7 +1,7 @@
 /*
-    %W%, %I% %E% %U%
+    engn/perldb2/DB2.xs, engn_perldb2, db2_v82fp9, 1.9 04/09/13 17:17:56
 
-    Copyright (c) 1995,1996,1997,1998,1999,2000,2001 International Business Machines Corp.
+    Copyright (c) 1995-2004 International Business Machines Corp.
 */
 
 #include "DB2.h"
@@ -53,11 +53,11 @@ _data_sources( drh, attribs=Nullsv )
     SV *        drh
     SV *        attribs
     CODE:
-    {
+    {                                                           
       AV *ds = dbd_data_sources( drh );
       ST(0) = sv_2mortal( newRV_noinc( (SV*)ds ) );
     }
-
+                                                          
 
 #endif
 
@@ -205,7 +205,7 @@ _do( dbh, stmt )
     {
       STRLEN lna;
       char *pstmt = SvOK(stmt) ? SvPV(stmt,lna) : "";
-      ST(0) = sv_2mortal(
+      ST(0) = sv_2mortal(                                        
                 newSViv( (IV)dbd_db_do( dbh, pstmt ) ) );
     }
 
@@ -214,9 +214,21 @@ void
 _ping( dbh )
     SV *        dbh
     CODE:
-    {
-      ST(0) = sv_2mortal( newSViv( (IV)dbd_db_ping( dbh ) ) );
-    }
+    {                                                           
+      ST(0) = sv_2mortal( newSViv( (IV)dbd_db_ping( dbh ) ) );   
+    }                                                           
+
+
+void
+_get_info( dbh, infotype=-1 )
+   SV      *dbh
+   short   infotype
+   CODE:
+   {
+      D_imp_dbh(dbh);
+      SV *sv = dbd_db_get_info( dbh, imp_dbh, infotype );        
+      ST(0) = sv;
+   }
 
 
 # -- end of DBD::DB2::db
@@ -267,7 +279,6 @@ bind_param(sth, param, value, attribs=Nullsv)
             attribs = Nullsv;
         }
         else {
-            SV **svp;
             DBD_ATTRIBS_CHECK("bind_param", sth, attribs);
             /* XXX we should perhaps complain if TYPE is not SvNIOK */
             /*DBD_ATTRIB_GET_IV(attribs, "TYPE",4, svp, sql_type);*/
@@ -303,7 +314,6 @@ bind_param_inout(sth, param, value_ref, maxlen, attribs=Nullsv)
             attribs = Nullsv;
         }
         else {
-            SV **svp;
             DBD_ATTRIBS_CHECK("bind_param_inout", sth, attribs);
             /*DBD_ATTRIB_GET_IV(attribs, "TYPE",4, svp, sql_type);*/
         }
@@ -489,11 +499,73 @@ _table_info( sth, attribs=Nullsv  )
     SV *        attribs
     CODE:
     {
-      D_imp_sth(sth);
-      DBD_ATTRIBS_CHECK( "_table_info", sth, attribs );
-      ST(0) = dbd_st_table_info( sth, imp_sth, attribs )
-                ? &sv_yes : &sv_no;
+      D_imp_sth(sth);                                            
+      DBD_ATTRIBS_CHECK( "_table_info", sth, attribs );          
+      ST(0) = dbd_st_table_info( sth, imp_sth, attribs )         
+                ? &sv_yes : &sv_no;                             
     }
+
+
+void
+_primary_key_info( sth, catalog=NULL, schema=NULL, table=NULL )
+   SV      *sth
+   char    *catalog
+   char    *schema
+   char    *table
+   CODE:
+   {
+      D_imp_sth(sth);
+      ST(0) = dbd_st_primary_key_info( sth,
+                                       imp_sth,
+                                       catalog,
+                                       schema,
+                                       table )                   
+                 ? &sv_yes : &sv_no;
+   }
+
+
+void
+_foreign_key_info( sth, pkCat=NULL, pkSchema=NULL, pkTable=NULL, fkCat=NULL, fkSchema=NULL, fkTable=NULL )
+   SV      *sth
+   char    *pkCat
+   char    *pkSchema
+   char    *pkTable
+   char    *fkCat
+   char    *fkSchema
+   char    *fkTable
+   CODE:
+   {
+      D_imp_sth(sth);
+      ST(0) = dbd_st_foreign_key_info( sth, imp_sth,
+                                       pkCat, pkSchema, pkTable,
+                                       fkCat, fkSchema, fkTable) 
+                 ? &sv_yes : &sv_no;
+   }
+
+
+void
+_column_info( sth, cat=NULL, schema=NULL, table=NULL, column=NULL )
+   SV      *sth
+   char    *cat
+   char    *schema
+   char    *table
+   char    *column
+   CODE:
+   {
+      D_imp_sth(sth);
+      ST(0) = dbd_st_column_info( sth, imp_sth, cat, schema, table, column )
+                 ? &sv_yes : &sv_no;                             
+   }
+
+void
+_type_info_all( sth )
+   SV      *sth
+   CODE:
+   {
+      D_imp_sth(sth);
+      ST(0) = dbd_st_type_info_all( sth, imp_sth )
+                 ? &sv_yes : &sv_no;                             
+   }
 
 
 

@@ -1,6 +1,6 @@
 package Bundle::DBD::DB2;
 
-$VERSION = '0.76';
+$VERSION = '0.77';
 
 1;
 
@@ -24,7 +24,7 @@ DBD::DB2     - DBD::DB2 by DB2PERL
 
 This bundle includes all the modules used by the Perl Database
 Interface (DBI) driver for DB2 (DBD::DB2), assuming the
-use of DBI version 1.13 or later, created by Tim Bunce.
+use of DBI version 1.21 or later, created by Tim Bunce.
 
 If you've not previously used the CPAN module to install any
 bundles, you will be interrogated during its setup phase.

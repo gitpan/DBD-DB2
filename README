@@ -1,22 +1,23 @@
 *** *BEFORE* BUILDING, TESTING AND INSTALLING this you will need to:
 
-    Build, test and install Perl 5 (IBM officially supports
-    version 5.004_04 or later).
+    Build, test and install Perl 5 (Preferrably 5.006_00 or later)
     It is very important to TEST it and INSTALL it!
 
-    Build, test and install the DBI module (at least DBI 0.93).
+    Build, test and install the DBI module (at least DBI 1.21).
     It is very important to TEST it and INSTALL it!
 
     Remember to *read* the DBI README file and this one CAREFULLY!
 
-    Ensure one of the following DB2 products is installed.
+    Ensure the following DB2 product is installed.
 
-        DB2 Software Developer's Kit v5.2
-            Included with the DB2 Application Developer's Kit
-
-        DB2 Application Development Client v6 or later
+        DB2 Application Development Client v7.2 or later
             Included with the DB2 Personal Developer's Edition and the
             DB2 Universal Developer's Edition
+
+    The Application Development Client can be downloaded here:
+
+    http://www.ibm.com/software/data/db2/udb/support/
+
 
 
 *** BUILDING:
@@ -45,6 +46,10 @@
     For other DBD::DB2 information, please see
 
         http://www.software.ibm.com/data/db2/perl
+
+    For documentation about DB2 and CLI, please see:
+
+        http://publib.boulder.ibm.com/infocenter/db2help/index.jsp
 
     Comments/suggestions/enhancement requests may be sent to
 

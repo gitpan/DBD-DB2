@@ -450,3 +450,38 @@ semantics can be used:
 
 The result contains all the valid table types for the data source.
 DBI 1.14 or later is required.
+
+=head1 Getting Primary and Foreign Key information
+
+The $dbh->primary_key, $dbh->primary_key_info, and $dbh->foreign_key_info
+are supported. Search patterns cannot be used to specify any of the arguments.
+Please see the DBI documentation for usage information.
+
+To obtain the primary keys for the table HOYMICH.MYTABLE:
+
+$sth = $dbh->primary_key_info( undef, 'HOYMICH', 'MYTABLE' );
+
+To obtain all the primary key column names:
+
+@key_column_names = $dbh->primary_key( $catalog, $schema, $table );
+
+=head1 Getting Type information
+
+Both $dbh->type_info_all and $dbh->type_info are supported.
+Please see the DBI documentation for usage information.
+
+=head1 Getting driver and database system information (GetInfo)
+
+The $dbh->get_info is supported.
+Please see the DBI documentation for usage information.
+Please see the CLI function, SQLGetInfo (link is available in
+the CAVEATS file), for the supported information types.
+
+To obtain the name of the DBMS product being accessed:
+
+$v = $dbh->get_info( SQL_DBMS_NAME );
+
+To obtain the name of the DBMS product version being accessed:
+
+$v = $dbh->get_info( SQL_DBMS_VER );
+

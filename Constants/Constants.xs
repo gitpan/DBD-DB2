@@ -9227,6 +9227,24 @@ int arg;
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "SQL_APPLICATION_CODEPAGE"))
+#ifdef SQL_APPLICATION_CODEPAGE
+	    return SQL_APPLICATION_CODEPAGE;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SQL_CONNECT_CODEPAGE"))
+#ifdef SQL_CONNECT_CODEPAGE
+	    return SQL_CONNECT_CODEPAGE;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SQL_DATABASE_CODEPAGE"))
+#ifdef SQL_DATABASE_CODEPAGE
+	    return SQL_DATABASE_CODEPAGE;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'T':
 	if (strEQ(name, "TRACE_VERSION"))
@@ -9260,7 +9278,7 @@ not_there:
 }
 
 
-MODULE = DBD::DB2::Constants		PACKAGE = DBD::DB2::Constants		
+MODULE = DBD::DB2::Constants		PACKAGE = DBD::DB2::Constants
 
 char *
 SQL_ALL_CATALOGS()

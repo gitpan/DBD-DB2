@@ -1,3 +1,38 @@
+September 15, 2004
+
+DBD::DB2 0.77
+
+  NOTE: DBD::DB2 now requires DBI 1.21, which requires
+  perl 5.005_03 or later.
+
+  Add support for primary_key_info and primary_key
+
+  Add support for foreign_key_info
+
+  Add support for column_info
+
+  Add support for get_info
+
+  Add support for type_info_all and type_info
+     - Read CAVEATS file for hints
+
+  Fix statement handle leak. Statements handles
+  are not destroyed properly.
+
+  Fix memory leak in $sth->prepare
+  Column buffers are not freed
+
+  Fix Linux and Fedora Core build problem by adding
+  -I$Config{vendorarch}/auto/DBI to Makefile.PL
+
+  Updated CAVEATS
+  Add documentation for binding CLI packages
+  Add information on metadata functions
+  Add note to remove constants to bypass a linux build error
+
+  Update DB2.pod
+  Add metadata function examples
+
 October 1, 2001
 
 DBD::DB2 0.76
