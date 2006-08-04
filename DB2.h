@@ -59,4 +59,5 @@ SV*  dbd_db_get_info _(( SV        *dbh,
                          imp_dbh_t *imp_dth,
                          short     infoType ));                  
 
+
 /* end of DB2.h */

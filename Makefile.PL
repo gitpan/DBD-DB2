@@ -81,7 +81,24 @@ $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 # libraries required to build DBD::DB2 driver
 if( $os eq 'MSWin32' || $os eq 'MSWin64' || $os eq 'os2' )
 {
-  $sysliblist = qq(-L"$DB2/lib" db2cli db2api);
+  
+  my $DB2LIB;
+  if (-e "$DB2/lib64")
+  {
+    $DB2LIB = "$DB2/lib64";
+  }
+  else
+  {
+    if (-e "$DB2/lib32")
+    {
+       $DB2LIB = "$DB2/lib32";
+    }
+    else
+    {
+      $DB2LIB = "$DB2/lib";
+    }
+  }
+  $sysliblist = qq(-L"$DB2LIB" db2cli db2api);
   my @libpaths = split /;/, $ENV{'LIB'};
   my $libpath;
   while( @libpaths )
@@ -97,7 +114,24 @@ if( $os eq 'MSWin32' || $os eq 'MSWin64' || $os eq 'os2' )
 }
 else
 {
-  $sysliblist = "-L$DB2/lib -ldb2";
+  my $DB2LIB;
+  if (-e "$DB2/lib64")
+  {
+    $DB2LIB = "$DB2/lib64";
+  }
+  else
+  {
+    if (-e "$DB2/lib32")
+    {
+       $DB2LIB = "$DB2/lib32";
+    }
+    else
+    {
+      $DB2LIB = "$DB2/lib";
+    }
+  }
+      
+  $sysliblist = "-L$DB2LIB -ldb2";
 }
 
 # --- Handle special cases ---

@@ -1,3 +1,21 @@
+August 04, 2006
+
+DBD::DB2 0.80
+
+  Add set current schema as a connection attribute
+
+  Add support for the cancel method
+
+  Add support for get_info in order to avoid errors when unsupported InfoType codes are requested
+
+  Add support for full connection string during db2_connect
+
+  Add 64 and 32 bit support during compilation
+
+  Updated DB2.pod
+  Add link to the DB2 Information Center
+  Add link to the IBM DB2 Perl Database Interface guide
+
 July 21, 2006
 
 DBD::DB2 0.79a

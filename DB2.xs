@@ -221,8 +221,8 @@ _ping( dbh )
 
 void
 _get_info( dbh, infotype=-1 )
-   SV      *dbh
-   short   infotype
+   SV *     dbh
+   short    infotype
    CODE:
    {
       D_imp_dbh(dbh);
@@ -397,6 +397,15 @@ fetchrow_array(sth)
             PUSHs(AvARRAY(av)[i]);
         }
     }
+
+
+void
+cancel(sth)
+    SV *        sth
+    CODE:
+    D_imp_sth(sth);
+    ST(0) = dbd_st_cancel(sth,imp_sth) ? &sv_yes : &sv_no;
+
 
 void
 finish(sth)

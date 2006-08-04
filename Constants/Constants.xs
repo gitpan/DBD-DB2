@@ -647,6 +647,12 @@ int arg;
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "SQL_API_SQLINFOEXISTS"))
+#ifdef SQL_API_SQLINFOEXISTS
+	    return SQL_API_SQLINFOEXISTS;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "SQL_API_SQLMORERESULTS"))
 #ifdef SQL_API_SQLMORERESULTS
 	    return SQL_API_SQLMORERESULTS;

@@ -23,7 +23,7 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '0.79a';
+    $VERSION = '0.80';
     require_version DBI 1.21;
 
     bootstrap DBD::DB2;
@@ -129,6 +129,7 @@
     use strict;
 
     sub connect {
+
         my($drh, $dbname, $user, $auth, $attr)= @_;
 
         # create a 'blank' dbh
