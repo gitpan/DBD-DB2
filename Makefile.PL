@@ -1,4 +1,4 @@
-#
+
 #   engn/perldb2/Makefile.PL, engn_perldb2, db2_v82fp9, 1.11 04/09/14 10:47:41
 #
 #   Copyright (c) 1995-2004 International Business Machines Corp.
@@ -132,6 +132,7 @@ else
   }
       
   $sysliblist = "-L$DB2LIB -ldb2";
+
 }
 
 # --- Handle special cases ---

@@ -108,7 +108,7 @@ to include 'use DBD::DB2::Constants').
   db2_close_behavior   SQL_CC_NO_RELEASE or SQL_CC_RELEASE
   db2_connect_node     Integer (must be set in DBI->connect method;
                        it cannot be modified afterwards)
-  db2_current_schema   Character string
+  db2_set_schema       Character string
   db2_db2estimate      Integer
   db2_db2explain       One of:
                          SQL_DB2EXPLAIN_OFF
@@ -136,7 +136,7 @@ SQLSetConnectAttr.  The attribute names listed above are similar to
 the CLI attributes documented (e.g.  db2_access_mode is equivalent to
 SQL_ATTR_ACCESS_MODE).
 
-Note: db2_current_schema can be used to set the current schema when
+Note: db2_set_schema can be used to set the current schema when
 setting up a connection.
 
 =head1 Statement Attributes
@@ -346,6 +346,20 @@ attribute:
 
 In this case the value passed to bind_param() is the file name.
 
+  For example, to insert a blob file "sample" into database blobtest:
+
+  my $stmt = "CREATE TABLE blobTest (id INTEGER, data BLOB)";
+  my $sth = $dbh->prepare($stmt);
+  $sth->execute();
+
+  $stmt = "INSERT INTO blobTest (id, data) values (?,?)";
+  my $sth = $dbh->prepare($stmt);
+  
+  $sth->bind_param(1,1);
+  $sth->bind_param(2,sample,{'db2_file' => 1});
+  $sth->execute();
+
+
 This is only valid for input and only for LOB parameters.  The
 following predefined attribute hashes have been provided for
 convenience:
@@ -353,6 +367,20 @@ convenience:
   $attrib_blobfile
   $attrib_clobfile
   $attrib_dbclobfile
+
+  Example:
+
+  my $stmt = "CREATE TABLE blobTest (id INTEGER, data BLOB)";
+  my $sth = $dbh->prepare($stmt);
+  $sth->execute();
+
+  $stmt = "INSERT INTO blobTest (id, data) values (?,?)";
+  my $sth = $dbh->prepare($stmt);
+
+  $sth->bind_param(1,1);
+  $sth->bind_param(2,sample,$attrib_blobfile);
+  $sth->execute();
+
 
 =head1 LongReadLen
 
@@ -384,6 +412,21 @@ is retrieved at once (subject to the LongReadLen setting).  An
 alternate method is to use:
 
   $buf = $sth->blob_read( $field, $offset, $len );
+
+  Example:
+
+  $stmt =  "SELECT data FROM blobTest";
+  my $sth = $dbh->prepare($stmt);
+  $sth->execute();
+
+  my $offset = 0;
+  my $buff="";
+  $sth->fetch();
+  while( $buff = $sth->blob_read(1,$offset,1000000)){
+         print $buff;
+         $offset+=length($buff);
+         $buff="";
+  }
 
 This will return up to $len bytes from the given LOB field.
 'undef' is returned when no more data is left to read.
@@ -515,3 +558,55 @@ undef is returned.  For a full list of supported InfoType codes,
 you may visit:
 http://publib.boulder.ibm.com/infocenter/db2luw/v8/index.jsp?topic=/com.ibm.db2.udb.doc/ad/r0000615.htm
 
+=head1 Native XML support
+
+DBD::DB2 version 0.9a supports native XML. The datatype
+xml is mapped to the sqltype SQL_XML and is stored in the database
+in a hierarchical structure. For all data manipulation purposes
+XML data is treated as a BLOB.
+
+To create a table with XML data:
+
+$stmt = "CREATE TABLE xmlTest (id INTEGER, data XML)";
+
+To insert an XML file:
+
+$stmt = "INSERT INTO xmlTest (id, data) values (?,?)";
+my $sth = $dbh->prepare($stmt);
+
+open(SAMPLE,"<sample") or die "Cannot open $path: $!";
+binmode SAMPLE;
+while(my $record = <SAMPLE>){
+      $input = $input.$record;
+}
+close(SAMPLE);
+
+$sth->bind_param(1,123456789);
+$sth->bind_param(2,$input);
+$sth->execute();
+
+XML data can be retrieved in two ways:
+
+1. As a BLOB:
+
+$stmt =  "SELECT data FROM xmlTest";
+my $sth = $dbh->prepare($stmt);
+$sth->execute();
+
+my $offset = 0;
+my $buff="";
+$sth->fetch();
+while( $buff = $sth->blob_read(1,$offset,1000000)){
+       print $buff;
+       $buff="";
+       $offset+=length($buff);
+}
+
+2. As a record:
+
+$stmt =  "SELECT data FROM xmlTest";
+my $sth = $dbh->prepare($stmt);
+$sth->execute();
+while( @row = $sth->fetchrow ) {
+      print $row[0] . "\n";
+}

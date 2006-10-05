@@ -1403,6 +1403,12 @@ int arg;
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "SQL_ATTR_SET_SCHEMA"))
+#ifdef SQL_ATTR_SET_SCHEMA
+	    return SQL_ATTR_SET_SCHEMA;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "SQL_ATTR_SIMULATE_CURSOR"))
 #ifdef SQL_ATTR_SIMULATE_CURSOR
 	    return SQL_ATTR_SIMULATE_CURSOR;
@@ -9212,6 +9218,12 @@ int arg;
 	if (strEQ(name, "SQL_WCHARTYPE_NOCONVERT"))
 #ifdef SQL_WCHARTYPE_NOCONVERT
 	    return SQL_WCHARTYPE_NOCONVERT;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SQL_XML"))
+#ifdef SQL_XML
+	    return SQL_XML;
 #else
 	    goto not_there;
 #endif

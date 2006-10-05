@@ -23,7 +23,7 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '0.80';
+    $VERSION = '0.9a';
     require_version DBI 1.21;
 
     bootstrap DBD::DB2;
