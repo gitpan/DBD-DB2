@@ -1,0 +1,675 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>DBD::DB2 - DataBase Driver for DB2 UDB</title>
+<link rel="stylesheet" href="../../../Active.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:" />
+</head>
+
+<body>
+<table border="0" width="100%" cellspacing="0" cellpadding="3">
+<tr><td class="block" valign="middle">
+<big><strong><span class="block">&nbsp;DBD::DB2 - DataBase Driver for DB2 UDB</span></strong></big>
+</td></tr>
+</table>
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#example">EXAMPLE</a></li>
+	<li><a href="#connection_attributes">Connection Attributes</a></li>
+	<li><a href="#statement_attributes">Statement Attributes</a></li>
+	<li><a href="#data_source_names__dsns_">Data Source Names (DSNs)</a></li>
+	<li><a href="#binding_parameters">Binding Parameters</a></li>
+	<ul>
+
+		<li><a href="#attributes">Attributes</a></li>
+		<li><a href="#parameter_type__input__ouput_and_input_output_">Parameter Type (Input, Ouput and Input/Output)</a></li>
+		<li><a href="#binding_input_values_by_reference_using_bind_param_inout__">Binding Input Values By Reference using <code>bind_param_inout()</code></a></li>
+		<li><a href="#binding_a_file_to_an_input_lob_parameter">Binding a File to an Input LOB Parameter</a></li>
+	</ul>
+
+	<li><a href="#longreadlen">LongReadLen</a></li>
+	<li><a href="#fetching_lob_data_in_pieces">Fetching LOB Data in Pieces</a></li>
+	<li><a href="#multiple_result_sets">Multiple Result Sets</a></li>
+	<li><a href="#getting_table_information">Getting Table information</a></li>
+	<ul>
+
+		<li><a href="#getting_a_list_of_schemas">Getting a List of Schemas</a></li>
+		<li><a href="#getting_a_list_of_table_types">Getting a List of Table Types</a></li>
+	</ul>
+
+	<li><a href="#getting_primary_and_foreign_key_information">Getting Primary and Foreign Key information</a></li>
+	<li><a href="#getting_type_information">Getting Type information</a></li>
+	<li><a href="#getting_driver_and_database_system_information__getinfo_">Getting driver and database system information (GetInfo)</a></li>
+	<li><a href="#native_xml_support">Native XML support</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>DBD::DB2 - DataBase Driver for DB2 UDB</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>DBD::DB2 is a Perl5 module which when used in conjunction with DBI
+allows Perl5 to communicate with IBM's DB2 Universal Database.</p>
+<p>In the generic sense, most of the functionality provided by any of
+the available DBDs is accessed indirectly through the DBI.</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+  <span class="keyword">use</span> <span class="variable">DBI</span><span class="operator">;</span>
+  <span class="keyword">use</span> <span class="variable">DBD::DB2::Constants</span><span class="operator">;</span>
+  <span class="keyword">use</span> <span class="variable">DBD::DB2</span><span class="operator">;</span>
+</pre>
+<pre>
+  <span class="variable">$dbh</span> <span class="operator">=</span> <span class="variable">DBI</span><span class="operator">-&gt;</span><span class="keyword">connect</span><span class="operator">(</span><span class="string">"dbi:DB2:db_name"</span><span class="operator">,</span> <span class="variable">$username</span><span class="operator">,</span> <span class="variable">$password</span><span class="operator">);</span>
+</pre>
+<p>See <em>DBI</em> for more information.</p>
+<p>The DBD::DB2 driver is supported by DB2 UDB V7.2 and later. See 
+<a href="http://www.software.ibm.com/data/db2/perl">http://www.software.ibm.com/data/db2/perl</a> for more information on
+supported environments.</p>
+<p>The DB2 Information Center is available at:
+<a href="http://publib.boulder.ibm.com/infocenter/db2help/index.jsp">http://publib.boulder.ibm.com/infocenter/db2help/index.jsp</a></p>
+<p>
+</p>
+<hr />
+<h1><a name="example">EXAMPLE</a></h1>
+<pre>
+  <span class="comment">#!/usr/local/bin/perl</span>
+</pre>
+<pre>
+  <span class="keyword">use</span> <span class="variable">DBI</span><span class="operator">;</span>
+  <span class="keyword">use</span> <span class="variable">DBD::DB2::Constants</span><span class="operator">;</span>
+  <span class="keyword">use</span> <span class="variable">DBD::DB2</span> <span class="string">qw($attrib_int $attrib_char $attrib_float
+                  $attrib_date $attrib_ts)</span><span class="operator">;</span>
+</pre>
+<pre>
+  <span class="comment"># an extraneous example of the syntax for creating a new</span>
+  <span class="comment"># attribute type</span>
+  <span class="variable">$attrib_dec</span> <span class="operator">=</span> <span class="operator">{</span> <span class="variable">%$attrib_int</span><span class="operator">,</span>
+                 <span class="string">'db2_type'</span>  <span class="operator">=&gt;</span> <span class="variable">SQL_DECIMAL</span><span class="operator">,</span>
+                 <span class="string">'SCALE'</span>     <span class="operator">=&gt;</span> <span class="number">2</span><span class="operator">,</span>
+                 <span class="string">'PRECISION'</span> <span class="operator">=&gt;</span> <span class="number">31</span> <span class="operator">}</span><span class="operator">;</span>
+</pre>
+<pre>
+  <span class="comment">#$DBI::dbi_debug=9; # increase the debug output</span>
+</pre>
+<pre>
+  <span class="comment"># Open a connection and set LongReadLen to maximum size of column</span>
+  <span class="variable">$dbh</span> <span class="operator">=</span> <span class="variable">DBI</span><span class="operator">-&gt;</span><span class="keyword">connect</span><span class="operator">(</span><span class="string">"dbi:DB2:sample"</span><span class="operator">,</span><span class="string">""</span><span class="operator">,</span><span class="string">""</span><span class="operator">,</span> <span class="operator">{</span> <span class="string">LongReadLen</span> <span class="operator">=&gt;</span> <span class="number">102400</span> <span class="operator">}</span> <span class="operator">);</span>
+  <span class="keyword">if</span> <span class="operator">(!</span><span class="keyword">defined</span><span class="operator">(</span><span class="variable">$dbh</span><span class="operator">))</span> <span class="operator">{</span> <span class="keyword">exit</span><span class="operator">;</span> <span class="operator">}</span>
+</pre>
+<pre>
+  <span class="comment"># Note in the following sequence, that the statement contains</span>
+  <span class="comment"># no parameter markers, which makes the execution sequence</span>
+  <span class="comment"># just prepare and execute.</span>
+  <span class="variable">$stmt</span> <span class="operator">=</span> <span class="string">"SELECT empno, photo_format FROM emp_photo WHERE
+            photo_format = 'gif';"</span><span class="operator">;</span>
+  <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span><span class="variable">$stmt</span><span class="operator">);</span>
+</pre>
+<pre>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+</pre>
+<pre>
+  <span class="comment"># $row[0] is the empno from the database and $row[1] is the</span>
+  <span class="comment"># image type.  In this case, the type will always be "gif".</span>
+  <span class="variable">$stmt</span> <span class="operator">=</span> <span class="string">"SELECT picture FROM emp_photo WHERE empno = ? AND
+              photo_format = ? ;"</span> <span class="operator">;</span>
+  <span class="comment"># prepare statement, which contains two parameter markers</span>
+  <span class="variable">$pict_sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span><span class="variable">$stmt</span><span class="operator">);</span>
+  <span class="keyword">while</span><span class="operator">(</span> <span class="variable">@row</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">fetchrow</span> <span class="operator">)</span> <span class="operator">{</span>
+    <span class="comment"># create an output file named empno.type in the current directory</span>
+    <span class="keyword">open</span><span class="operator">(</span><span class="variable">OUTPUT</span><span class="operator">,</span><span class="string">"&gt;$row[0].$row[1]"</span><span class="operator">)</span> <span class="operator">||</span> <span class="keyword">die</span> <span class="string">"Can't open $row[0].$row[1]"</span><span class="operator">;</span>
+    <span class="keyword">binmode</span> <span class="variable">OUTPUT</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="comment"># use bind_param to tell the DB2 code where to find the variables</span>
+    <span class="comment"># containing the values for the parameters.  Additionally,</span>
+    <span class="comment"># tell DB2 how to convert a perl value to a DB2 value based</span>
+    <span class="comment"># on the contents of the $attrib_* hash.  One bind_param</span>
+    <span class="comment"># call per parameter per execution.</span>
+    <span class="variable">$pict_sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="number">1</span><span class="operator">,</span><span class="variable">$row</span><span class="operator">[</span><span class="number">0</span><span class="operator">]</span><span class="operator">);</span>
+    <span class="variable">$pict_sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="number">2</span><span class="operator">,</span><span class="variable">$row</span><span class="operator">[</span><span class="number">1</span><span class="operator">]</span><span class="operator">);</span>
+    <span class="variable">$pict_sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+</pre>
+<pre>
+    <span class="comment"># do a fetch to get the blob</span>
+    <span class="variable">@row</span> <span class="operator">=</span> <span class="variable">$pict_sth</span><span class="operator">-&gt;</span><span class="variable">fetchrow</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="keyword">print</span> <span class="variable">OUTPUT</span> <span class="variable">$row</span><span class="operator">[</span><span class="number">0</span><span class="operator">]</span><span class="operator">;</span>
+    <span class="variable">@row</span> <span class="operator">=</span> <span class="string">""</span><span class="operator">;</span>
+</pre>
+<pre>
+    <span class="keyword">close</span><span class="operator">(</span><span class="variable">OUTPUT</span><span class="operator">);</span>
+    <span class="comment"># close the blob cursor</span>
+    <span class="variable">$pict_sth</span><span class="operator">-&gt;</span><span class="variable">finish</span><span class="operator">();</span>
+      <span class="operator">}</span>
+      <span class="comment"># redundantly close the blob cursor -- should be harmless</span>
+      <span class="variable">$pict_sth</span><span class="operator">-&gt;</span><span class="variable">finish</span><span class="operator">();</span>
+      <span class="comment"># close selection criteria cursor</span>
+      <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">finish</span><span class="operator">();</span>
+      <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">disconnect</span><span class="operator">();</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="connection_attributes">Connection Attributes</a></h1>
+<p>The following DB2 connection attributes are supported.  (For
+information on setting and querying connection attributes see the
+DBI guide.)  Supported values are also shown: boolean refers to Perl
+true or false, tokens listed in uppercase are DB2 constants (be sure
+to include 'use DBD::DB2::Constants').</p>
+<pre>
+  <span class="variable">db2_access_mode</span>      <span class="variable">SQL_MODE_READ_ONLY</span> <span class="keyword">or</span> <span class="variable">SQL_MODE_READ_WRITE</span>
+  <span class="variable">db2_clischema</span>        <span class="variable">Character</span> <span class="variable">string</span>
+  <span class="variable">db2_close_behavior</span>   <span class="variable">SQL_CC_NO_RELEASE</span> <span class="keyword">or</span> <span class="variable">SQL_CC_RELEASE</span>
+  <span class="variable">db2_connect_node</span>     <span class="variable">Integer</span> <span class="operator">(</span><span class="variable">must</span> <span class="variable">be</span> <span class="variable">set</span> <span class="variable">in</span> <span class="variable">DBI</span><span class="operator">-&gt;</span><span class="keyword">connect</span> <span class="variable">method</span><span class="operator">;</span>
+                       <span class="variable">it</span> <span class="variable">cannot</span> <span class="variable">be</span> <span class="variable">modified</span> <span class="variable">afterwards</span><span class="operator">)</span>
+  <span class="variable">db2_set_schema</span>       <span class="variable">Character</span> <span class="variable">string</span>
+  <span class="variable">db2_db2estimate</span>      <span class="variable">Integer</span>
+  <span class="variable">db2_db2explain</span>       <span class="variable">One</span> <span class="variable">of</span><span class="operator">:</span>
+                         <span class="variable">SQL_DB2EXPLAIN_OFF</span>
+                         <span class="variable">SQL_DB2EXPLAIN_SNAPSHOT_ON</span>
+                         <span class="variable">SQL_DB2EXPLAIN_MODE_ON</span>
+                         <span class="variable">SQL_DB2EXPLAIN_SNAPSHOT_MODE_ON</span>
+  <span class="variable">db2_info_acctstr</span>     <span class="variable">Character</span> <span class="variable">string</span>
+  <span class="variable">db2_info_applname</span>    <span class="variable">Character</span> <span class="variable">string</span>
+  <span class="variable">db2_info_userid</span>      <span class="variable">Character</span> <span class="variable">string</span>
+  <span class="variable">db2_info_wrkstnname</span>  <span class="variable">Character</span> <span class="variable">string</span>
+  <span class="variable">db2_longdata_compat</span>  <span class="variable">Boolean</span>
+  <span class="variable">db2_quiet_mode</span>       <span class="variable">Integer</span>
+  <span class="variable">db2_sqlerrp</span>          <span class="variable">Character</span> <span class="variable">string</span> <span class="operator">(</span><span class="keyword">read</span> <span class="variable">only</span><span class="operator">)</span>
+  <span class="variable">db2_txn_isolation</span>    <span class="variable">One</span> <span class="variable">of</span> <span class="variable">the</span> <span class="variable">following</span><span class="operator">:</span>
+                         <span class="variable">SQL_TXN_READ_UNCOMMITTED</span>
+                         <span class="variable">SQL_TXN_READ_COMMITTED</span>
+                         <span class="variable">SQL_TXN_REPEATABLE_READ</span>
+                         <span class="variable">SQL_TXN_SERIALIZABLE</span>
+                         <span class="variable">SQL_TXN_NOCOMMIT</span>
+</pre>
+<p>Not all the attributes are available in older versions of DB2.  For
+further information on these attributes, refer to the DB2 Call Level
+Interface Guide and Reference, Chapter 5.  CLI Functions,
+SQLSetConnectAttr.  The attribute names listed above are similar to
+the CLI attributes documented (e.g.  db2_access_mode is equivalent to
+SQL_ATTR_ACCESS_MODE).</p>
+<p>Note: db2_set_schema can be used to set the current schema when
+setting up a connection.</p>
+<p>
+</p>
+<hr />
+<h1><a name="statement_attributes">Statement Attributes</a></h1>
+<p>The following DB2 statement attributes are supported.  (For
+information on setting and querying statement attributes see the
+DBI guide.)  Supported values are also shown: boolean refers to Perl
+true or false.</p>
+<pre>
+  db2_concurrency               One of:
+                                  SQL_CONCUR_READ_ONLY
+                                  SQL_CONCUR_LOCK
+                                  SQL_CONCUR_VALUES
+  db2_cursor_hold               Boolean
+  db2_deferred_prepare          Boolean
+  db2_earlyclose                Boolean
+  db2_max_length                Integer
+  db2_max_rows                  Integer
+  db2_more_results              Boolean (read only, see the section
+                                  below: Multiple Result Sets)
+  db2_noscan                    Boolean
+  db2_optimize_for_nrows        Integer
+  db2_prefetch                  Boolean
+  db2_query_optimization_level  Integer
+  db2_query_timeout             Integer (see note below)
+  db2_retrieve_data             Boolean
+  db2_row_number                Integer (read only)
+  db2_txn_isolation             One of the following:
+                                  SQL_TXN_READ_UNCOMMITTED
+                                  SQL_TXN_READ_COMMITTED
+                                  SQL_TXN_REPEATABLE_READ
+                                  SQL_TXN_SERIALIZABLE
+                                  SQL_TXN_NOCOMMIT</pre>
+<p>For further information on these attributes, refer to the DB2 Call
+Level Interface Guide and Reference, Chapter 5. CLI Functions,
+SQLSetStmtAttr.  The attribute names listed above are similar to the
+CLI attributes documented (e.g.  db2_deferred_prepare is equivalent
+to SQL_ATTR_DEFERRED_PREPARE).</p>
+<p>Note: that some versions of the CLI Guide say SQL_ATTR_QUERY_TIMEOUT
+applies to Windows 3.1 only.  This is incorrect, it works on all
+platforms.  Later versions of the book have been corrected.</p>
+<p>
+</p>
+<hr />
+<h1><a name="data_source_names__dsns_">Data Source Names (DSNs)</a></h1>
+<p>Connection using the DBI-&gt;<code>connect()</code> method can be done in two
+different fashions.</p>
+<p>Uncataloged database connections can be done by using the full
+connection string.  For example:</p>
+<pre>
+  <span class="keyword">my</span> <span class="variable">$string</span> <span class="operator">=</span> <span class="string">"dbi:DB2:DATABASE=$db; HOSTNAME=$hostname; PORT=$port; PROTOCOL=TCPIP; UID=$user; PWD=$pass;"</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$dbh</span> <span class="operator">=</span> <span class="variable">DBI</span><span class="operator">-&gt;</span><span class="keyword">connect</span><span class="operator">(</span><span class="variable">$string</span><span class="operator">,</span> <span class="variable">$user</span><span class="operator">,</span> <span class="variable">$pass</span><span class="operator">)</span> <span class="operator">||</span> <span class="keyword">die</span> <span class="string">"Connection failed with error: $DBI::errstr"</span><span class="operator">;</span>
+</pre>
+<p>Cataloged database connections can be done by passing the database
+alias, username, and password as parameters.  This method does
+not allow entering the host name, port number, etc but will
+require you to catalog the database (local or remote) through DB2.
+For example:</p>
+<pre>
+  <span class="keyword">my</span> <span class="variable">$string</span> <span class="operator">=</span> <span class="string">"cataloged_db_alias"</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$dbh</span> <span class="operator">=</span> <span class="variable">DBI</span><span class="operator">-&gt;</span><span class="keyword">connect</span><span class="operator">(</span><span class="variable">$string</span><span class="operator">,</span> <span class="variable">$user</span><span class="operator">,</span> <span class="variable">$pass</span><span class="operator">)</span> <span class="operator">||</span> <span class="keyword">die</span> <span class="string">"Connection failed with error: $DBI::errstr"</span><span class="operator">;</span>
+</pre>
+<p>To access a remote database, catalog the remote node, the DCS database
+(for AS/400, MVS and VM/VSE databases) and the database alias.  See
+the DB2 Installation and Configuration Supplement for help with
+configuring client-to-server communications.  For information on
+accessing host databases, see the DB2 Connect User's Guide.</p>
+<p>DBI-&gt;<code>data_sources('DB2')</code> returns a list of all cataloged databases.</p>
+<p>
+</p>
+<hr />
+<h1><a name="binding_parameters">Binding Parameters</a></h1>
+<p>DBD::DB2 supports the following methods of binding parameters:</p>
+<pre>
+  <span class="variable">For</span> <span class="variable">input</span><span class="operator">-</span><span class="variable">only</span> <span class="variable">parameters</span><span class="operator">:</span>
+  <span class="variable">$rc</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="variable">$p_num</span><span class="operator">,</span> <span class="variable">$bind_value</span><span class="operator">);</span>
+  <span class="variable">$rc</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="variable">$p_num</span><span class="operator">,</span> <span class="variable">$bind_value</span><span class="operator">,</span> <span class="variable">$bind_type</span><span class="operator">);</span>
+  <span class="variable">$rc</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="variable">$p_num</span><span class="operator">,</span> <span class="variable">$bind_value</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">%attr</span><span class="operator">);</span>
+</pre>
+<pre>
+  <span class="variable">For</span> <span class="variable">input</span><span class="operator">/</span><span class="variable">output</span><span class="operator">,</span> <span class="variable">output</span> <span class="keyword">or</span> <span class="variable">input</span> <span class="variable">by</span> <span class="variable">reference</span><span class="operator">:</span>
+  <span class="variable">$rc</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param_inout</span><span class="operator">(</span><span class="variable">$p_num</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">$bind_value</span><span class="operator">,</span> <span class="variable">$max_len</span><span class="operator">);</span>
+  <span class="variable">$rc</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param_inout</span><span class="operator">(</span><span class="variable">$p_num</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">$bind_value</span><span class="operator">,</span> <span class="variable">$max_len</span><span class="operator">,</span> <span class="variable">$bind_type</span><span class="operator">);</span>
+  <span class="variable">$rc</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param_inout</span><span class="operator">(</span><span class="variable">$p_num</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">$bind_value</span><span class="operator">,</span> <span class="variable">$max_len</span><span class="operator">,</span> <span class="operator">\</span><span class="variable">%attr</span><span class="operator">)</span>
+</pre>
+<p>
+</p>
+<h2><a name="attributes">Attributes</a></h2>
+<p>An attribute hash is
+a collection of information about particular types of data.  Each
+attribute can be determined at compile time (see DB2.pm for a list
+of predefined attribute hashes), created at run time, or modified
+at run time.</p>
+<p>The following attributes are supported by DBD::DB2:</p>
+<pre>
+  TYPE            SQL_CHAR, SQL_BINARY, SQL_INTEGER etc.
+  PRECISION       Size of column
+  SCALE           Decimal digits
+  db2_param_type  SQL_PARAM_INPUT, SQL_PARAM_OUTPUT etc.
+  db2_c_type      SQL_C_CHAR or SQL_C_BINARY
+  db2_type        synonym for TYPE: SQL_CHAR, SQL_BINARY, SQL_INTEGER etc.
+  db2_file        Boolean value, see below</pre>
+<p>For backward compatibility, the following old attribute names are
+still supported.  Note that these may not be supported in future
+releases of DBD::DB2 so it's a good idea to start using the new
+attribute names:</p>
+<pre>
+  Stype   Same as db2_type
+  Prec    Same as PRECISION
+  Scale   Same as SCALE
+  ParamT  Same as db2_param_type
+  Ctype   Same as db2_c_type
+  File    Same as db2_file</pre>
+<p>The easiest method of creating a new attribute hash is to
+change an existing hash:</p>
+<pre>
+  <span class="variable">$new_type</span> <span class="operator">=</span> <span class="operator">{</span> <span class="variable">%$existing_type</span><span class="operator">,</span> <span class="string">'db2_type'</span> <span class="operator">=&gt;</span> <span class="variable">SQL_</span><span class="string">"NewTYPE"</span> <span class="operator">}</span><span class="operator">;</span>
+</pre>
+<p>or you can create a complete new type:</p>
+<pre>
+  <span class="variable">$attrib_char</span> <span class="operator">=</span> <span class="operator">{</span> <span class="string">'db2_param_type'</span> <span class="operator">=&gt;</span> <span class="variable">SQL_PARAM_INPUT</span><span class="operator">,</span>
+                   <span class="string">'db2_c_type'</span>     <span class="operator">=&gt;</span> <span class="variable">SQL_C_CHAR</span><span class="operator">,</span>
+                   <span class="string">'db2_type'</span>       <span class="operator">=&gt;</span> <span class="variable">SQL_CHAR</span><span class="operator">,</span>
+                   <span class="string">'PRECISION'</span>      <span class="operator">=&gt;</span> <span class="number">254</span><span class="operator">,</span>
+                   <span class="string">'SCALE'</span>          <span class="operator">=&gt;</span> <span class="number">0</span><span class="operator">,</span>
+                 <span class="operator">}</span><span class="operator">;</span>
+</pre>
+<p>Attributes are not generally required as the statement will be
+``described'' and appropriate values will be used.  However, attributes
+are required under the
+following conditions:</p>
+<pre>
+  - Database server does not support SQLDescribeParam:
+      - DB2 for MVS, versions earlier than 5.1.2
+      - DB2 for VM
+      - DB2 for AS/400
+  - Statement is a CALL to an unregistered stored procedure
+  - You desire non-default behaviour such as:
+      - binding a file directly to a LOB parameter
+      - binding an output-only parameter</pre>
+<p>Even though attributes are not always required, providing them can
+improve performance as it may make the ``describe'' step unnecessary.
+Specifically, 'db2_type' and 'SCALE' must either
+be provided in the attributes or must be obtained automatically
+via SQLDescribeParam.</p>
+<p>
+</p>
+<h2><a name="parameter_type__input__ouput_and_input_output_">Parameter Type (Input, Ouput and Input/Output)</a></h2>
+<p><code>bind_param()</code> can only be used for input-only parameters and therefore
+the db2_param_type attribute is ignored.  <code>bind_param_inout()</code> assumes
+input/output but a parameter can be designated as input-only or
+output-only via db2_param_type in the attribute hash:</p>
+<pre>
+  db2_param_type =&gt; SQL_PARAM_INPUT</pre>
+<p>or</p>
+<pre>
+  db2_param_type =&gt; SQL_PARAM_OUTPUT</pre>
+<p>Note that
+the 'maxlen' value provided to <code>bind_param_inout()</code> must be large
+enough for all possible input values as well as output values.</p>
+<p>
+</p>
+<h2><a name="binding_input_values_by_reference_using_bind_param_inout__">Binding Input Values By Reference using <code>bind_param_inout()</code></a></h2>
+<p>This function - despite its name - can also be used to bind an
+input parameter variable once to allow repeated execution without
+rebinding.  Consider the following example using bind_param():</p>
+<pre>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span> <span class="string">"INSERT INTO MYTABLE (INTCOL) VALUES(?)"</span> <span class="operator">);</span>
+  <span class="keyword">for</span><span class="operator">(...)</span>
+  <span class="operator">{</span>
+    <span class="variable">$int</span> <span class="operator">=</span> <span class="operator">...;</span>                  <span class="comment"># get a new value</span>
+    <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span> <span class="number">1</span><span class="operator">,</span> <span class="variable">$int</span> <span class="operator">);</span> <span class="comment"># value set at bind time</span>
+    <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+  <span class="operator">}</span>
+</pre>
+<p>Each iteration binds a new value.  This can be made more
+efficient as follows:</p>
+<pre>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span> <span class="string">"INSERT INTO MYTABLE (INTCOL) VALUES(?)"</span> <span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param_inout</span><span class="operator">(</span> <span class="number">1</span><span class="operator">,</span>
+                          <span class="operator">\</span><span class="variable">$input</span><span class="operator">,</span>
+                          <span class="number">20</span><span class="operator">,</span> <span class="comment"># 20 bytes is enough for any integer</span>
+                          <span class="operator">{</span> <span class="string">db2_param_type</span> <span class="operator">=&gt;</span> <span class="variable">SQL_PARAM_INPUT</span> <span class="operator">}</span> <span class="operator">);</span>
+  <span class="keyword">for</span><span class="operator">(...)</span>
+  <span class="operator">{</span>
+    <span class="variable">$input</span> <span class="operator">=</span> <span class="operator">...</span>     <span class="comment"># set a new value</span>
+    <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span> <span class="comment"># new value read at execution time</span>
+  <span class="operator">}</span>
+</pre>
+<p>Note that since the variable is bound by reference, the input value
+is deferred until execute time unlike <code>bind_param()</code> where the value
+is copied at bind time.  The 'maxlen' value must be big enough for
+all expected input values.</p>
+<p>
+</p>
+<h2><a name="binding_a_file_to_an_input_lob_parameter">Binding a File to an Input LOB Parameter</a></h2>
+<p>A file can be bound directly to a LOB parameter by specifying the
+attribute:</p>
+<pre>
+  db2_file =&gt; 1</pre>
+<p>In this case the value passed to <code>bind_param()</code> is the file name.</p>
+<pre>
+  For example, to insert a blob file &quot;sample&quot; into database blobtest:</pre>
+<pre>
+  <span class="keyword">my</span> <span class="variable">$stmt</span> <span class="operator">=</span> <span class="string">"CREATE TABLE blobTest (id INTEGER, data BLOB)"</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span><span class="variable">$stmt</span><span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+</pre>
+<pre>
+  <span class="variable">$stmt</span> <span class="operator">=</span> <span class="string">"INSERT INTO blobTest (id, data) values (?,?)"</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span><span class="variable">$stmt</span><span class="operator">);</span>
+  
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="number">1</span><span class="operator">,</span><span class="number">1</span><span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="number">2</span><span class="operator">,</span><span class="variable">sample</span><span class="operator">,</span><span class="operator">{</span><span class="string">'db2_file'</span> <span class="operator">=&gt;</span> <span class="number">1</span><span class="operator">}</span><span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+</pre>
+<p>This is only valid for input and only for LOB parameters.  The
+following predefined attribute hashes have been provided for
+convenience:</p>
+<pre>
+  $attrib_blobfile
+  $attrib_clobfile
+  $attrib_dbclobfile</pre>
+<pre>
+  Example:</pre>
+<pre>
+  <span class="keyword">my</span> <span class="variable">$stmt</span> <span class="operator">=</span> <span class="string">"CREATE TABLE blobTest (id INTEGER, data BLOB)"</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span><span class="variable">$stmt</span><span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+</pre>
+<pre>
+  <span class="variable">$stmt</span> <span class="operator">=</span> <span class="string">"INSERT INTO blobTest (id, data) values (?,?)"</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span><span class="variable">$stmt</span><span class="operator">);</span>
+</pre>
+<pre>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="number">1</span><span class="operator">,</span><span class="number">1</span><span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">bind_param</span><span class="operator">(</span><span class="number">2</span><span class="operator">,</span><span class="variable">sample</span><span class="operator">,</span><span class="variable">$attrib_blobfile</span><span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="longreadlen">LongReadLen</a></h1>
+<p>The default value for LongReadLen is 32700, equivalent to the maximum
+size for SQL_LONG types.  It only applies to fetched columns; it does
+not apply to output parameters.
+This option applies to the following column types:</p>
+<pre>
+  SQL_LONGVARBINARY
+  SQL_LONGVARCHAR
+  SQL_LONGVARGRAPHIC
+  SQL_BLOB
+  SQL_CLOB
+  SQL_DBCLOB</pre>
+<p>To change the value, provide it in the connection attributes:</p>
+<pre>
+  <span class="variable">$dbh</span> <span class="operator">=</span> <span class="variable">DBI</span><span class="operator">-&gt;</span><span class="keyword">connect</span><span class="operator">(</span> <span class="variable">$db</span><span class="operator">,</span> <span class="variable">$user</span><span class="operator">,</span> <span class="variable">$pw</span><span class="operator">,</span> <span class="operator">{</span> <span class="string">LongReadLen</span> <span class="operator">=&gt;</span> <span class="number">100</span> <span class="operator">}</span> <span class="operator">);</span>
+</pre>
+<p>or set it at any time after connecting:</p>
+<pre>
+  <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="operator">{</span><span class="string">LongReadLen</span><span class="operator">}</span> <span class="operator">=</span> <span class="number">100</span><span class="operator">;</span>
+</pre>
+<p>
+</p>
+<hr />
+<h1><a name="fetching_lob_data_in_pieces">Fetching LOB Data in Pieces</a></h1>
+<p>While LOB columns are fully supported by the normal methods of
+retrieving data, it can take a lot of memory as the whole LOB
+is retrieved at once (subject to the LongReadLen setting).  An
+alternate method is to use:</p>
+<pre>
+  <span class="variable">$buf</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">blob_read</span><span class="operator">(</span> <span class="variable">$field</span><span class="operator">,</span> <span class="variable">$offset</span><span class="operator">,</span> <span class="variable">$len</span> <span class="operator">);</span>
+</pre>
+<pre>
+  Example:</pre>
+<pre>
+  <span class="variable">$stmt</span> <span class="operator">=</span>  <span class="string">"SELECT data FROM blobTest"</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">prepare</span><span class="operator">(</span><span class="variable">$stmt</span><span class="operator">);</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">execute</span><span class="operator">();</span>
+</pre>
+<pre>
+  <span class="keyword">my</span> <span class="variable">$offset</span> <span class="operator">=</span> <span class="number">0</span><span class="operator">;</span>
+  <span class="keyword">my</span> <span class="variable">$buff</span><span class="operator">=</span><span class="string">""</span><span class="operator">;</span>
+  <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">fetch</span><span class="operator">();</span>
+  <span class="keyword">while</span><span class="operator">(</span> <span class="variable">$buff</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">blob_read</span><span class="operator">(</span><span class="number">1</span><span class="operator">,</span><span class="variable">$offset</span><span class="operator">,</span><span class="number">1000000</span><span class="operator">)){</span>
+         <span class="keyword">print</span> <span class="variable">$buff</span><span class="operator">;</span>
+         <span class="variable">$offset</span><span class="operator">+=</span><span class="keyword">length</span><span class="operator">(</span><span class="variable">$buff</span><span class="operator">);</span>
+         <span class="variable">$buff</span><span class="operator">=</span><span class="string">""</span><span class="operator">;</span>
+  <span class="operator">}</span>
+</pre>
+<p>This will return up to $len bytes from the given LOB field.
+'undef' is returned when no more data is left to read.
+Despite the name this function works for all LOB types
+(BLOB, CLOB and DBCLOB).  For maximum efficiency, set
+LongReadLen to 0 prior to execution so no LOB data is
+retrieved at all on the initial fetch (but remember that
+LongReadLen will affect all long fields).</p>
+<p>The $offset parameter is currently ignored by DB2.  Note that
+this function isn't officially documented in DBI yet so it is
+subject to change.</p>
+<p>
+</p>
+<hr />
+<h1><a name="multiple_result_sets">Multiple Result Sets</a></h1>
+<p>Multiple result sets can be processed using the db2_more_results
+statement attribute as follows:</p>
+<pre>
+  <span class="keyword">do</span>
+  <span class="operator">{</span>
+    <span class="keyword">while</span><span class="operator">(</span> <span class="variable">@row</span> <span class="operator">=</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="variable">fetchrow_array</span> <span class="operator">)</span>
+    <span class="operator">{</span>
+      <span class="comment"># process row data</span>
+    <span class="operator">}</span>
+  <span class="operator">}</span> <span class="keyword">while</span><span class="operator">(</span> <span class="variable">$sth</span><span class="operator">-&gt;</span><span class="operator">{</span><span class="string">db2_more_results</span><span class="operator">}</span> <span class="operator">);</span>
+</pre>
+<p>Accessing this attribute closes the current result set and opens
+the new one.  If there are no more result sets, the attribute
+returns false and sets the state to 02000.</p>
+<p>
+</p>
+<hr />
+<h1><a name="getting_table_information">Getting Table information</a></h1>
+<p>Both $dbh-&gt;tables and $dbh-&gt;table_info are supported.  The table
+names returned by $dbh-&gt;tables are qualified, i.e. they are in the
+form &lt;schema&gt;.&lt;table&gt;. If no
+attributes are specified, information for all tables, views,
+aliases etc. is returned. With DBI 1.14 or later, the following
+attributes can be used to narrow down the list:</p>
+<pre>
+  <span class="variable">TABLE_SCHEM</span>  <span class="variable">Schema</span> <span class="variable">name</span> <span class="variable">pattern</span><span class="operator">,</span> <span class="variable">default</span> <span class="variable">is</span> <span class="variable">all</span> <span class="variable">schemas</span>
+  <span class="variable">TABLE_NAME</span>   <span class="variable">Table</span> <span class="variable">name</span> <span class="variable">pattern</span><span class="operator">,</span> <span class="variable">default</span> <span class="variable">is</span> <span class="variable">all</span> <span class="variable">tables</span>
+  <span class="variable">TABLE_TYPE</span>   <span class="variable">Table</span> <span class="variable">type</span><span class="operator">;</span> <span class="variable">one</span> <span class="keyword">or</span> <span class="variable">more</span> <span class="variable">of</span> <span class="variable">the</span> <span class="variable">following</span><span class="operator">,</span>
+               <span class="variable">separated</span> <span class="variable">by</span> <span class="variable">commas</span><span class="operator">,</span> <span class="variable">default</span> <span class="variable">is</span> <span class="variable">all</span> <span class="variable">types</span><span class="operator">:</span>
+                 <span class="variable">TABLE</span><span class="operator">,</span> <span class="variable">VIEW</span><span class="operator">,</span> <span class="variable">SYSTEM</span> <span class="variable">TABLE</span><span class="operator">,</span> <span class="variable">ALIAS</span><span class="operator">,</span> <span class="variable">SYNONYM</span>
+</pre>
+<p>Each pattern-value argument can contain:</p>
+<pre>
+  - The underscore (_) character which stands for any single character.
+  - The percent (%) character which stands for any sequence of zero or
+    more characters. Note that providing a pattern-value containing a
+    single % is equivalent to passing an empty string for that argument.
+  - Characters which stand for themselves. The case of a letter is
+    significant.</pre>
+<p>To treat the metadata characters (_, %) as themselves, precede the
+character with a backslash (\).  The escape character itself can be
+specified as part of the pattern by including it twice in succession.</p>
+<p>For example, to get a list of all tables and views for the schema
+'CHOMSKY':</p>
+<pre>
+  <span class="variable">@tables</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">tables</span><span class="operator">(</span> <span class="operator">{</span> <span class="string">'TABLE_SCHEM'</span> <span class="operator">=&gt;</span> <span class="string">'CHOMSKY'</span><span class="operator">,</span>
+                            <span class="string">'TABLE_TYPE'</span>  <span class="operator">=&gt;</span> <span class="string">'TABLE,VIEW'</span> <span class="operator">}</span> <span class="operator">);</span>
+</pre>
+<p>
+</p>
+<h2><a name="getting_a_list_of_schemas">Getting a List of Schemas</a></h2>
+<p>To obtain a list of all schemas, the following special
+semantics can be used:</p>
+<pre>
+  <span class="variable">@schemas</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">tables</span><span class="operator">(</span> <span class="operator">{</span> <span class="string">'TABLE_SCHEM'</span> <span class="operator">=&gt;</span> <span class="string">'%'</span><span class="operator">,</span>
+                             <span class="string">'TABLE_TYPE'</span>  <span class="operator">=&gt;</span> <span class="string">''</span> <span class="operator">}</span> <span class="operator">);</span>
+</pre>
+<p>or</p>
+<pre>
+  <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">table_info</span><span class="operator">(</span> <span class="operator">{</span> <span class="string">'TABLE_SCHEM'</span> <span class="operator">=&gt;</span> <span class="string">'%'</span><span class="operator">,</span>
+                             <span class="string">'TABLE_TYPE'</span>  <span class="operator">=&gt;</span> <span class="string">''</span> <span class="operator">}</span> <span class="operator">);</span>
+</pre>
+<p>The result contains all the valid schemas in the data source.
+DBI 1.14 or later is required.</p>
+<p>
+</p>
+<h2><a name="getting_a_list_of_table_types">Getting a List of Table Types</a></h2>
+<p>To obtain a list of supported table types, the following special
+semantics can be used:</p>
+<pre>
+  <span class="variable">$sth</span> <span class="operator">=</span> <span class="variable">$dbh</span><span class="operator">-&gt;</span><span class="variable">table_info</span><span class="operator">(</span> <span class="operator">{</span> <span class="string">'TABLE_TYPE'</span>  <span class="operator">=&gt;</span> <span class="string">'%'</span><span class="operator">,</span>
+                             <span class="string">'TABLE_SCHEM'</span> <span class="operator">=&gt;</span> <span class="string">''</span><span class="operator">,</span>
+                             <span class="string">'TABLE_NAME'</span>  <span class="operator">=&gt;</span> <span class="string">''</span> <span class="operator">}</span> <span class="operator">);</span>
+</pre>
+<p>The result contains all the valid table types for the data source.
+DBI 1.14 or later is required.</p>
+<p>
+</p>
+<hr />
+<h1><a name="getting_primary_and_foreign_key_information">Getting Primary and Foreign Key information</a></h1>
+<p>The $dbh-&gt;primary_key, $dbh-&gt;primary_key_info, and $dbh-&gt;foreign_key_info
+are supported. Search patterns cannot be used to specify any of the arguments.
+Please see the DBI documentation for usage information.</p>
+<p>To obtain the primary keys for the table HOYMICH.MYTABLE:</p>
+<p>$sth = $dbh-&gt;primary_key_info( undef, 'HOYMICH', 'MYTABLE' );</p>
+<p>To obtain all the primary key column names:</p>
+<p>@key_column_names = $dbh-&gt;primary_key( $catalog, $schema, $table );</p>
+<p>
+</p>
+<hr />
+<h1><a name="getting_type_information">Getting Type information</a></h1>
+<p>Both $dbh-&gt;type_info_all and $dbh-&gt;type_info are supported.
+Please see the DBI documentation for usage information.</p>
+<p>
+</p>
+<hr />
+<h1><a name="getting_driver_and_database_system_information__getinfo_">Getting driver and database system information (GetInfo)</a></h1>
+<p>The $dbh-&gt;get_info is supported.
+Please see the DBI documentation for usage information.
+Please see the CLI function, SQLGetInfo (link is available in
+the CAVEATS file), for the supported information types.</p>
+<p>To obtain the name of the DBMS product being accessed:</p>
+<p>$v = $dbh-&gt;get_info( SQL_DBMS_NAME );</p>
+<p>To obtain the name of the DBMS product version being accessed:</p>
+<p>$v = $dbh-&gt;get_info( SQL_DBMS_VER );</p>
+<p>If information regarding an unsupported InfoType is requested,
+undef is returned.  For a full list of supported InfoType codes,
+you may visit:
+<a href="http://publib.boulder.ibm.com/infocenter/db2luw/v8/index.jsp?topic=/com.ibm.db2.udb.doc/ad/r0000615.htm">http://publib.boulder.ibm.com/infocenter/db2luw/v8/index.jsp?topic=/com.ibm.db2.udb.doc/ad/r0000615.htm</a></p>
+<p>
+</p>
+<hr />
+<h1><a name="native_xml_support">Native XML support</a></h1>
+<p>DBD::DB2 version 0.9a supports native XML. The datatype
+xml is mapped to the sqltype SQL_XML and is stored in the database
+in a hierarchical structure. For all data manipulation purposes
+XML data is treated as a BLOB.</p>
+<p>To create a table with XML data:</p>
+<p>$stmt = ``CREATE TABLE xmlTest (id INTEGER, data XML)'';</p>
+<p>To insert an XML file:</p>
+<p>$stmt = ``INSERT INTO xmlTest (id, data) values (?,?)'';
+my $sth = $dbh-&gt;prepare($stmt);</p>
+<p><code>open(SAMPLE,``&lt;sample'')</code> or die ``Cannot open $path: $!'';
+binmode SAMPLE;
+while(my $record = &lt;SAMPLE&gt;){
+      $input = $input.$record;
+}
+close(SAMPLE);</p>
+<p>$sth-&gt;bind_param(1,123456789);
+$sth-&gt;bind_param(2,$input);
+$sth-&gt;execute();</p>
+<p>XML data can be retrieved in two ways:</p>
+<p>1. As a BLOB:</p>
+<p>$stmt =  ``SELECT data FROM xmlTest'';
+my $sth = $dbh-&gt;prepare($stmt);
+$sth-&gt;execute();</p>
+<p>my $offset = 0;
+my $buff=``'';
+$sth-&gt;fetch();
+while( $buff = $sth-&gt;blob_read(1,$offset,1000000)){
+       print $buff;
+       $buff=``'';
+       $offset+=length($buff);
+}</p>
+<p>2. As a record:</p>
+<p>$stmt =  ``SELECT data FROM xmlTest'';
+my $sth = $dbh-&gt;prepare($stmt);
+$sth-&gt;execute();
+while( @row = $sth-&gt;fetchrow ) {
+      print $row[0] . ``\n'';
+}</p>
+<table border="0" width="100%" cellspacing="0" cellpadding="3">
+<tr><td class="block" valign="middle">
+<big><strong><span class="block">&nbsp;DBD::DB2 - DataBase Driver for DB2 UDB</span></strong></big>
+</td></tr>
+</table>
+
+</body>
+
+</html>
