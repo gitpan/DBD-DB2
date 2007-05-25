@@ -1,3 +1,9 @@
+May 24th, 2007
+
+DBD::DB2 1.1
+  
+  Fixed compile error which was caused due to changes made with DBIc_CACHED_KIDS in DBIv1.55.
+
 October 2nd, 2006
 
 DBD::DB2 1.0

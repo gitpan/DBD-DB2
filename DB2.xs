@@ -6,6 +6,16 @@
 
 #include "DB2.h"
 
+/* 
+Redefining DBIc_CACHED_KIDS to fix the compile issue in DBD::DB2
+which was due to change in definition of DBIc_CACHED_KIDS in DBIv1.55
+*/
+#ifdef DB2_CACHE_FIX
+    #undef DBIc_CACHED_KIDS
+    #define DBIc_CACHED_KIDS(imp)    _imp2com(imp, _old_cached_kids)
+#endif
+
+
 
 /* --- Variables --- */
 
@@ -109,7 +119,12 @@ disconnect(dbh)
     if ( !DBIc_ACTIVE(imp_dbh) ) {
         XSRETURN_YES;
     }
+
     /* pre-disconnect checks and tidy-ups */
+    SV **svp = hv_fetch((HV*)SvRV(dbh), "CachedKids", 10, 0);
+    if (svp && SvROK(*svp) && SvTYPE(SvRV(*svp)) == SVt_PVHV) {
+        hv_clear((HV*)SvRV(dbh));
+    }
     if (DBIc_CACHED_KIDS(imp_dbh)) {
         SvREFCNT_dec(DBIc_CACHED_KIDS(imp_dbh));      /* cast them to the winds */
         DBIc_CACHED_KIDS(imp_dbh) = Nullhv;
@@ -170,6 +185,10 @@ DESTROY(dbh)
     }
     else {
         /* pre-disconnect checks and tidy-ups */
+        SV **svp = hv_fetch((HV*)SvRV(dbh), "CachedKids", 10, 0);
+        if (svp && SvROK(*svp) && SvTYPE(SvRV(*svp)) == SVt_PVHV) {
+            hv_clear((HV*)SvRV(dbh));
+        }
         if (DBIc_CACHED_KIDS(imp_dbh)) {
             SvREFCNT_dec(DBIc_CACHED_KIDS(imp_dbh));  /* cast them to the winds */
             DBIc_CACHED_KIDS(imp_dbh) = Nullhv;

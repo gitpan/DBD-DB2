@@ -4,6 +4,10 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.1, May 24, 2007
+  
+  Fixed compile error which was caused due to changes made with DBIc_CACHED_KIDS in DBIv1.55.
+
 =head2 Changes in DBD::DB2 1.0, October 25, 2006
 
   Fixed bug in cancel method

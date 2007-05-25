@@ -12,7 +12,7 @@ require 'flush.pl';
 
 use DBI;        # The DBI must be installed before we can build a DBD
 
-%opts = (
+my %opts = (
     'NAME'         => 'DBD::DB2',
     'VERSION_FROM' => 'DB2.pm',
     ($] ge '5.005')
@@ -73,7 +73,6 @@ die "$envvar environment variable ($DB2) not valid.\n" unless -d $DB2;
 print qq(Using DB2 in "$DB2"\n);
 
 # --- Setup include paths and libraries
-
 $opts{INC} .= qq(-I"$DB2/include" -I"$Config{sitearch}/auto/DBI" );
 $opts{INC} .= qq(-I"$Config{vendorarch}/auto/DBI") if $Config{vendorarch};
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
@@ -81,21 +80,23 @@ $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 # libraries required to build DBD::DB2 driver
 if( $os eq 'MSWin32' || $os eq 'MSWin64' || $os eq 'os2' )
 {
-  
-  my $DB2LIB;
-  if (-e "$DB2/lib64")
+  my $DB2LIB = $ENV{'DB2LIB'};
+  if( not $DB2LIB )
   {
-    $DB2LIB = "$DB2/lib64";
-  }
-  else
-  {
-    if (-e "$DB2/lib32")
+    if (-e "$DB2/lib64")
     {
-       $DB2LIB = "$DB2/lib32";
+      $DB2LIB = "$DB2/lib64";
     }
     else
     {
-      $DB2LIB = "$DB2/lib";
+      if (-e "$DB2/lib32")
+      {
+         $DB2LIB = "$DB2/lib32";
+      }
+      else
+      {
+        $DB2LIB = "$DB2/lib";
+      }
     }
   }
   $sysliblist = qq(-L"$DB2LIB" db2cli db2api);
@@ -114,20 +115,23 @@ if( $os eq 'MSWin32' || $os eq 'MSWin64' || $os eq 'os2' )
 }
 else
 {
-  my $DB2LIB;
-  if (-e "$DB2/lib64")
+  my $DB2LIB = $ENV{'DB2LIB'};
+  if( not $DB2LIB )
   {
-    $DB2LIB = "$DB2/lib64";
-  }
-  else
-  {
-    if (-e "$DB2/lib32")
+    if (-e "$DB2/lib64")
     {
-       $DB2LIB = "$DB2/lib32";
+      $DB2LIB = "$DB2/lib64";
     }
     else
     {
-      $DB2LIB = "$DB2/lib";
+      if (-e "$DB2/lib32")
+      {
+         $DB2LIB = "$DB2/lib32";
+      }
+      else
+      {
+        $DB2LIB = "$DB2/lib";
+      }
     }
   }
       
@@ -140,6 +144,15 @@ if ($os eq 'hpux')
 {
   $sysliblist .= ' -lcl';
   $opts{DEFINE} .= ' +e';
+}
+
+#Defining a macro to fix the compile issue in DBD::DB2  
+#which was due to change in definition of DBIc_CACHED_KIDS in DBIv1.55  
+ 
+#if( $DBI::VERSION > 1.54 )
+if( "$DBI::VERSION" ge "1.55" )
+{
+   $opts{DEFINE} .= ' -DDB2_CACHE_FIX ';
 }
 
 $opts{LIBS} = [ $sysliblist ];
