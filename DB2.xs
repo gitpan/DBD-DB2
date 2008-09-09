@@ -114,6 +114,7 @@ rollback(dbh)
 void
 disconnect(dbh)
     SV *        dbh
+    SV **svp = hv_fetch((HV*)SvRV(dbh), "CachedKids", 10, 0);
     CODE:
     D_imp_dbh(dbh);
     if ( !DBIc_ACTIVE(imp_dbh) ) {
@@ -121,7 +122,6 @@ disconnect(dbh)
     }
 
     /* pre-disconnect checks and tidy-ups */
-    SV **svp = hv_fetch((HV*)SvRV(dbh), "CachedKids", 10, 0);
     if (svp && SvROK(*svp) && SvTYPE(SvRV(*svp)) == SVt_PVHV) {
         hv_clear((HV*)SvRV(dbh));
     }

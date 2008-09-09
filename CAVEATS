@@ -1,6 +1,6 @@
 Building DBD::DB2
 -----------------
-1.  The DBD::DB2 driver is supported by DB2 UDB V7.2 and
+1.  The DBD::DB2 driver is supported by DB2 UDB V8.2 and
     later. See http://www.software.ibm.com/data/db2/perl
     for more information on supported environments.
 2.  The DB2 Application Development Client is required.

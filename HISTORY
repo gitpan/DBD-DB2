@@ -1,3 +1,10 @@
+September 4th, 2008
+
+DBD::DB2 1.2
+
+  Release and Code Changes to support Trusted Context.
+  Fixed Bug for Driver Compilation Failing on Solaris.
+
 May 24th, 2007
 
 DBD::DB2 1.1

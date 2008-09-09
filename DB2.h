@@ -2,6 +2,8 @@
    engn/perldb2/DB2.h, engn_perldb2, db2_v82fp9, 1.9 04/09/13 17:17:47
 
    Copyright (c) 1995-2004  International Business Machines Corp.
+
+
 */
 
 #define NEED_DBIXS_VERSION 7
@@ -26,6 +28,12 @@ AV*  dbd_data_sources _((SV *drh));
 
 #ifndef SQL_XML
 #define SQL_XML -370
+#endif
+
+#ifndef SQL_ATTR_USE_TRUSTED_CONTEXT
+#define SQL_ATTR_USE_TRUSTED_CONTEXT 2561
+#define SQL_ATTR_TRUSTED_CONTEXT_USERID 2562
+#define SQL_ATTR_TRUSTED_CONTEXT_PASSWORD 2563
 #endif
 
 #ifndef SQL_ATTR_SET_SCHEMA

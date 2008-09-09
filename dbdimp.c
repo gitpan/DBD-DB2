@@ -405,8 +405,19 @@ static int dbd_db_connect( SV *dbh,
       if( SQL_SUCCESS != ret )
         goto exit;
     }
-  }
 
+	pval = hv_fetch( attrh, "db2_trusted_context", 19, 0 );
+    if( NULL != pval )
+    {
+      ret = SQLSetConnectAttr( imp_dbh->hdbc,
+                               SQL_ATTR_USE_TRUSTED_CONTEXT,
+                               (SQLPOINTER)SvIV( *pval ),
+                               SQL_IS_INTEGER );
+      ret = check_error( dbh, ret, "Set trusted context failed" );
+      if( SQL_SUCCESS != ret )
+        goto exit;
+    }
+  }
 
   /* If the string contains a =, use SQLDriverConnect */
   if (strstr (dbname, "=") != NULL) {
@@ -794,6 +805,8 @@ static SQLINTEGER getConnectAttr( char *key,
       else if( strEQ( key, "db2_info_acctstr" ) )
         return SQL_ATTR_INFO_ACCTSTR;
 #endif
+	  else if( strEQ( key, "db2_trusted_user" ) )
+        return SQL_ATTR_TRUSTED_CONTEXT_USERID;
       return SQL_ERROR;
 
 #ifndef AS400
@@ -812,14 +825,23 @@ static SQLINTEGER getConnectAttr( char *key,
       else if( strEQ( key, "db2_current_schema" ) )
         return SQL_ATTR_CURRENT_SCHEMA;
       return SQL_ERROR;
+#endif
 
     case 19:
-      if( strEQ( key, "db2_info_wrkstnname" ) )
+      if(      strEQ( key, "db2_trusted_context" ) )
+        return SQL_ATTR_USE_TRUSTED_CONTEXT;
+#ifndef AS400
+	  else if( strEQ( key, "db2_info_wrkstnname" ) )
         return SQL_ATTR_INFO_WRKSTNNAME;
       else if( strEQ( key, "db2_longdata_compat" ) )
         return SQL_ATTR_LONGDATA_COMPAT;
-      return SQL_ERROR;
 #endif
+      return SQL_ERROR;
+
+    case 20:      
+      if(      strEQ( key, "db2_trusted_password" ) )
+        return SQL_ATTR_TRUSTED_CONTEXT_PASSWORD;
+      return SQL_ERROR;
 
     default:
       return SQL_ERROR;
@@ -897,13 +919,17 @@ int dbd_db_STORE_attrib( SV *dbh,
                       "Execute immediate failed" );
       SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       break;
-
+#endif
+	case SQL_ATTR_TRUSTED_CONTEXT_USERID:
+	case SQL_ATTR_TRUSTED_CONTEXT_PASSWORD:
+#ifndef AS400
     case SQL_ATTR_CLISCHEMA:
     case SQL_ATTR_CURRENT_SCHEMA:
     case SQL_ATTR_INFO_ACCTSTR:
     case SQL_ATTR_INFO_APPLNAME:
     case SQL_ATTR_INFO_USERID:
     case SQL_ATTR_INFO_WRKSTNNAME:
+#endif
       if( SvOK( valuesv ) )
       {
         STRLEN vl;
@@ -911,10 +937,10 @@ int dbd_db_STORE_attrib( SV *dbh,
         StringLength = (SQLINTEGER)vl;
       }
       break;
-#endif
 
     /* Integers */
     case SQL_ATTR_ACCESS_MODE:
+	case SQL_ATTR_USE_TRUSTED_CONTEXT:
 #ifndef AS400
     case SQL_ATTR_CLOSE_BEHAVIOR:
 #endif
@@ -952,7 +978,9 @@ int dbd_db_STORE_attrib( SV *dbh,
       return FALSE;
   }
 
-  if ( Attribute != SQL_ATTR_SET_SCHEMA && Attribute != SQL_ATTR_LOGIN_TIMEOUT) {
+  if (  Attribute != SQL_ATTR_SET_SCHEMA && 
+        Attribute != SQL_ATTR_LOGIN_TIMEOUT && 
+        Attribute != SQL_ATTR_USE_TRUSTED_CONTEXT ) {
     ret = SQLSetConnectAttr( imp_dbh->hdbc,
                              Attribute,
                              ValuePtr,
@@ -1047,6 +1075,7 @@ SV *dbd_db_FETCH_attrib( SV *dbh,
 #endif
       case SQL_ATTR_DB2_SQLERRP:
       case SQL_ATTR_SET_SCHEMA:
+	  case SQL_ATTR_TRUSTED_CONTEXT_USERID:
 #ifndef AS400
       case SQL_ATTR_INFO_ACCTSTR:
       case SQL_ATTR_INFO_APPLNAME:
@@ -1058,6 +1087,7 @@ SV *dbd_db_FETCH_attrib( SV *dbh,
 
       /* Integers */
       case SQL_ATTR_ACCESS_MODE:
+	  case SQL_ATTR_USE_TRUSTED_CONTEXT:
 #ifndef AS400
       case SQL_ATTR_CLOSE_BEHAVIOR:
       case SQL_ATTR_CONNECT_NODE:
