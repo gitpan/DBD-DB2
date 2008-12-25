@@ -4,7 +4,11 @@ DBD::DB2 - List of changes
 
 =cut
 
-=head2 Changes in DBD::DB2 1.2, Sept 4, 2007
+=head2 Changes in DBD::DB2 1.3, Dec 25,2008
+  Added support for DB2 on MacOS
+  Changes in Makefile.PL to support compilation with dmake with ActivePerl 5.8.X and 5.10.X
+
+=head2 Changes in DBD::DB2 1.2, Sept 4, 2008
   New Added Support for Trusted Context
   Fixed Compilation Problem on Solaris
 

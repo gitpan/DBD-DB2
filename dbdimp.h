@@ -92,8 +92,6 @@ struct phs_st { /* scalar placeholder */
   SQLUINTEGER  descColumnSize;                                   
 };
 
-SQLCHAR sql_state[6];
-
 #define dbd_init            db2_init
 #ifndef AS400
 #define dbd_data_sources    db2_data_sources                     
