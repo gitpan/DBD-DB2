@@ -4,6 +4,14 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.6, Feb 18, 2009
+  Improved Error and Warning Handling - Internal Bug - 166025
+  Improved XML Support to handle large XML Files - 171868
+  Include SQL_ATTR_INFO_PROGRAMNAME as Constant - 166029
+  Include SQL_ATTR_CALL_RETURN as Constant - 171813
+  Memory Cleanup - 170940
+  
+
 =head2 Changes in DBD::DB2 1.3, Dec 25,2008
   Added support for DB2 on MacOS
   Changes in Makefile.PL to support compilation with dmake with ActivePerl 5.8.X and 5.10.X

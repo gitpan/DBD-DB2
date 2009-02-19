@@ -8,88 +8,105 @@
 #define MAX_COL_NAME_LEN 128                                      
 #define MAX_BIND_VARS   99
 
+#include <dbivport.h>
+/**
+ * Macro for Error Handling. This error handling is followed from
+ * CLI Development Guide for v951 - Chapter8 (Diagnostics in CLI Applications)
+ * We try to capture 5 types of return codes and print the diagnostic 
+ * information for the same. The return codes captured are
+ *
+ * 1. SQL_SUCCESS - Nothing to be done. Sucessful execution of CLI API
+ * 2. SQL_SUCCESS_WITH_INFO - This is warning thrown back.
+ * 3. SQL_NO_DATA_FOUND	- Function success but no data was returned
+ * 4. SQL_ERROR	- Function failed
+ * 5. SQL_INVALID HANDLE - Function failed due to invalid handle
+ */
+
+#define CHECK_ERROR(perlHandle, handleType, handle, ret, what)				\
+if(ret != SQL_SUCCESS) {                                 				\
+        ret = diagnoseError(perlHandle, handleType, handle, ret, what);	 	 	\
+}
 
 typedef struct imp_fbh_st imp_fbh_t;
 
 struct imp_drh_st {
-  dbih_drc_t com;                     /* MUST be first element in structure   */
-  SQLHENV henv;
-  int     connects;
-  SV     *svNUM_OF_FIELDS;                                       
+	dbih_drc_t com;                     /* MUST be first element in structure   */
+	SQLHENV henv;
+	int     connects;
+	SV     *svNUM_OF_FIELDS;                                       
 };
 
 /* Define dbh implementor data structure */
 struct imp_dbh_st {
-  dbih_dbc_t com;                     /* MUST be first element in structure   */
-  SQLHENV henv;
-  SQLHDBC hdbc;
-  char sqlerrp[9];                                               
+	dbih_dbc_t com;                     /* MUST be first element in structure   */
+	SQLHENV henv;
+	SQLHDBC hdbc;
+	char sqlerrp[9];                                               
 };
 
 
 /* Define sth implementor data structure */
-struct imp_sth_st {
-  dbih_stc_t  com;                    /* MUST be first element in structure   */
-  SQLHENV     henv;
-  SQLHDBC     hdbc;
-  SQLHSTMT    phstmt;
+struct imp_sth_st {	
+	dbih_stc_t  com;                    /* MUST be first element in structure   */
+	SQLHENV     henv;
+	SQLHDBC     hdbc;
+	SQLHSTMT    phstmt;
 
-  /* Input Details    */
-  SQLCHAR     *statement;             /* sql (see sth_scan)                   */
-  HV          *bind_names;
+	/* Input Details    */
+	SQLCHAR     *statement;             /* sql (see sth_scan)                   */
+	HV          *bind_names;
 
-  /* Output Details   */
-  SQLINTEGER  done_desc;              /* have we described this sth yet ?     */
-  imp_fbh_t   *fbh;                   /* array of imp_fbh_t structs           */
-  SQLCHAR     *fbh_cbuf;              /* memory for all field names           */
-  int         numFieldsAllocated;     /* number of fields allocated, could be */
-                                      /* more than current number of fields   */
-                                      /* in the case of multiple result sets  */
-  SQLINTEGER  RowCount;               /* Rows affected by insert, update,     */
-                                      /* delete (unreliable for SELECT)       */
-  int         bHasInput;              /* Has at least one input parameter     */
-                                      /* (by reference)                       */
-  int         bHasOutput;             /* Has at least one output parameter    */
-  int         bMoreResults;           /* Definitely has more results          */
-                                      /*   1=more results, 0=unknown          */
+	/* Output Details   */
+	SQLINTEGER  done_desc;              /* have we described this sth yet ?     */
+	imp_fbh_t   *fbh;                   /* array of imp_fbh_t structs           */
+	SQLCHAR     *fbh_cbuf;              /* memory for all field names           */
+	int         numFieldsAllocated;     /* number of fields allocated, could be */
+					    /* more than current number of fields   */
+					    /* in the case of multiple result sets  */
+	SQLINTEGER  RowCount;               /* Rows affected by insert, update,     */
+	                                    /* delete (unreliable for SELECT)       */
+	int         bHasInput;              /* Has at least one input parameter     */
+					    /* (by reference)                       */
+	int         bHasOutput;             /* Has at least one output parameter    */
+	int         bMoreResults;           /* Definitely has more results          */
+					    /*   1=more results, 0=unknown          */
 };
+
 #define IMP_STH_EXECUTING       0x0001
 
+struct imp_fbh_st {     		/* field buffer */
+	imp_sth_t *imp_sth; 		/* 'parent' statement */
 
-struct imp_fbh_st {     /* field buffer */
-  imp_sth_t *imp_sth; /* 'parent' statement */
+	/* description of the field */
+	SQLSMALLINT dbtype;                                            
+	SQLCHAR    *cbuf;           	/* ptr to name of select-list item */
+	SQLSMALLINT cbufl;          	/* length of select-list item name */
+	SQLINTEGER  dsize;          	/* max display size if field is a SQLCHAR */
+	SQLUINTEGER prec;                                              
+	SQLSMALLINT scale;                                             
+	SQLSMALLINT nullok;                                            
 
-  /* description of the field */
-  SQLSMALLINT dbtype;                                            
-  SQLCHAR    *cbuf;           /* ptr to name of select-list item */
-  SQLSMALLINT cbufl;          /* length of select-list item name */
-  SQLINTEGER  dsize;          /* max display size if field is a SQLCHAR */
-  SQLUINTEGER prec;                                              
-  SQLSMALLINT scale;                                             
-  SQLSMALLINT nullok;                                            
-
-  /* Our storage space for the field data as it's fetched */
-  SQLSMALLINT ftype;          /* external datatype we wish to get             */
-  short       indp;           /* null/trunc indicator variable                */
-  void       *buffer;         /* data buffer (poSQLINTEGERs to sv data)       */
-  SQLINTEGER  bufferSize;     /* length of data buffer                        */
-  SQLINTEGER  rlen;           /* length of returned data                      */
+	/* Our storage space for the field data as it's fetched */
+	SQLSMALLINT ftype;          	/* external datatype we wish to get             */
+	short       indp;           	/* null/trunc indicator variable                */
+	void       *buffer;         	/* data buffer (poSQLINTEGERs to sv data)       */
+	SQLINTEGER  bufferSize;     	/* length of data buffer                        */
+	SQLINTEGER  rlen;           	/* length of returned data                      */
 };
-
 
 typedef struct phs_st phs_t;    /* scalar placeholder */
 
 struct phs_st { /* scalar placeholder */
-  SV          *sv;                  /* the variable reference for bind_inout  */
-  void        *buffer;              /* input and output buffer                */
-  int          bufferSize;          /* size of buffer                         */
-  SQLUSMALLINT paramType;           /* INPUT, OUTPUT or INPUT_OUTPUT          */
-  SQLINTEGER   indp;                /* null indicator or length indicator     */
-  int          bDescribed;          /* already described this parameter       */
-  int          bDescribeOK;         /* describe was successful                */
-  SQLSMALLINT  descSQLType;                                      
-  SQLSMALLINT  descDecimalDigits;                                
-  SQLUINTEGER  descColumnSize;                                   
+	SV          *sv;                  /* the variable reference for bind_inout  */
+	void        *buffer;              /* input and output buffer                */
+	int          bufferSize;          /* size of buffer                         */
+	SQLUSMALLINT paramType;           /* INPUT, OUTPUT or INPUT_OUTPUT          */
+	SQLINTEGER   indp;                /* null indicator or length indicator     */
+	int          bDescribed;          /* already described this parameter       */
+	int          bDescribeOK;         /* describe was successful                */
+	SQLSMALLINT  descSQLType;                                      
+	SQLSMALLINT  descDecimalDigits;                                
+	SQLUINTEGER  descColumnSize;                                   
 };
 
 #define dbd_init            db2_init
@@ -124,5 +141,12 @@ struct phs_st { /* scalar placeholder */
 #define dbd_st_column_info      db2_st_column_info               
 #define dbd_db_get_info         db2_db_get_info                  
 
+/*
+ * Error Handling function to diagnose errors 
+ * @return: Return Code 
+ * */
+static SQLRETURN diagnoseError(SV* perlHandle, SQLSMALLINT handleType, SQLHANDLE handle, SQLRETURN rc, char* what);
+static void setErrorFromDiagRecInfo( SV* perlHandle, SQLSMALLINT handleType, SQLHANDLE handle, char* err);
+static void setErrorFromString( SV* perlHandle, SQLRETURN returnCode, char* what);
 
 /* end */

@@ -941,6 +941,12 @@ int arg;
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "SQL_ATTR_CALL_RETURN"))
+#ifdef SQL_ATTR_CALL_RETURN
+	    return SQL_ATTR_CALL_RETURN;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "SQL_ATTR_CONCURRENCY"))
 #ifdef SQL_ATTR_CONCURRENCY
 	    return SQL_ATTR_CONCURRENCY;
@@ -1154,6 +1160,12 @@ int arg;
 	if (strEQ(name, "SQL_ATTR_INFO_APPLNAME"))
 #ifdef SQL_ATTR_INFO_APPLNAME
 	    return SQL_ATTR_INFO_APPLNAME;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SQL_ATTR_INFO_PROGRAMNAME"))
+#ifdef SQL_ATTR_INFO_PROGRAMNAME
+	    return SQL_ATTR_INFO_PROGRAMNAME;
 #else
 	    goto not_there;
 #endif

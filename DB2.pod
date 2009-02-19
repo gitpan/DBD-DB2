@@ -117,6 +117,7 @@ to include 'use DBD::DB2::Constants').
                          SQL_DB2EXPLAIN_SNAPSHOT_MODE_ON
   db2_info_acctstr     Character string
   db2_info_applname    Character string
+  db2_info_programname Character string
   db2_info_userid      Character string
   db2_info_wrkstnname  Character string
   db2_longdata_compat  Boolean
@@ -154,6 +155,7 @@ true or false.
   db2_deferred_prepare          Boolean
   db2_earlyclose                Boolean
   db2_max_length                Integer
+  db2_call_return		Integer
   db2_max_rows                  Integer
   db2_more_results              Boolean (read only, see the section
                                   below: Multiple Result Sets)
