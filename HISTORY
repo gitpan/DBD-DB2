@@ -1,3 +1,14 @@
+February 18th, 2009
+
+DBD::DB2 1.61
+
+  Version 1.6 broke the CPAN install. Thus I renamed and reuploaded as 1.61
+  Improved Error and Warning Handling - Internal Bug - 166025
+  Improved XML Support to handle large XML Files - 171868
+  Include SQL_ATTR_INFO_PROGRAMNAME as Constant - 166029
+  Include SQL_ATTR_CALL_RETURN as Constant - 171813
+  Memory Cleanup - 170940
+
 September 4th, 2008
 
 DBD::DB2 1.2

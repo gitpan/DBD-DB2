@@ -4,7 +4,8 @@ DBD::DB2 - List of changes
 
 =cut
 
-=head2 Changes in DBD::DB2 1.6, Feb 18, 2009
+=head2 Changes in DBD::DB2 1.61, Feb 18, 2009
+  Version 1.6 broke the CPAN install. Thus I renamed and reuploaded as 1.61
   Improved Error and Warning Handling - Internal Bug - 166025
   Improved XML Support to handle large XML Files - 171868
   Include SQL_ATTR_INFO_PROGRAMNAME as Constant - 166029

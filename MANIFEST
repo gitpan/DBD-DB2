@@ -12,6 +12,7 @@ DB2.h
 dbdimp.h
 dbdimp.c
 test.pl
+META.yml
 lib/Bundle/DBD/DB2.pm
 t/base.t
 t/main.t
