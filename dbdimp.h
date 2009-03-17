@@ -148,5 +148,9 @@ struct phs_st { /* scalar placeholder */
 static SQLRETURN diagnoseError(SV* perlHandle, SQLSMALLINT handleType, SQLHANDLE handle, SQLRETURN rc, char* what);
 static void setErrorFromDiagRecInfo( SV* perlHandle, SQLSMALLINT handleType, SQLHANDLE handle, char* err);
 static void setErrorFromString( SV* perlHandle, SQLRETURN returnCode, char* what);
-
+#ifdef CLI_DBC_SERVER_TYPE_DB2LUW
+#ifdef SQL_ATTR_DECFLOAT_ROUNDING_MODE
+static void _db2_set_decfloat_rounding_mode_client(SV* dbh, imp_dbh_t *imp_dbh);
+#endif
+#endif
 /* end */

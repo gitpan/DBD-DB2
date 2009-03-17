@@ -947,6 +947,24 @@ int arg;
 #else
 	    goto not_there;
 #endif
+	if (strEQ(name, "SQL_ATTR_ROWCOUNT_PREFETCH"))
+#ifdef SQL_ATTR_ROWCOUNT_PREFETCH
+	    return SQL_ATTR_ROWCOUNT_PREFETCH;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SQL_ROWCOUNT_PREFETCH_ON"))
+#ifdef SQL_ROWCOUNT_PREFETCH_ON
+	    return SQL_ROWCOUNT_PREFETCH_ON;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "SQL_ROWCOUNT_PREFETCH_OFF"))
+#ifdef SQL_ROWCOUNT_PREFETCH_OFF
+	    return SQL_ROWCOUNT_PREFETCH_OFF;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "SQL_ATTR_CONCURRENCY"))
 #ifdef SQL_ATTR_CONCURRENCY
 	    return SQL_ATTR_CONCURRENCY;
@@ -3862,6 +3880,12 @@ int arg;
 	    return SQL_DECIMAL;
 #else
 	    goto not_there;
+#endif
+        if (strEQ(name, "SQL_DECFLOAT"))
+#ifdef SQL_DECFLOAT
+            return SQL_DECFLOAT;
+#else
+            goto not_there;
 #endif
 	if (strEQ(name, "SQL_DEFAULT"))
 #ifdef SQL_DEFAULT

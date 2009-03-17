@@ -5,6 +5,7 @@ LICENSE
 HISTORY
 Changes
 Makefile.PL
+META.yml
 DB2.pm
 DB2.pod
 DB2.xs
@@ -12,7 +13,6 @@ DB2.h
 dbdimp.h
 dbdimp.c
 test.pl
-META.yml
 lib/Bundle/DBD/DB2.pm
 t/base.t
 t/main.t

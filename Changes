@@ -4,6 +4,12 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.7, Mar 17, 2009
+  Improved support for Getting Client Info using DB2 CLP. Enhancement on 160229
+  Errors while retrieving multiple resultsets from stored procedures using db2_more_results defect number 172486
+  Support for Decfloat Datatype - 172301
+  Support for SQLRowCount to prefetch the number of rows that can be retured by a Select/Update/Delete/Insert query - 173018
+
 =head2 Changes in DBD::DB2 1.61, Feb 18, 2009
   Version 1.6 broke the CPAN install. Thus I renamed and reuploaded as 1.61
   Improved Error and Warning Handling - Internal Bug - 166025

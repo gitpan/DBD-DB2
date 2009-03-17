@@ -1553,12 +1553,13 @@ require AutoLoader;
 	SQL_WCHARTYPE_DEFAULT
 	SQL_WCHARTYPE_NOCONVERT
         SQL_XML
+	SQL_DECFLOAT
 	SQL_XOPEN_CLI_YEAR
 	SQL_YEAR
 	SQL_YEAR_TO_MONTH
 	TRACE_VERSION
 );
-$VERSION = '1.61';
+$VERSION = '1.7';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

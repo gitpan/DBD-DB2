@@ -260,6 +260,7 @@ static int dbd_db_connect( SV *dbh,
 	D_imp_drh_from_dbh;
 
 	SQLRETURN ret;
+	STRLEN length;
 	SQLCHAR *new_dsn = NULL;
 	int dsn_length;
 	imp_dbh->hdbc = SQL_NULL_HDBC;
@@ -315,6 +316,18 @@ static int dbd_db_connect( SV *dbh,
 		  	if( SQL_SUCCESS != ret )
 				goto exit;
 	    	}
+		pval = hv_fetch( attrh, "db2_info_programname", 20, 0 );
+	    	if( NULL != pval ) {
+			SQLPOINTER value = (SQLPOINTER)SvPV( *pval, length );
+		  	ret = SQLSetConnectAttr( imp_dbh->hdbc,
+	 				SQL_ATTR_INFO_PROGRAMNAME,
+	 				value,
+	 				(SQLINTEGER) length );
+			CHECK_ERROR(dbh, SQL_HANDLE_DBC, imp_dbh->hdbc, ret, "Set Programname Failed");
+		  	if( SQL_SUCCESS != ret )
+				goto exit;
+	    	}
+
       	}
 	
       	/* If the string contains a =, use SQLDriverConnect */
@@ -338,6 +351,16 @@ static int dbd_db_connect( SV *dbh,
 	}
       	if( SQL_SUCCESS != ret )
 	    	goto exit;
+
+#ifdef CLI_DBC_SERVER_TYPE_DB2LUW
+#ifdef SQL_ATTR_DECFLOAT_ROUNDING_MODE
+	/**
+	 * Code for setting SQL_ATTR_DECFLOAT_ROUNDING_MODE 
+	 * for implementation of Decfloat Datatype
+	 * */
+        _db2_set_decfloat_rounding_mode_client(dbh, imp_dbh);
+#endif
+#endif
 	
       	/* Set default value for LongReadLen */
       	DBIc_LongReadLen( imp_dbh ) = 32700;
@@ -360,6 +383,56 @@ exit:
       	return ret;
 }
 
+#ifdef CLI_DBC_SERVER_TYPE_DB2LUW
+#ifdef SQL_ATTR_DECFLOAT_ROUNDING_MODE
+/**
+ * Function for implementation of DECFLOAT Datatype
+ * 
+ * Description :
+ * This function retrieves the value of special register decflt_rounding
+ * from the database server which signifies the current rounding mode set
+ * on the server. For using decfloat, the rounding mode has to be in sync
+ * on the client as well as server. Thus we set here on the client, the
+ * same rounding mode as the server.
+ * @return: success or failure
+ * */
+static void _db2_set_decfloat_rounding_mode_client(SV* dbh, imp_dbh_t *imp_dbh) {
+	SQLCHAR decflt_rounding[20];
+	SQLHANDLE hstmt;
+	SQLHDBC hdbc = imp_dbh->hdbc;
+	int ret = 0;
+	int rounding_mode;
+	SQLINTEGER decfloat;
+	
+	SQLCHAR *stmt = (SQLCHAR *)"values current decfloat rounding mode";
+	
+	/* Allocate a Statement Handle */
+	ret = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
+	CHECK_ERROR(dbh, SQL_HANDLE_STMT, hstmt, ret, "Statement Allocation Error");
+
+	ret = SQLExecDirect((SQLHSTMT)hstmt, (SQLPOINTER)stmt, SQL_NTS);
+	CHECK_ERROR(dbh, SQL_HANDLE_STMT, hstmt, ret, "Execute Direct Failed for the statement on Decfloat Rounding Mode");
+
+	ret = SQLBindCol((SQLHSTMT)hstmt, 1, SQL_C_DEFAULT, decflt_rounding, 20, NULL);
+	CHECK_ERROR(dbh, SQL_HANDLE_STMT, hstmt, ret, "BindCol Failed on Decfloat Rounding Mode");
+
+	ret = SQLFetch(hstmt);
+	ret = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+	/* Now setting up the same rounding mode on the client*/
+	if(strcmp(decflt_rounding,"ROUND_HALF_EVEN")== 0) { rounding_mode = SQL_ROUND_HALF_EVEN };
+	if(strcmp(decflt_rounding,"ROUND_HALF_UP")== 0) { rounding_mode = SQL_ROUND_HALF_UP };
+	if(strcmp(decflt_rounding,"ROUND_DOWN")== 0) { rounding_mode = SQL_ROUND_DOWN };
+	if(strcmp(decflt_rounding,"ROUND_CEILING")== 0) { rounding_mode = SQL_ROUND_CEILING };
+	if(strcmp(decflt_rounding,"ROUND_FLOOR")== 0) { rounding_mode = SQL_ROUND_FLOOR };
+#ifndef AS400
+	ret = SQLSetConnectAttr(hdbc,SQL_ATTR_DECFLOAT_ROUNDING_MODE, (SQLPOINTER)rounding_mode ,SQL_NTS);
+#else
+	ret = SQLSetConnectAttr(hdbc,SQL_ATTR_DECFLOAT_ROUNDING_MODE,(SQLPOINTER)&rounding_mode ,SQL_NTS);
+#endif
+	return;
+}
+#endif
+#endif
 
 int dbd_db_login2( SV *dbh,
                    imp_dbh_t *imp_dbh,
@@ -1001,7 +1074,10 @@ static int dbd_describe( SV *sth,
 	  	}
 		
 	  	DBIc_NUM_FIELDS(imp_sth) = num_fields;
-		
+		if(DBIc_FIELDS_AV(imp_sth)) {
+                        sv_free((SV*) DBIc_FIELDS_AV(imp_sth));
+                        DBIc_FIELDS_AV(imp_sth) = Nullav;
+                }
 	  	SvREFCNT_dec( value );
     	}
 	
@@ -2489,7 +2565,7 @@ AV *dbd_st_fetch( SV *sth,
 	  	return Nullav;
     	}
 	
-    	av = DBIS->get_fbav(imp_sth);
+    	av = DBIc_DBISTATE(imp_sth)->get_fbav(imp_sth);
     	/* Reset array size if necessary */
     	arraylen = av_len( av ) + 1;
     	if( arraylen != num_fields ) {
@@ -2819,6 +2895,10 @@ static SQLINTEGER getStatementAttr( char *key,
 				return SQL_ATTR_DEFERRED_PREPARE;
 		  	return SQL_ERROR;
 #endif
+		case 21:
+			if(      strEQ( key, "db2_rowcount_prefetch") )
+				return SQL_ATTR_ROWCOUNT_PREFETCH;
+			return SQL_ERROR;
 			
 	    	case 22:
 		  	if(      strEQ( key, "db2_optimize_for_nrows" ) )
@@ -2875,17 +2955,18 @@ int dbd_st_STORE_attrib( SV *sth,
 #endif
 		/* Integers */
 		case SQL_ATTR_CALL_RETURN:
-	    	case SQL_ATTR_CONCURRENCY:
+		case SQL_ATTR_CONCURRENCY:
+		case SQL_ATTR_ROWCOUNT_PREFETCH:
 #ifndef AS400
-	    	case SQL_ATTR_LOGIN_TIMEOUT:
-	    	case SQL_ATTR_MAX_LENGTH:
-	    	case SQL_ATTR_MAX_ROWS:
+		case SQL_ATTR_LOGIN_TIMEOUT:
+		case SQL_ATTR_MAX_LENGTH:
+		case SQL_ATTR_MAX_ROWS:
 #endif
-	    	case SQL_ATTR_OPTIMIZE_FOR_NROWS:
-	    	case SQL_ATTR_QUERY_OPTIMIZATION_LEVEL:
+		case SQL_ATTR_OPTIMIZE_FOR_NROWS:
+		case SQL_ATTR_QUERY_OPTIMIZATION_LEVEL:
 #ifndef AS400
-	    	case SQL_ATTR_QUERY_TIMEOUT:
-	    	case SQL_ATTR_TXN_ISOLATION:
+		case SQL_ATTR_QUERY_TIMEOUT:
+		case SQL_ATTR_TXN_ISOLATION:
 #endif
 		  	if( SvIOK( valuesv ) ) {
 				ValuePtr = (SQLPOINTER)SvIV( valuesv );
@@ -3106,6 +3187,7 @@ SV *dbd_st_FETCH_attrib( SV *sth,
 				/* Integers */
 				case SQL_ATTR_CALL_RETURN:
 				case SQL_ATTR_CONCURRENCY:
+				case SQL_ATTR_ROWCOUNT_PREFETCH:
 #ifndef AS400
 				case SQL_ATTR_LOGIN_TIMEOUT:
 				case SQL_ATTR_MAX_LENGTH:

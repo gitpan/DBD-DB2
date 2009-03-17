@@ -21,7 +21,7 @@ the available DBDs is accessed indirectly through the DBI.
 
 See L<DBI> for more information.
 
-The DBD::DB2 driver is supported by DB2 UDB V7.2 and later. See 
+The DBD::DB2 driver is supported by DB2 UDB V9 and later. See 
 http://www.software.ibm.com/data/db2/perl for more information on
 supported environments.
 
@@ -162,6 +162,7 @@ true or false.
   db2_noscan                    Boolean
   db2_optimize_for_nrows        Integer
   db2_prefetch                  Boolean
+  db2_rowcount_prefetch		Boolean
   db2_query_optimization_level  Integer
   db2_query_timeout             Integer (see note below)
   db2_retrieve_data             Boolean
@@ -397,6 +398,7 @@ This option applies to the following column types:
   SQL_BLOB
   SQL_CLOB
   SQL_DBCLOB
+  SQL_XML
 
 To change the value, provide it in the connection attributes:
 
