@@ -1,3 +1,10 @@
+March 26th, 2009
+
+DBD::DB2 1.71
+
+  Retrieving CLOB type gave truncated for DB2 version 9.1fp2 fixed. - 173663
+  Segmentation fault unless db2profile is sourced - CPAN - 44505
+
 March 17th, 2009
 
 DBD::DB2 1.7

@@ -61,7 +61,8 @@ static SQLRETURN diagnoseError(SV* perlHandle, SQLSMALLINT handleType, SQLHANDLE
 			setErrorFromString(perlHandle, rc, what);
 			break;
 		default:
-			setErrorFromString(perlHandle, -3, "Unable to Diagnose Error - Please report");
+			what = what? what:"Unable to Diagnose Error - Please report";
+			setErrorFromString(perlHandle, -3, what);
 			break;
 	}
 	return rc;
@@ -446,6 +447,11 @@ int dbd_db_login2( SV *dbh,
     	if (! imp_drh->connects) {
 		ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE,
    				&imp_drh->henv);
+		if(ret == SQL_ERROR) {
+			/* I don't want to call SQLDiagRec since it would return an error
+			 * instead I want to print my custom status message. Set ret = -3 */
+			ret = -3;
+		}
 		CHECK_ERROR(dbh, SQL_HANDLE_ENV, imp_drh->henv, ret, 
 				SQL_NULL_HENV == imp_drh->henv
 				? "Total Environment allocation failure!  "
@@ -2596,14 +2602,16 @@ AV *dbd_st_fetch( SV *sth,
     	for( i = 0; i < num_fields; ++i ) {
 	  	fbh = &imp_sth->fbh[i];
 	  	sv = AvARRAY(av)[i]; /* Note: we reuse the supplied SV    */
-		ret=SQLGetData( imp_sth->phstmt,
-				i+1,
-				fbh->ftype,
-				NULL,
-				0,
-				&retl );
-		fbh->bufferSize = retl + 1;
-		fbh->rlen = retl;
+		if(fbh->dbtype == SQL_XML) {
+			ret=SQLGetData( imp_sth->phstmt,
+					i+1,
+					fbh->ftype,
+					NULL,
+					0,
+					&retl );
+			fbh->bufferSize = retl + 1;
+			fbh->rlen = retl;
+		}
 		
 #ifdef AS400
 	  	if( fbh->rlen == SQL_NTS )
