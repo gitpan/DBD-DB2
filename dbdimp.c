@@ -216,8 +216,12 @@ AV* dbd_data_sources( SV *drh ) {
   	/* Convert following two return codes to SQL_NO_DATA so the state */
   	/* gets set correctly in do_error */
   	if( SQLE_RC_NODBDIR == sqlca.sqlcode ||
-  			SQLE_RC_NODENTRY == sqlca.sqlcode )
-  		ret = sqlca.sqlcode = SQL_NO_DATA;
+  			SQLE_RC_NODENTRY == sqlca.sqlcode ) {
+  		sqlca.sqlcode = SQL_NO_DATA;
+		ret = sqlca.sqlcode;
+	} else {
+		ret = sqlca.sqlcode;
+	}
 		
 	CHECK_ERROR(drh, 0, SQL_NULL_HANDLE, ret, "sqledosd Failed");
   	if( SQL_SUCCESS != ret )
@@ -1318,130 +1322,117 @@ static int dbd_describe( SV *sth,
 
 static void dbd_preparse( imp_sth_t *imp_sth,
 		char *statement ) {
-    	
 	bool in_literal = FALSE;
-    	SQLCHAR  *src, *start, *dest;
-    	phs_t phs_tpl;
-    	SV *phs_sv;
-    	int idx=0, style=0, laststyle=0;
+	SQLCHAR  *src, *start, *dest;
+	phs_t phs_tpl;
+	SV *phs_sv;
+	int idx=0, style=0 ;
 	
-    	/* allocate room for copy of statement with spare capacity    */
-    	/* for editing ':1' into ':p1' so we can use obndrv.    */
-    	imp_sth->statement = (SQLCHAR *)safemalloc(strlen(statement) +
-			(DBIc_NUM_PARAMS(imp_sth)*4));
+	float num_placeholders = 0;
+	int num_bytes_required = 0, num_digits = 0;
+
+	/*
+ 	 * Calculate the number of bytes required according to number 
+ 	 * of Placeholders. The placeholders ?
+ 	 * are converted to :pn where n denotes nth placeholder
+ 	 * ex:- 200th ? is converted to :p200
+ 	 * */
+
+	num_bytes_required = strlen(statement) + DBIc_NUM_PARAMS(imp_sth) * 2;
+	num_placeholders = (double)DBIc_NUM_PARAMS(imp_sth);
+	while(num_placeholders >=1) {
+		num_placeholders /= 10.0;
+		num_digits++;
+	}
+	num_bytes_required += DBIc_NUM_PARAMS(imp_sth) * num_digits;
 	
-    	/* initialise phs ready to be cloned per placeholder    */
-    	memset(&phs_tpl, '\0',sizeof(phs_tpl));
-    	phs_tpl.sv = NULL;                                           
+	/* allocate room for copy of statement with spare capacity */
+	/* for editing ':1' into ':p1' */
+	imp_sth->statement = (SQLCHAR *)safemalloc(num_bytes_required);
 	
-    	src  = (SQLCHAR *)statement;
-    	dest = imp_sth->statement;
-    	while(*src) {
-	  	if( *src == '/' ) {
-	       		*dest++ = *src++;
-	       		if( *src ) {
-		    		if( *src == '*' ) {
-			 		/* Start of a comment */
-			 		if( DBIS->debug >= 2 ) {
-			       			PerlIO_printf( DBILOGFP, "Start of comment: %s\n", src );
-			  		}
-			 		*dest++ = *src++;
-			 		/* Skip everything until we hit end of comment */
-			 		while( *src ) {
-			      			if( *src == '*' ) {
-				   			*dest++ = *src++;
-				   			if( *src ) {
+	/* initialise phs ready to be cloned per placeholder    */
+	memset(&phs_tpl, '\0',sizeof(phs_tpl));
+	phs_tpl.sv = NULL;
+	src  = (SQLCHAR *)statement;
+	dest = imp_sth->statement;
+	while(*src) {
+		if( *src == '/' ) {
+			*dest++ = *src++;
+			if( *src ) {
+				if( *src == '*' ) {
+					/* Start of a comment */
+					if( DBIS->debug >= 2 ) {
+						PerlIO_printf( DBILOGFP, "Start of comment: %s\n", src );
+					}
+					*dest++ = *src++;
+					/* Skip everything until we hit end of comment */
+					while( *src ) {
+						if( *src == '*' ) {
+							*dest++ = *src++;
+							if( *src ) {
 								if( *src == '/' ) {
-					     				/* Found end of commented */
-					      				*dest++ = *src++;
-					     				if( DBIS->debug >= 2 ) {
-						   				PerlIO_printf( DBILOGFP, "End of comment: %s\n", src );
-					     				}
-					     				break;
+									/* Found end of commented */
+									*dest++ = *src++;
+									if( DBIS->debug >= 2 ) {
+										PerlIO_printf( DBILOGFP, "End of comment: %s\n", src );
+									}
+									break;
 								}
-				   			}
-				   			else {
+							}
+							else {
 								/* Hit end of statement */
 								break;
-				   			}
-			      			}
-			      			else {
-				    			*dest++ = *src++;
-			      			}
-			 		}
-		    		}
-	       		}
-	       		else {
-		    		break;
-	       		}
-	  	}
-	  	if( ! (*src) ) {
-	       		break;
-	  	}                                                         
-	  	if (*src == '\'') {
-	       		in_literal = ~in_literal;
-	  	}
-	  	if ((*src != ':' && *src != '?') || in_literal) {
-	      		*dest++ = *src++;
-	      		continue;
-	  	}
-	  	start = dest;            /* save name inc colon    */
-	  	*dest++ = *src++;
-	  	if (*start == '?')       /* X/Open standard    */
-	  	{
-	      		sprintf((char *)start,":p%d", ++idx); /* '?' -> ':1' (etc)*/
-	      		dest = start+strlen((char *)start);
-	      		style = 3;
-	  	}
-	  	else if (isDIGIT(*src))            /* ':1'        */
-	  	{
-	      		idx = atoi((char *)src);
-	      		*dest++ = 'p';               /* ':1'->':p1'    */
-	      		if (idx > MAX_BIND_VARS || idx <= 0)
-		      		croak("Placeholder :%d index out of range", idx);
-	      		while(isDIGIT(*src)) {
-				*dest++ = *src++;
-	      		}
-	      		style = 1;
-	  	}
-	  	else if (isALNUM(*src))      /* ':foo'    */
-	  	{
-	      		while(isALNUM(*src))    /* includes '_'    */
-	      		{
-		   		*dest++ = *src++;
-	      		}
-	      		style = 2;
-	  	}
-	  	else                        /* perhaps ':=' PL/SQL construct */
-	  	{
-	      		continue;
-	  	}
-	  	*dest = '\0';            /* handy for debugging    */
+							}
+						}
+						else {
+							*dest++ = *src++;
+						}
+					}
+				}
+			}
+			else {
+				break;
+			}
+		}
+		if( ! (*src) ) {
+			break;
+		}                                                         
+		if (*src == '\'') {
+			in_literal = ~in_literal;
+		}
+		if ((*src != ':' && *src != '?') || in_literal) {
+			*dest++ = *src++;
+			continue;
+		}
+		start = dest;            /* save name inc colon    */
+		*dest++ = *src++;
+		if (*start == '?')       /* X/Open standard    */
+		{
+			sprintf((char *)start,":p%d", ++idx); /* '?' -> ':1' (etc)*/
+			dest = start+strlen((char *)start);
+		}
+		*dest = '\0';            /* handy for debugging    */
 		
-	  	if (laststyle && style != laststyle)
-	      		croak("Can't mix placeholder styles (%d/%d)",style,laststyle);
-	  	laststyle = style;
-	  	if (imp_sth->bind_names == NULL)
-	      		imp_sth->bind_names = newHV();
-	  	phs_sv = newSVpv((char *)&phs_tpl, sizeof(phs_tpl));
-	  	hv_store(imp_sth->bind_names, (char *)start,
- 				(STRLEN)(dest-start), phs_sv, 0);
-	  	/* warn("bind_names: '%s'\n", start);    */
-    	}
+		if (imp_sth->bind_names == NULL)
+			imp_sth->bind_names = newHV();
+		phs_sv = newSVpv((char *)&phs_tpl, sizeof(phs_tpl));
+		hv_store(imp_sth->bind_names, (char *)start,
+				(STRLEN)(dest-start), phs_sv, 0);
+	}
 	
-    	*dest = '\0';
-    	if( DBIS->debug >= 2 ) {
-	  	PerlIO_printf( DBILOGFP,
-	   			"statement = %s\nimp_sth->statement=%s\n",
-	   			statement, imp_sth->statement );
-    	}
-    	if (imp_sth->bind_names) {
-	  	DBIc_NUM_PARAMS(imp_sth) = (SQLINTEGER)HvKEYS(imp_sth->bind_names);
-	  	if (DBIS->debug >= 2)
+	*dest = '\0';
+	if( DBIS->debug >= 2 ) {
+		PerlIO_printf( DBILOGFP,
+				"statement = %s\nimp_sth->statement=%s\n",
+				statement, imp_sth->statement );
+	}
+	if (imp_sth->bind_names) {
+		DBIc_NUM_PARAMS(imp_sth) = (SQLINTEGER)HvKEYS(imp_sth->bind_names);
+		if (DBIS->debug >= 2)
 			PerlIO_printf( DBILOGFP,
-		 			"scanned %d distinct placeholders\n",
-		 			(SQLINTEGER)DBIc_NUM_PARAMS(imp_sth) );
-    	}
+					"scanned %d distinct placeholders\n",
+					(SQLINTEGER)DBIc_NUM_PARAMS(imp_sth) );
+	}
 }
 
 int dbd_st_table_info( SV *sth,

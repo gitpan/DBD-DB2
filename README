@@ -36,6 +36,24 @@
     nmake test
     nmake install
 
+*** TESTING:
+
+    All Platforms:
+    Edit the file connection.pl in the folder tests so that it looks like the following:
+
+    $USERID="userid";
+    $PASSWORD="password";
+    $PORT=50000;
+    $HOSTNAME="localhost";
+    $DATABASE="database";
+    $PROTOCOL="TCPIP";
+
+    The next section has details about the trusted context user. If you dont have trusted users set specifically, then you may leave this section as is and the testcase for the trusted context would fail. This is an expected behavior.
+
+    The details for fakeport etc can be left untouched.
+
+    Run the test suite by running the following command:
+    $ perl run-tests.pl
 
 *** IF YOU HAVE PROBLEMS:
 
@@ -62,7 +80,7 @@
 
     Comments/suggestions/enhancement requests may be sent to
 
-        db2perl@ca.ibm.com
+        opendev@us.ibm.com
 
     Please see the following files for more information:
         CAVEATS - important build/usage information

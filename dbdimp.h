@@ -6,7 +6,6 @@
 
 /* these are (almost) random values ! */
 #define MAX_COL_NAME_LEN 128                                      
-#define MAX_BIND_VARS   99
 
 #include <dbivport.h>
 /**

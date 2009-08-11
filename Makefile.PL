@@ -72,23 +72,16 @@ die "$envvar environment variable ($DB2) not valid.\n" unless -d $DB2;
 
 print qq(Using DB2 in "$DB2"\n);
 
+# --- Setup include paths and libraries
+$opts{INC} .= qq(-I"$DB2/include" -I"$Config{sitearchexp}/auto/DBI" );
+$opts{INC} .= qq(-I"$Config{installarchlib}/auto/DBI") if $Config{installarchlib};
+$opts{INC} .= qq(-I"$Config{installvendorarch}/auto/DBI") if $Config{installvendorarch};
+$opts{INC} .= qq(-I"$Config{installsitearch}/auto/DBI") if $Config{installsitearch};
+$opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
+
 # libraries required to build DBD::DB2 driver
 if( $os eq 'MSWin32' || $os eq 'MSWin64' || $os eq 'os2' )
 {
-  # --- Setup include paths and libraries
-  if( $] ge '5.010000')
-  {
-    $opts{INC} .= qq(-I"$DB2/include" -I"$Config{archlib}/auto/DBI" );
-    $opts{INC} .= qq(-I"$Config{vendorarch}/auto/DBI") if $Config{vendorarch};
-    $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
-  }
-  else
-  {
-    $opts{INC} .= qq(-I"$DB2/include" -I"$Config{sitearch}/auto/DBI" );
-    $opts{INC} .= qq(-I"$Config{vendorarch}/auto/DBI") if $Config{vendorarch};
-    $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
-  }
-
   my $DB2LIB = $ENV{'DB2LIB'};
   if( not $DB2LIB )
   {
@@ -124,12 +117,6 @@ if( $os eq 'MSWin32' || $os eq 'MSWin64' || $os eq 'os2' )
 }
 else
 {
-
-  # --- Setup include paths and libraries
-  $opts{INC} .= qq(-I"$DB2/include" -I"$Config{sitearch}/auto/DBI" );
-  $opts{INC} .= qq(-I"$Config{vendorarch}/auto/DBI") if $Config{vendorarch};
-  $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
-
   my $DB2LIB = $ENV{'DB2LIB'};
   if( not $DB2LIB )
   {
