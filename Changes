@@ -4,7 +4,10 @@ DBD::DB2 - List of changes
 
 =cut
 
-=head2 Changes in DBD::DB2
+=head2 Changes in DBD::DB2 1.75, Nov 09, 2009
+  Changes in Makefile.PL - Cpan - 49802
+
+=head2 Changes in DBD::DB2 1.74, Aug 13, 2009
   DBD-DB2 differed on include paths for Perl 5.8.7 and 5.10. - Cpan - 44903
   Memory Corruption in dbd_preparse in handling more than 10 params - Cpan - 28655
   Inclusion of Test Suite

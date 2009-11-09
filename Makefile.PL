@@ -73,10 +73,10 @@ die "$envvar environment variable ($DB2) not valid.\n" unless -d $DB2;
 print qq(Using DB2 in "$DB2"\n);
 
 # --- Setup include paths and libraries
-$opts{INC} .= qq(-I"$DB2/include" -I"$Config{sitearchexp}/auto/DBI" );
-$opts{INC} .= qq(-I"$Config{installarchlib}/auto/DBI") if $Config{installarchlib};
-$opts{INC} .= qq(-I"$Config{installvendorarch}/auto/DBI") if $Config{installvendorarch};
-$opts{INC} .= qq(-I"$Config{installsitearch}/auto/DBI") if $Config{installsitearch};
+$opts{INC} .= qq( -I"$DB2/include" -I"$Config{sitearchexp}/auto/DBI" );
+$opts{INC} .= qq(-I"$Config{installarchlib}/auto/DBI" ) if $Config{installarchlib};
+$opts{INC} .= qq(-I"$Config{installvendorarch}/auto/DBI" ) if $Config{installvendorarch};
+$opts{INC} .= qq(-I"$Config{installsitearch}/auto/DBI" ) if $Config{installsitearch};
 $opts{dynamic_lib} = { OTHERLDFLAGS => '$(COMPOBJS) '};
 
 # libraries required to build DBD::DB2 driver
