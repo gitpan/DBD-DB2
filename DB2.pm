@@ -23,7 +23,7 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '1.75';
+    $VERSION = '1.76';
     require_version DBI 1.41;
 
     bootstrap DBD::DB2;
@@ -119,6 +119,10 @@
             });
 
         $drh;
+    }
+
+    sub CLONE{
+        undef $drh;
     }
 
     1;

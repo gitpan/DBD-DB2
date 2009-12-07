@@ -4,6 +4,10 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.76, Dec 04, 2009
+  Changes for proper functioning of ChopBlanks Feature - Cpan - 50703/51173
+  Adding CLONE method in DB2.pm to support threaded environment
+
 =head2 Changes in DBD::DB2 1.75, Nov 09, 2009
   Changes in Makefile.PL - Cpan - 49802
 

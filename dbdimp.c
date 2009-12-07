@@ -2668,7 +2668,7 @@ AV *dbd_st_fetch( SV *sth,
 				   			fbh->buffer,
 				   			GetTrimmedSpaceLen( fbh->buffer, fbh->rlen ) );
 				else
-			      		sv_setpvn( sv, (char*)fbh->buffer, GetTrimmedSpaceLen( fbh->buffer, fbh->rlen ) );
+			      		sv_setpvn( sv, (char*)fbh->buffer, fbh->rlen );
 		  	}
 		  	else                  /*  column contains a null value */
 		  	{
