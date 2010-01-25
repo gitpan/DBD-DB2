@@ -1559,7 +1559,7 @@ require AutoLoader;
 	SQL_YEAR_TO_MONTH
 	TRACE_VERSION
 );
-$VERSION = '1.76';
+$VERSION = '1.78';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

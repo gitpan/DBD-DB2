@@ -4,6 +4,10 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.78, Jan 25, 2010
+  Changes for proper handling of LOB types
+  Fixed issue of segfault due to passing of NULL to DBIh_SET_ERR_CHAR - Cpan - 52883/53525
+
 =head2 Changes in DBD::DB2 1.76, Dec 04, 2009
   Changes for proper functioning of ChopBlanks Feature - Cpan - 50703/51173
   Adding CLONE method in DB2.pm to support threaded environment

@@ -58,7 +58,11 @@ static SQLRETURN diagnoseError(SV* perlHandle, SQLSMALLINT handleType, SQLHANDLE
 			setErrorFromDiagRecInfo(perlHandle, handleType, handle, Nullch);
 			break;
 		case SQL_INVALID_HANDLE:
-			setErrorFromString(perlHandle, rc, what);
+			if( what != NULL ) {
+				setErrorFromString(perlHandle, rc, what);
+			} else {
+				setErrorFromString(perlHandle, rc, "");
+			}
 			break;
 		default:
 			what = what? what:"Unable to Diagnose Error - Please report";
@@ -107,6 +111,8 @@ static void setErrorFromDiagRecInfo( SV* perlHandle,
 					message = "SQL_ERROR encountered. Please see Infocenter for SQLGetDiagRec for More Details";
 					break;
 			}
+		} else {
+			message = "";
 		}
 	}
 	DBIh_SET_ERR_CHAR(perlHandle, imp_xxh, err, sqlcode, message, sqlstate, Nullch);
@@ -130,6 +136,16 @@ static void fbh_dump( imp_fbh_t *fbh,
 			fbh->dbtype, (long)fbh->dsize, fbh->prec, fbh->scale );
     	PerlIO_printf( DBILOGFP, "   out: ftype %d, indp %d, bufl %d, rlen %d\n",
 			fbh->ftype, fbh->indp, fbh->bufferSize, fbh->rlen );
+}
+
+static int SQLTypeIsLob( SQLSMALLINT SQLType ) {
+      	if( SQL_BLOB == SQLType ||
+		  	SQL_XML == SQLType ||
+		  	SQL_CLOB == SQLType ||
+		  	SQL_DBCLOB == SQLType )
+	    	return TRUE;
+	
+      	return FALSE;
 }
 
 static int SQLTypeIsLong( SQLSMALLINT SQLType ) {
@@ -1028,10 +1044,52 @@ SV *dbd_db_FETCH_attrib( SV *dbh,
       	return retsv;
 }
 
+static SQLRETURN bind_lob_column_helper( imp_fbh_t *fbh, SQLINTEGER col_num ) {
+  switch( fbh->dbtype ) {
+    case SQL_CLOB:
+      fbh->loc_type   =  SQL_CLOB_LOCATOR;
+      fbh->bufferSize = 0;
+
+      return SQLBindCol( fbh->imp_sth->phstmt,
+                    (SQLUSMALLINT) col_num,
+                    fbh->loc_type,
+                    &fbh->lob_loc,
+                    4,
+                    &fbh->loc_ind );
+
+    case SQL_BLOB:
+      fbh->loc_type   =  SQL_BLOB_LOCATOR;
+      fbh->bufferSize = 0;
+
+      return SQLBindCol( fbh->imp_sth->phstmt,
+                    (SQLUSMALLINT) col_num,
+                    fbh->loc_type,
+                    &fbh->lob_loc,
+                    4,
+                    &fbh->loc_ind );
+
+    case SQL_DBCLOB:
+      fbh->loc_type =  SQL_DBCLOB_LOCATOR;
+      fbh->bufferSize = 0;
+
+      return SQLBindCol( fbh->imp_sth->phstmt,
+                    (SQLUSMALLINT) col_num,
+                    fbh->loc_type,
+                    &fbh->lob_loc,
+                    4,
+                    &fbh->loc_ind );
+
+    case SQL_XML:
+      fbh->ftype = SQL_C_BINARY;
+      fbh->rlen  = fbh->bufferSize = fbh->dsize = 0;
+      return SQL_SUCCESS;
+  }
+}
+
 static int dbd_describe( SV *sth,
 		imp_sth_t *imp_sth ) {
-    	
-	D_imp_dbh_from_sth;
+
+        D_imp_dbh_from_sth;
     	SQLCHAR  *cbuf_ptr;
     	SQLINTEGER t_cbufl=0;
     	short num_fields;
@@ -1120,12 +1178,12 @@ static int dbd_describe( SV *sth,
 	
     	/* Get number of fields and space needed for field names    */
     	for(i=0; i < num_fields; ++i ) {
-	  	fbh = &imp_sth->fbh[i];
-	  	fbh->cbufl = MAX_COL_NAME_LEN+1;
-	  	bufferSizeRequired = 0;
+	  	  fbh = &imp_sth->fbh[i];
+	  	  fbh->cbufl = MAX_COL_NAME_LEN+1;
+	  	  bufferSizeRequired = 0;
 	    	/* Get number of fields and space needed for field names    */
 		
-	  	ret = SQLDescribeCol( imp_sth->phstmt,
+	  	  ret = SQLDescribeCol( imp_sth->phstmt,
     				(SQLUSMALLINT) (i+1),
     				(SQLCHAR*) cbuf_ptr,
     				(SQLSMALLINT) MAX_COL_NAME_LEN,
@@ -1134,190 +1192,184 @@ static int dbd_describe( SV *sth,
     				(SQLUINTEGER*)&fbh->prec,
     				(SQLSMALLINT*)&fbh->scale,
     				(SQLSMALLINT*)&fbh->nullok );
-		CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "DescribeCol Failed");
-	  	EOI(ret);
-	  	fbh->imp_sth = imp_sth;
-	  	fbh->cbuf    = cbuf_ptr;
-	  	fbh->cbuf[fbh->cbufl] = '\0';     /* ensure null terminated    */
-	  	cbuf_ptr += fbh->cbufl + 1;       /* increment name pointer    */
-	  	/* Now define the storage for this field data.            */
+		  CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "DescribeCol Failed");
+	  	  EOI(ret);
+	  	  fbh->imp_sth = imp_sth;
+	  	  fbh->cbuf    = cbuf_ptr;
+	  	  fbh->cbuf[fbh->cbufl] = '\0';     /* ensure null terminated    */
+	  	  cbuf_ptr += fbh->cbufl + 1;       /* increment name pointer    */
+	  	  /* Now define the storage for this field data.            */
 		
 #ifdef AS400
-	  	if( SQL_SMALLINT == fbh->dbtype ||
+	  	  if( SQL_SMALLINT == fbh->dbtype ||
 		      		SQL_INTEGER == fbh->dbtype) {
 	      		fbh->ftype = SQL_C_LONG;
 	      		fbh->rlen = bufferSizeRequired = sizeof(SQLINTEGER);
-		}
-	  	else if( SQL_DECIMAL == fbh->dbtype ||
+		  }
+	  	  else if( SQL_DECIMAL == fbh->dbtype ||
 		 		SQL_NUMERIC == fbh->dbtype ||
 		 		SQL_DOUBLE == fbh->dbtype||
 		 		SQL_FLOAT == fbh->dbtype||
 		 		SQL_REAL == fbh->dbtype) {
 	      		fbh->ftype = SQL_C_DOUBLE;
 	      		fbh->rlen = bufferSizeRequired = sizeof(SQLDOUBLE);
-		}
-	  	else if(SQL_BLOB == fbh->dbtype ||	
+		  }
+	  	  else if(SQL_BLOB == fbh->dbtype ||	
       				SQL_CLOB == fbh->dbtype ||
 		  		SQL_DBCLOB == fbh->dbtype) {
 	      		fbh->ftype = fbh->dbtype;
 	  		fbh->rlen = bufferSizeRequired = fbh->dsize = fbh->prec;
-		}
-	  	else if (SQL_XML == fbh->dbtype) {
+		  }
+	  	  else if (SQL_XML == fbh->dbtype) {
 	      		fbh->ftype = SQL_C_BINARY;
 	      		fbh->rlen = bufferSizeRequired = fbh->dsize = -1;
-		}
-	  	else
+		  }
+          else
 #endif
 		
-			if( SQL_BINARY == fbh->dbtype ||
-					SQL_VARBINARY == fbh->dbtype ||
-			      		SQL_LONGVARBINARY == fbh->dbtype ||
-			      		SQL_BLOB == fbh->dbtype) {
-		      		fbh->ftype = SQL_C_BINARY;
-		      		fbh->rlen = bufferSizeRequired = fbh->dsize = fbh->prec;
-		  	}
-		  	else {
-				if (SQL_XML == fbh->dbtype) {
-			      		fbh->ftype = SQL_C_BINARY;
-			      		fbh->rlen = bufferSizeRequired = fbh->dsize = -1;
-				}
-				else {
-			      		fbh->ftype = SQL_C_CHAR;
+          if( SQL_BINARY == fbh->dbtype ||
+               SQL_VARBINARY == fbh->dbtype ||
+                 SQL_LONGVARBINARY == fbh->dbtype ||
+                    SQL_BLOB == fbh->dbtype) {
+              fbh->ftype = SQL_C_BINARY;
+              fbh->rlen = bufferSizeRequired = fbh->dsize = fbh->prec;
+          } else {
+			  if( !SQLTypeIsLob( fbh->dbtype ) ) {
+                fbh->ftype = SQL_C_CHAR;
 #ifdef AS400
-			      		ret = SQLColAttributes( imp_sth->phstmt,
-			  				i+1,
-		       					SQL_DESC_DISPLAY_SIZE,
-		       					NULL,
-		       					0,
-		       					NULL,
-		       					&fbh->dsize );
+                ret = SQLColAttributes( imp_sth->phstmt,
+                      i+1,
+                      SQL_DESC_DISPLAY_SIZE,
+                      NULL,
+                      0,
+                      NULL,
+                      &fbh->dsize );
 #else
-			      		ret = SQLColAttribute( imp_sth->phstmt,
-		       					(SQLSMALLINT) (i+1),
-		       					SQL_DESC_DISPLAY_SIZE,
-		       					NULL,
-		       					0,
-		       					NULL,
-		       					&fbh->dsize );
+                ret = SQLColAttribute( imp_sth->phstmt,
+                      (SQLSMALLINT) (i+1),
+                      SQL_DESC_DISPLAY_SIZE,
+                      NULL,
+                      0,
+                      NULL,
+                      &fbh->dsize );
 #endif
-					CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "ColAttribute Failed");
-			      		EOI(ret);
+                CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "ColAttribute Failed");
+                EOI(ret);
+
+                ret = SQLGetInfo( imp_dbh->hdbc,
+                      SQL_DATABASE_CODEPAGE,
+                      valuePtr,
+                      bufferLength,
+                      &stringLength );
+
+                if( ret == SQL_SUCCESS_WITH_INFO &&  bufferLength < (stringLength + 1) ) {
+                  if( DBIS->debug >= 2) {
+                    PerlIO_printf( DBILOGFP,
+                                   "GetInfo(%d) local buffer isn't big enough. stringlength=%d\n",
+                                   SQL_DATABASE_CODEPAGE, stringLength );
+                  }
+                  /* Local buffer isn't big enough, dynamically allocate new one */
+                  bufferLength = stringLength + 1;
+                  Safefree(valuePtr);
+                  Newc( 1, valuePtr, bufferLength, char, SQLPOINTER );
+                  Zero( valuePtr, bufferLength, char );
+
+                  ret = SQLGetInfo( imp_dbh->hdbc,
+                                    SQL_DATABASE_CODEPAGE,
+                                    valuePtr,
+                                    bufferLength,
+                                    &stringLength );
+                }
+
+                CHECK_ERROR(sth, SQL_HANDLE_DBC, imp_dbh->hdbc, ret, "Error Calling SQLGetInfo");
+
+                if( ret == SQL_SUCCESS) {
+                  db_codepage = *(int *)valuePtr;
+                  retsv = sv_2mortal( newSViv( (I32)( *(SQLINTEGER*)valuePtr) ) );
+                }
+
+                ret = SQLGetInfo( imp_dbh->hdbc,
+                                  SQL_APPLICATION_CODEPAGE,
+                                  valuePtr,
+                                  bufferLength,
+                                  &stringLength );
 					
-			      		ret = SQLGetInfo( imp_dbh->hdbc,
-			     				SQL_DATABASE_CODEPAGE,
-			     				valuePtr,
-			     				bufferLength,
-			     				&stringLength );
-					
-			      		if( ret == SQL_SUCCESS_WITH_INFO &&  bufferLength < (stringLength + 1) ) {
-				 		if( DBIS->debug >= 2) {
-				   			PerlIO_printf( DBILOGFP,
-						 			"GetInfo(%d) local buffer isn't big enough. stringlength=%d\n",
-						 			SQL_DATABASE_CODEPAGE, stringLength );
-				 		}
-				 		/* Local buffer isn't big enough, dynamically allocate new one */
-				 		bufferLength = stringLength + 1;
-				 		Safefree(valuePtr);
-				 		Newc( 1, valuePtr, bufferLength, char, SQLPOINTER );
-				 		Zero( valuePtr, bufferLength, char );
-				 
-						ret = SQLGetInfo( imp_dbh->hdbc,
-				   				SQL_DATABASE_CODEPAGE,
-				   				valuePtr,
-				   				bufferLength,
-				   				&stringLength );
-			   		}
-					
-					CHECK_ERROR(sth, SQL_HANDLE_DBC, imp_dbh->hdbc, ret, "Error Calling SQLGetInfo");
-					
-			   		if( ret == SQL_SUCCESS) {
-			       			db_codepage = *(int *)valuePtr;
-			       			retsv = sv_2mortal( newSViv( (I32)( *(SQLINTEGER*)valuePtr) ) );
-			   		}
-					
-			      		ret = SQLGetInfo( imp_dbh->hdbc,
-			     				SQL_APPLICATION_CODEPAGE,
-			     				valuePtr,
-			     				bufferLength,
-			     				&stringLength );
-					
-			      		if( ret == SQL_SUCCESS_WITH_INFO &&  bufferLength < (stringLength + 1) ) {
-				 		if( DBIS->debug >= 2) {
-				   			PerlIO_printf( DBILOGFP,
-						 			"GetInfo(%d) local buffer isn't big enough. stringlength=%d\n",
-						 			SQL_APPLICATION_CODEPAGE, stringLength );
-				 		}
+                if( ret == SQL_SUCCESS_WITH_INFO &&  bufferLength < (stringLength + 1) ) {
+                  if( DBIS->debug >= 2) {
+                     PerlIO_printf( DBILOGFP,
+                                    "GetInfo(%d) local buffer isn't big enough. stringlength=%d\n",
+                                    SQL_APPLICATION_CODEPAGE, stringLength );
+                  }
 						
-				 		/* Local buffer isn't big enough, dynamically allocate new one */
-				 		bufferLength = stringLength + 1;
-				 		Safefree(valuePtr);
-				 		Newc( 1, valuePtr, bufferLength, char, SQLPOINTER );
-				 		Zero( valuePtr, bufferLength, char );
+                  /* Local buffer isn't big enough, dynamically allocate new one */
+                  bufferLength = stringLength + 1;
+                  Safefree(valuePtr);
+                  Newc( 1, valuePtr, bufferLength, char, SQLPOINTER );
+                  Zero( valuePtr, bufferLength, char );
 						
-				 		ret = SQLGetInfo( imp_dbh->hdbc,
-				   				SQL_APPLICATION_CODEPAGE,
-				   				valuePtr,
-				   				bufferLength,
-				   				&stringLength );
-			   		}
+                  ret = SQLGetInfo( imp_dbh->hdbc,
+                                    SQL_APPLICATION_CODEPAGE,
+                                    valuePtr,
+                                    bufferLength,
+                                    &stringLength );
+                }
 					
-					CHECK_ERROR(sth, SQL_HANDLE_DBC, imp_dbh->hdbc, ret, "Error Calling SQLGetInfo");
+                CHECK_ERROR(sth, SQL_HANDLE_DBC, imp_dbh->hdbc, ret, "Error Calling SQLGetInfo");
+
+                if( ret == SQL_SUCCESS) {
+                  app_codepage = *(int *)valuePtr; 
+                  retsv = sv_2mortal( newSViv( (I32)( *(SQLINTEGER*)valuePtr) ) );
+                }
 					
-			   		if( ret == SQL_SUCCESS) {
-			       			app_codepage = *(int *)valuePtr; 
-			       			retsv = sv_2mortal( newSViv( (I32)( *(SQLINTEGER*)valuePtr) ) );
-			   		}
-					
-			   		if ( app_codepage != db_codepage) {
-			      			fbh->rlen = bufferSizeRequired = (4*fbh->dsize)+1;/* +1: STRING null terminator */
-			   		} else {
-			      			fbh->rlen = bufferSizeRequired = fbh->dsize+1;/* +1: STRING null terminator */
-			   		}
-		       		}
-		  	}
+                if ( app_codepage != db_codepage) {
+                  fbh->rlen = bufferSizeRequired = (4*fbh->dsize)+1;/* +1: STRING null terminator */
+                } else {
+                  fbh->rlen = bufferSizeRequired = fbh->dsize+1;/* +1: STRING null terminator */
+                }
+            }
+		  }
 		
-	  	/* Limit buffer size based on LongReadLen for long column types */
-	  	if( SQLTypeIsLong( fbh->dbtype ) ) {
-			unsigned int longReadLen = DBIc_LongReadLen( imp_sth );
-			
-			if( fbh->rlen > (int) longReadLen ) {
-		      		if( SQL_LONGVARBINARY == fbh->dbtype ||
-				  		SQL_BLOB == fbh->dbtype ||
-				  		SQL_XML == fbh->dbtype ||
-				  		0 == longReadLen )
-			    		fbh->rlen = bufferSizeRequired = longReadLen;
-		      		else
-			    		fbh->rlen = bufferSizeRequired = longReadLen+1; /* +1 for null terminator */
-			}
-	  	}
+	  	  /* Limit buffer size based on LongReadLen for long column types */
+          if( SQLTypeIsLob( fbh->dbtype ) ) {
+              ret = bind_lob_column_helper( fbh, i+1 );
+          } else {
+              if( SQLTypeIsLong( fbh->dbtype ) ) {
+                unsigned int longReadLen = DBIc_LongReadLen( imp_sth );
+                if( fbh->rlen > (int) longReadLen ) {
+                  if( SQL_LONGVARBINARY == fbh->dbtype ||
+                      0 == longReadLen )
+                    fbh->rlen = bufferSizeRequired = longReadLen;
+                  else
+                    fbh->rlen = bufferSizeRequired = longReadLen+1; /* +1 for null terminator */
+                }
+			  }
+              /* Allocate output buffer */
+              if( bufferSizeRequired > fbh->bufferSize ) {
+                  fbh->bufferSize = bufferSizeRequired;
+                  Safefree(fbh->buffer);
+                  Newc( 1, fbh->buffer, fbh->bufferSize, SQLCHAR, void* );
+              }
 		
-	  	/* Allocate output buffer */
-	  	if( bufferSizeRequired > fbh->bufferSize ) {
-			fbh->bufferSize = bufferSizeRequired;
-			Safefree(fbh->buffer);
-			Newc( 1, fbh->buffer, fbh->bufferSize, SQLCHAR, void* );
-	  	}
+              /* BIND */
+              ret = SQLBindCol( imp_sth->phstmt,
+                    (SQLUSMALLINT) (i+1),
+                    fbh->ftype,
+                    fbh->buffer,
+                    fbh->bufferSize,
+                    &fbh->rlen );
+		  }
+
+          if (ret == SQL_SUCCESS_WITH_INFO ) {
+              warn("BindCol error on %s: %d", fbh->cbuf);
+          } else {
+              CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "BindCol Failed");
+              EOI(ret);
+          }
 		
-	  	/* BIND */
-		if(SQL_XML != fbh->dbtype) {
-			ret = SQLBindCol( imp_sth->phstmt,
-					(SQLUSMALLINT) (i+1),
-					fbh->ftype,
-					fbh->buffer,
-					fbh->bufferSize,
-					&fbh->rlen );
-		  	if (ret == SQL_SUCCESS_WITH_INFO ) {
-		      		warn("BindCol error on %s: %d", fbh->cbuf);
-		  	} else {
-				CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "BindCol Failed");
-		      		EOI(ret);
-		  	}
-		}
-		
-	  	if (DBIS->debug >= 2)
-	      		fbh_dump(fbh, i);
-    	}
-    	return TRUE;
+          if (DBIS->debug >= 2)
+            fbh_dump(fbh, i);
+        }
+        return TRUE;
 }
 
 static void dbd_preparse( imp_sth_t *imp_sth,
@@ -2506,14 +2558,150 @@ int dbd_st_execute( SV *sth,     /* error : <=(-2), ok row count : >=0, unknown 
     	return imp_sth->RowCount;
 }
 
+static SQLRETURN get_lob_length( imp_fbh_t *fbh, SQLINTEGER col_num, SQLHANDLE hdbc ){
+  SQLHANDLE        new_hstmt;
+  SQLRETURN        rc;
+
+  rc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &new_hstmt);
+
+  if( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO ) {
+    return rc;
+  }
+
+  switch( fbh->dbtype ) {
+    case SQL_CLOB:
+      fbh->ftype   =  SQL_C_CHAR;
+
+      rc = SQLGetLength( new_hstmt,
+                           fbh->loc_type,
+                           fbh->lob_loc,
+                           &fbh->rlen,
+                           &fbh->loc_ind );
+      break;
+
+    case SQL_BLOB:
+      fbh->ftype   =  SQL_C_BINARY;
+
+      rc = SQLGetLength( new_hstmt,
+                           fbh->loc_type,
+                           fbh->lob_loc,
+                           &fbh->rlen,
+                           &fbh->loc_ind );
+      break;
+
+    case SQL_DBCLOB:
+      fbh->ftype   =  SQL_C_CHAR;
+
+      rc = SQLGetLength( new_hstmt,
+                           fbh->loc_type,
+                           fbh->lob_loc,
+                           &fbh->rlen,
+                           &fbh->loc_ind );
+      break;
+
+    case SQL_XML:
+      fbh->ftype = SQL_C_BINARY;
+
+      rc = SQLGetData( fbh->imp_sth->phstmt,
+                       col_num,
+                       fbh->ftype,
+                       NULL,
+                       0,
+                       &fbh->rlen );
+      return rc;
+  }
+
+  SQLFreeHandle(SQL_HANDLE_STMT, new_hstmt);
+
+  return rc;
+}
+
+static SQLRETURN get_lob_data( imp_fbh_t *fbh, SQLINTEGER col_num, SQLHANDLE hdbc ){
+  SQLHANDLE        new_hstmt;
+  SQLRETURN        rc;
+  SQLINTEGER       out_length = 0;
+
+  rc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &new_hstmt);
+
+  if( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO ) {
+    return rc;
+  }
+
+  switch( fbh->dbtype ) {
+    case SQL_CLOB:
+      fbh->ftype   =  SQL_C_CHAR;
+
+      rc = SQLGetSubString( new_hstmt,
+                            fbh->loc_type,
+                            fbh->lob_loc,
+                            1,
+                            fbh->rlen,
+                            fbh->ftype,
+                            fbh->buffer,
+                            fbh->bufferSize+1,
+                            &out_length,
+                            &fbh->loc_ind );
+      fbh->rlen = out_length;
+      break;
+
+    case SQL_BLOB:
+      fbh->ftype   =  SQL_C_BINARY;
+
+      rc = SQLGetSubString( new_hstmt,
+                            fbh->loc_type,
+                            fbh->lob_loc,
+                            1,
+                            fbh->rlen,
+                            fbh->ftype,
+                            fbh->buffer,
+                            fbh->bufferSize,
+                            &out_length,
+                            &fbh->loc_ind );
+      fbh->rlen = out_length;
+      break;
+
+    case SQL_DBCLOB:
+      fbh->ftype   =  SQL_C_CHAR;
+
+      rc = SQLGetSubString( new_hstmt,
+                            fbh->loc_type,
+                            fbh->lob_loc,
+                            1,
+                            fbh->rlen,
+                            fbh->ftype,
+                            fbh->buffer,
+                            fbh->bufferSize+1,
+                            &out_length,
+                            &fbh->loc_ind );
+      fbh->rlen = out_length;
+      break;
+
+    case SQL_XML:
+      fbh->ftype = SQL_C_BINARY;
+
+      rc = SQLGetData( fbh->imp_sth->phstmt,
+                      col_num,
+                      fbh->ftype,
+                      fbh->buffer,
+                      fbh->bufferSize,
+                      &out_length );
+      return rc;
+  }
+
+  SQLFreeHandle(SQL_HANDLE_STMT, new_hstmt);
+
+  return rc;
+}
+
 AV *dbd_st_fetch( SV *sth,
 		imp_sth_t *imp_sth ) {
     
-	D_imp_dbh_from_sth;
+	    D_imp_dbh_from_sth;
     	SQLINTEGER num_fields = DBIc_NUM_FIELDS( imp_sth );
     	SQLINTEGER ChopBlanks;
+        SQLINTEGER bufferSizeRequired;
     	SQLINTEGER i;
-	SQLINTEGER retl = 0;
+        SQLINTEGER retl = 0;
     	SQLRETURN ret=-3;
     	AV *av;
     	imp_fbh_t *fbh;
@@ -2592,17 +2780,8 @@ AV *dbd_st_fetch( SV *sth,
     	ChopBlanks = DBIc_has( imp_sth, DBIcf_ChopBlanks );
     	for( i = 0; i < num_fields; ++i ) {
 	  	fbh = &imp_sth->fbh[i];
+        bufferSizeRequired = 0;
 	  	sv = AvARRAY(av)[i]; /* Note: we reuse the supplied SV    */
-		if(fbh->dbtype == SQL_XML) {
-			ret=SQLGetData( imp_sth->phstmt,
-					i+1,
-					fbh->ftype,
-					NULL,
-					0,
-					&retl );
-			fbh->bufferSize = retl + 1;
-			fbh->rlen = retl;
-		}
 		
 #ifdef AS400
 	  	if( fbh->rlen == SQL_NTS )
@@ -2625,57 +2804,84 @@ AV *dbd_st_fetch( SV *sth,
 			}
 	  	} else {
 #endif
-		  	if( fbh->rlen > -1 &&      /* normal case - column is not null */
-			      		fbh->bufferSize > 0 ) {
-				int nullAdj = SQL_C_CHAR == fbh->ftype ? 1 : 0;
+        if( SQLTypeIsLob( fbh->dbtype ) ) {
+          unsigned int longReadLen = DBIc_LongReadLen( imp_sth );
+
+          ret = get_lob_length( fbh, i+1, imp_dbh->hdbc );
+          CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "Retrieving LOB length Failed");
+          EOI(ret);
+
+          if( fbh->rlen > (int) longReadLen ) {
+            if( SQL_BLOB == fbh->dbtype ||
+                SQL_XML == fbh->dbtype ||
+                0 == longReadLen )
+              fbh->rlen = bufferSizeRequired = longReadLen;
+            else
+              fbh->rlen = bufferSizeRequired = longReadLen+1; /* +1 for null terminator */
+		  } else {
+            if( SQL_BLOB == fbh->dbtype ||
+                SQL_XML == fbh->dbtype ||
+                0 == longReadLen )
+              bufferSizeRequired = fbh->rlen;
+            else
+              bufferSizeRequired = fbh->rlen+1; /* +1 for null terminator */
+		  }
+		  if( fbh->buffer != NULL ) {
+            Safefree(fbh->buffer);
+            fbh->buffer = NULL;
+		  }
+          fbh->bufferSize = bufferSizeRequired;
+          Newc( 1, fbh->buffer, fbh->bufferSize, SQLCHAR, void* );
+        }
+
+        if( fbh->rlen > -1 &&      /* normal case - column is not null */
+                    fbh->bufferSize > 0 ) {
+            int nullAdj = SQL_C_CHAR == fbh->ftype ? 1 : 0;
+
+            if( SQLTypeIsLob( fbh->dbtype ) ) {
+              ret = get_lob_data( fbh, i+1, imp_dbh->hdbc );
+              CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "Retrieving LOB Data Failed");
+              EOI(ret);
+            }
 				
-				if(fbh->dbtype == SQL_XML) {
-					Safefree( fbh->buffer );
-					Newc( 1, fbh->buffer, fbh->bufferSize, SQLCHAR, void* );
-					Zero( fbh->buffer, fbh->bufferSize, char );
-					ret=SQLGetData( imp_sth->phstmt,
-							i+1,
-							fbh->ftype,
-							fbh->buffer,
-							fbh->bufferSize,
-							&retl );
-				}
-				
-				if( fbh->rlen > ( fbh->bufferSize - nullAdj ) ) /* data has been truncated */
-				{
-			      		int longTruncOk = DBIc_has( imp_sth, DBIcf_LongTruncOk );
-			      		char msg[200];
+            if( fbh->rlen > ( fbh->bufferSize - nullAdj ) ) /* data has been truncated */
+            {
+              int longTruncOk = DBIc_has( imp_sth, DBIcf_LongTruncOk );
+              char msg[200];
+
+              sv_setpvn( sv,
+                         (char*)fbh->buffer,
+                         fbh->bufferSize - nullAdj
+                       );
 					
-			      		sv_setpvn( sv,
-				   			(char*)fbh->buffer,
-				   			fbh->bufferSize - nullAdj );
+              sprintf( msg,
+                       "%s: Data in column %d has been truncated to %d bytes."
+                       "  A maximum of %d bytes are available",
+                       longTruncOk ? "Warning" : "Error",
+                       i,
+                       fbh->bufferSize - nullAdj,
+                       fbh->rlen
+					  );
 					
-			      		sprintf( msg,
-				     			"%s: Data in column %d has been truncated to %d bytes."
-				     			"  A maximum of %d bytes are available",
-				     			longTruncOk ? "Warning" : "Error",
-				     			i,
-				     			fbh->bufferSize - nullAdj,
-				     			fbh->rlen );
-					
-			      		if( longTruncOk )
-				    		warn( msg );
-			      		else
-				    		croak( msg );
-				}
-				else if( ChopBlanks && SQL_CHAR == fbh->dbtype )
-			      		sv_setpvn( sv,
-				   			fbh->buffer,
-				   			GetTrimmedSpaceLen( fbh->buffer, fbh->rlen ) );
-				else
-			      		sv_setpvn( sv, (char*)fbh->buffer, fbh->rlen );
+              if( longTruncOk )
+                warn( msg );
+              else
+                croak( msg );
+            }
+            else if( ChopBlanks && SQL_CHAR == fbh->dbtype )
+              sv_setpvn( sv,
+                         fbh->buffer,
+                         GetTrimmedSpaceLen( fbh->buffer, fbh->rlen )
+                       );
+            else
+              sv_setpvn( sv, (char*)fbh->buffer, fbh->rlen );
 		  	}
-		  	else                  /*  column contains a null value */
-		  	{
-				fbh->indp = (short) fbh->rlen;
-				fbh->rlen = 0;
-				(void)SvOK_off(sv);
-		  	}
+        else                  /*  column contains a null value */
+        {
+          fbh->indp = (short) fbh->rlen;
+          fbh->rlen = 0;
+          (void)SvOK_off(sv);
+        }
 			
 #ifdef AS400
 	  	}

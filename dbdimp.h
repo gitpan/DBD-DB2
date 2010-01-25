@@ -91,6 +91,11 @@ struct imp_fbh_st {     		/* field buffer */
 	void       *buffer;         	/* data buffer (poSQLINTEGERs to sv data)       */
 	SQLINTEGER  bufferSize;     	/* length of data buffer                        */
 	SQLINTEGER  rlen;           	/* length of returned data                      */
+
+	/*LOB locator and LOB type indicator fields for LOB columns(CLOB/BLOB)*/
+	SQLINTEGER   lob_loc;
+	SQLINTEGER   loc_ind;
+	SQLSMALLINT  loc_type;
 };
 
 typedef struct phs_st phs_t;    /* scalar placeholder */
