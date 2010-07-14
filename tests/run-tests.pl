@@ -177,6 +177,7 @@ system("$PL perld092_typeDecfloat.pl") if ($runall || $tc{perld092_typeDecfloat}
 system("$PL perld093_testStoredPrcMultResultset.pl") if ($runall || $tc{perld093_testStoredPrcMultResultset});
 system("$PL perld094_testSQLRowCount.pl") if ($runall || $tc{perld094_testSQLRowCount});
 system("$PL perld095_chopblanks_test.pl") if ($runall || $tc{perld095_chopblanks_test});
+system("$PL perld_null_clob_test.pl") if ($runall || $tc{perld_null_clob_test});
 
 #################################################################################
 # Cleanup

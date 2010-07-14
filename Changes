@@ -4,6 +4,9 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.79, Jul 14, 2010
+  Fixed bug 57562: Handling for NULL data LOB added.
+
 =head2 Changes in DBD::DB2 1.78, Jan 25, 2010
   Changes for proper handling of LOB types
   Fixed issue of segfault due to passing of NULL to DBIh_SET_ERR_CHAR - Cpan - 52883/53525

@@ -2562,6 +2562,11 @@ static SQLRETURN get_lob_length( imp_fbh_t *fbh, SQLINTEGER col_num, SQLHANDLE h
   SQLHANDLE        new_hstmt;
   SQLRETURN        rc;
 
+  if( fbh->loc_ind == SQL_NULL_DATA ) { /* If column value is NULL then set rlen to -1 and return SQL_SUCCESS */
+    fbh->rlen = -1;
+    return SQL_SUCCESS;
+  }
+
   rc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &new_hstmt);
 
   if( rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO ) {
