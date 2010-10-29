@@ -2816,28 +2816,30 @@ AV *dbd_st_fetch( SV *sth,
           CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "Retrieving LOB length Failed");
           EOI(ret);
 
-          if( fbh->rlen > (int) longReadLen ) {
-            if( SQL_BLOB == fbh->dbtype ||
-                SQL_XML == fbh->dbtype ||
-                0 == longReadLen )
-              fbh->rlen = bufferSizeRequired = longReadLen;
-            else
-              fbh->rlen = bufferSizeRequired = longReadLen+1; /* +1 for null terminator */
-		  } else {
-            if( SQL_BLOB == fbh->dbtype ||
-                SQL_XML == fbh->dbtype ||
-                0 == longReadLen )
-              bufferSizeRequired = fbh->rlen;
-            else
-              bufferSizeRequired = fbh->rlen+1; /* +1 for null terminator */
-		  }
-		  if( fbh->buffer != NULL ) {
-            Safefree(fbh->buffer);
-            fbh->buffer = NULL;
-		  }
-          fbh->bufferSize = bufferSizeRequired;
-          Newc( 1, fbh->buffer, fbh->bufferSize, SQLCHAR, void* );
-        }
+          if(fbh->rlen > -1 ) { /*LOB data is not null*/
+		    if( fbh->rlen > (int) longReadLen ) {
+              if( SQL_BLOB == fbh->dbtype ||
+                  SQL_XML == fbh->dbtype ||
+                  0 == longReadLen )
+                fbh->rlen = bufferSizeRequired = longReadLen;
+              else
+                fbh->rlen = bufferSizeRequired = longReadLen+1; /* +1 for null terminator */
+		    } else {
+              if( SQL_BLOB == fbh->dbtype ||
+                  SQL_XML == fbh->dbtype ||
+                  0 == longReadLen )
+                bufferSizeRequired = fbh->rlen;
+              else
+                bufferSizeRequired = fbh->rlen+1; /* +1 for null terminator */
+		    }
+		    if( fbh->buffer != NULL ) {
+              Safefree(fbh->buffer);
+              fbh->buffer = NULL;
+		    }
+            fbh->bufferSize = bufferSizeRequired;
+            Newc( 1, fbh->buffer, fbh->bufferSize, SQLCHAR, void* );
+          }
+		}
 
         if( fbh->rlen > -1 &&      /* normal case - column is not null */
                     fbh->bufferSize > 0 ) {
