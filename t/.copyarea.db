@@ -1,0 +1,6 @@
+ClearCase CopyAreaDB|4
+opendbad\perl\DBD-DB2\t
+2
+2
+6:main.t|1|124fb6e1ef3|dd9|2df2531e|871715e77f2711db80e9000180c71916|0
+6:base.t|1|124fb6e1e95|18a|cded7577|855715d77f2711db80e9000180c71916|0

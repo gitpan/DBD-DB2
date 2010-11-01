@@ -4,6 +4,9 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.80, Oct 29, 2010
+  Fix for Handling for NULL data LOB broken on Perl-5.8
+  
 =head2 Changes in DBD::DB2 1.79, Jul 14, 2010
   Fixed bug 57562: Handling for NULL data LOB added.
 

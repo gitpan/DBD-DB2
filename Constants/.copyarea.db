@@ -1,0 +1,8 @@
+ClearCase CopyAreaDB|4
+opendbad\perl\DBD-DB2\Constants
+2
+4
+8:MANIFEST|1|124fb6e1bb7|2f|97e81006|707714e77f2711db80e9000180c71916|0
+c:Constants.pm|1|12bf6b1d2a5|85d6|9100012a|16eb5015f0524eb9b1db875f46a39c97|0
+c:Constants.xs|1|124fb6e1b69|33d62|54ce9cd4|1faf886a70164e7d97e3877cd5612ea7|0
+b:Makefile.PL|1|124fb6e1c05|75b|13740fbf|71a714f77f2711db80e9000180c71916|0
