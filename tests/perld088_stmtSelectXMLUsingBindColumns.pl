@@ -48,14 +48,14 @@ check_value("EXECUTE", "rv", -1);
 for($i=1; $i<4; $i++)
 {
   @row_ary = $sth->fetchrow_array();
-  check_error("FETCHROW_ARRAY $i");
+  #check_error("FETCHROW_ARRAY $i");
   check_value("FETCHROW_ARRAY $i", "smallint2", $i);
   check_value("FETCHROW_ARRAY $i", "xml2", $real_value{XML}[$i-1], FALSE);
 }
 
 while (@row_arg = $sth->fetchrow())
 {
-  check_error("FETCHROW $i");
+  #check_error("FETCHROW $i");
   check_value("FETCHROW $i", "smallint2", $i);
   check_value("FETCHROW $i", "xml2", $real_value{XML}[$i-1], FALSE);
   $i++;

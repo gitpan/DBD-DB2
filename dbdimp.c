@@ -48,12 +48,14 @@ static SQLRETURN diagnoseError(SV* perlHandle, SQLSMALLINT handleType, SQLHANDLE
 	D_imp_xxh(perlHandle);
 	switch(rc)
 	{
-		if(DBIc_TRACE_LEVEL(imp_xxh) >=3){
+		/*if(DBIc_TRACE_LEVEL(imp_xxh) >=3){*/
 			case SQL_SUCCESS_WITH_INFO:
+                                setErrorFromDiagRecInfo(perlHandle, handleType, handle, Nullch);
+                                break;
 			case SQL_NO_DATA_FOUND:
 				setErrorFromDiagRecInfo(perlHandle, handleType, handle, "");
 				break;
-		}
+		/*}*/
 		case SQL_ERROR:
 			setErrorFromDiagRecInfo(perlHandle, handleType, handle, Nullch);
 			break;
@@ -2433,6 +2435,20 @@ int dbd_bind_ph( SV *sth,
   				maxlen,
   				&phs->indp );
 #else
+                SQLPOINTER datap;
+                switch (ctype) {
+                        case SQL_C_SHORT:
+                        case SQL_C_LONG:
+                                datap = &phs->ivValue;
+                                break;
+                        case SQL_C_FLOAT:
+                        case SQL_C_DOUBLE:
+                                datap = &phs->dblValue;
+                                break;
+                        default:
+                                datap = phs->buffer;
+                                break;
+                }
 	  	ret = SQLBindParameter( imp_sth->phstmt,
   				(SQLUSMALLINT)SvIV( param ),
   				phs->paramType,
@@ -2440,11 +2456,14 @@ int dbd_bind_ph( SV *sth,
   				sql_type,
   				phs->bDescribeOK ? phs->descColumnSize : prec,
   				scale,
-  				phs->buffer,
+  				datap,
   				maxlen,
   				&phs->indp );
 #endif
     	}
+
+	phs->cType = ctype;	/*Set the cType of the variable to which the parameter is bound*/
+
 	CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "Bind Failed");
     	EOI(ret);
 	
@@ -2541,10 +2560,16 @@ int dbd_st_execute( SV *sth,     /* error : <=(-2), ok row count : >=0, unknown 
 			    		}
 #endif
 			    		else {
-				  		sv_setpvn( phs->sv, phs->buffer, phs->indp );
-						if( phs->indp > phs->bufferSize )
-					       		warn( "Output buffer too small, data truncated "
-						  			"for parameter '%s'", key );
+						if( phs->cType == SQL_C_LONG || phs->cType == SQL_C_SHORT ) {
+                                                        sv_setiv(phs->sv, phs->ivValue);
+                                                } else if( phs->cType == SQL_C_DOUBLE || phs->cType == SQL_C_FLOAT ) {
+                                                        sv_setnv(phs->sv, phs->dblValue);
+                                                } else {
+                                                        sv_setpvn( phs->sv, phs->buffer, phs->indp );
+							if( phs->indp > phs->bufferSize )
+					       			warn( "Output buffer too small, data truncated "
+						  				"for parameter '%s'", key );
+						}
 			    		}
 		      		}
 			}

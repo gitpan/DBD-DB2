@@ -50,14 +50,14 @@ check_value("EXECUTE", "rv", -1);
 for($i=1; $i<4; $i++)
 {
   $ary_ref = $sth->fetchrow_arrayref();
-  check_error("FETCHROW_ARRAYREF $i");
+  #check_error("FETCHROW_ARRAYREF $i");
   check_value("FETCHROW_ARRAYREF $i", "smallint1", $i);
   check_value("FETCHROW_ARRAYREF $i", "xml1", $real_value{XML}[$i-1], FALSE);
 }
 
 while ($ary_ref = $sth->fetch())
 {
-  check_error("FETCH $i");
+  #check_error("FETCH $i");
   check_value("FETCH $i", "smallint1", $i);
   check_value("FETCH $i", "xml1", $real_value{XML}[$i-1], FALSE);
   $i++;

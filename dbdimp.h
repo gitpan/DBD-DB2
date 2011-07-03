@@ -105,12 +105,15 @@ struct phs_st { /* scalar placeholder */
 	void        *buffer;              /* input and output buffer                */
 	int          bufferSize;          /* size of buffer                         */
 	SQLUSMALLINT paramType;           /* INPUT, OUTPUT or INPUT_OUTPUT          */
+        SQLSMALLINT cType;               /* The parameter cType                    */
 	SQLINTEGER   indp;                /* null indicator or length indicator     */
 	int          bDescribed;          /* already described this parameter       */
 	int          bDescribeOK;         /* describe was successful                */
 	SQLSMALLINT  descSQLType;                                      
 	SQLSMALLINT  descDecimalDigits;                                
 	SQLUINTEGER  descColumnSize;                                   
+	IV	     ivValue;		 /*integer variable to hold the bound output value */
+	double	     dblValue;           /*double variable to hold the bound output value*/
 };
 
 #define dbd_init            db2_init

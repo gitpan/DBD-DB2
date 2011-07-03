@@ -4,6 +4,10 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.81, Jul 03, 2011
+  Binding to the return value of a stored procedure silently fails - Cpan - 42185
+  Return warning codes when there is successful execution of SQLs with warnings
+  
 =head2 Changes in DBD::DB2 1.80, Oct 29, 2010
   Fix for Handling for NULL data LOB broken on Perl-5.8
   

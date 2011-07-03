@@ -178,6 +178,7 @@ system("$PL perld093_testStoredPrcMultResultset.pl") if ($runall || $tc{perld093
 system("$PL perld094_testSQLRowCount.pl") if ($runall || $tc{perld094_testSQLRowCount});
 system("$PL perld095_chopblanks_test.pl") if ($runall || $tc{perld095_chopblanks_test});
 system("$PL perld_null_clob_test.pl") if ($runall || $tc{perld_null_clob_test});
+system("$PL perld_test_sql_warning.pl") if ($runall || $tc{perld_test_sql_warning});
 
 #################################################################################
 # Cleanup
