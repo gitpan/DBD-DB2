@@ -4,6 +4,7 @@
     Copyright (c) 1995-2004 International Business Machines Corp.
 */
 
+#define NEED_newRV_noinc
 #include "DB2.h"
 
 /* 
@@ -46,7 +47,7 @@ void
 disconnect_all(drh)
     SV *        drh
     CODE:
-    if (!dirty && !SvTRUE(perl_get_sv("DBI::PERL_ENDING",0))) {
+    if (!PL_dirty && !SvTRUE(perl_get_sv("DBI::PERL_ENDING",0))) {
         D_imp_drh(drh);
         sv_setiv(DBIc_ERR(imp_drh), (IV)1);
         sv_setpv(DBIc_ERRSTR(imp_drh),
@@ -89,7 +90,7 @@ _login(dbh, dbname, username, password, attribs=Nullsv)
     D_imp_dbh(dbh);
     char *u = (SvOK(username)) ? SvPV(username,lna) : "";
     char *p = (SvOK(password)) ? SvPV(password,lna) : "";
-    ST(0) = dbd_db_login2(dbh, imp_dbh, dbname, u, p, attribs) ? &sv_yes : &sv_no;
+    ST(0) = dbd_db_login2(dbh, imp_dbh, dbname, u, p, attribs) ? &PL_sv_yes : &PL_sv_no;
     }
 
 
@@ -100,7 +101,7 @@ commit(dbh)
     D_imp_dbh(dbh);
     if (DBIc_has(imp_dbh,DBIcf_AutoCommit))
         warn("commit ineffective with AutoCommit enabled");
-    ST(0) = dbd_db_commit(dbh, imp_dbh) ? &sv_yes : &sv_no;
+    ST(0) = dbd_db_commit(dbh, imp_dbh) ? &PL_sv_yes : &PL_sv_no;
 
 void
 rollback(dbh)
@@ -109,7 +110,7 @@ rollback(dbh)
     D_imp_dbh(dbh);
     if (DBIc_has(imp_dbh,DBIcf_AutoCommit))
         warn("rollback ineffective with AutoCommit enabled");
-    ST(0) = dbd_db_rollback(dbh, imp_dbh) ? &sv_yes : &sv_no;
+    ST(0) = dbd_db_rollback(dbh, imp_dbh) ? &PL_sv_yes : &PL_sv_no;
 
 void
 disconnect(dbh)
@@ -131,14 +132,14 @@ disconnect(dbh)
     }
     /* Check for disconnect() being called whilst refs to cursors       */
     /* still exists. This possibly needs some more thought.             */
-    if (DBIc_ACTIVE_KIDS(imp_dbh) && DBIc_WARN(imp_dbh) && !dirty) {
+    if (DBIc_ACTIVE_KIDS(imp_dbh) && DBIc_WARN(imp_dbh) && !PL_dirty) {
         STRLEN lna;
         char *plural = (DBIc_ACTIVE_KIDS(imp_dbh)==1) ? "" : "s";
         warn("%s->disconnect invalidates %d active statement handle%s %s",
             SvPV(dbh,lna), (int)DBIc_ACTIVE_KIDS(imp_dbh), plural,
             "(either destroy statement handles or call finish on them before disconnecting)");
     }
-    ST(0) = dbd_db_disconnect(dbh, imp_dbh) ? &sv_yes : &sv_no;
+    ST(0) = dbd_db_disconnect(dbh, imp_dbh) ? &PL_sv_yes : &PL_sv_no;
     /* The connection will not be deactivated if there is an invalid */
     /* transaction state, this is handled in dbd_db_disconnect       */
     /*DBIc_ACTIVE_off(imp_dbh);*/  /* ensure it's off, regardless */
@@ -153,10 +154,10 @@ STORE(dbh, keysv, valuesv)
     D_imp_dbh(dbh);
     if (SvGMAGICAL(valuesv))
         mg_get(valuesv);
-    ST(0) = &sv_yes;
+    ST(0) = &PL_sv_yes;
     if (!dbd_db_STORE_attrib(dbh, imp_dbh, keysv, valuesv))
         if (!DBIS->set_attr(dbh, keysv, valuesv))
-            ST(0) = &sv_no;
+            ST(0) = &PL_sv_no;
 
 void
 FETCH(dbh, keysv)
@@ -175,10 +176,10 @@ DESTROY(dbh)
     SV *        dbh
     PPCODE:
     D_imp_dbh(dbh);
-    ST(0) = &sv_yes;
+    ST(0) = &PL_sv_yes;
     if (!DBIc_IMPSET(imp_dbh)) {        /* was never fully set up       */
         STRLEN lna;
-        if (DBIc_WARN(imp_dbh) && !dirty && DBIS->debug >= 2)
+        if (DBIc_WARN(imp_dbh) && !PL_dirty && DBIS->debug >= 2)
              PerlIO_printf(DBILOGFP,
                 "         DESTROY for %s ignored - handle not initialised\n",
                         SvPV(dbh,lna));
@@ -205,7 +206,7 @@ DESTROY(dbh)
             /* Perl will call DESTROY on the dbh and, if we don't rollback,     */
             /* the server may automatically commit! Bham! Corrupt database!     */
             if (!DBIc_has(imp_dbh,DBIcf_AutoCommit)) {
-                if (DBIc_WARN(imp_dbh) && (!dirty || DBIS->debug >= 3))
+                if (DBIc_WARN(imp_dbh) && (!PL_dirty || DBIS->debug >= 3))
                      warn("Issuing rollback() for database handle being DESTROY'd without explicit disconnect()");
                 dbd_db_rollback(dbh, imp_dbh);                  /* ROLLBACK! */
             }
@@ -268,7 +269,7 @@ _prepare(sth, statement, attribs=Nullsv)
     {
     D_imp_sth(sth);
     DBD_ATTRIBS_CHECK("_prepare", sth, attribs);
-    ST(0) = dbd_st_prepare(sth, imp_sth, statement, attribs) ? &sv_yes : &sv_no;
+    ST(0) = dbd_st_prepare(sth, imp_sth, statement, attribs) ? &PL_sv_yes : &PL_sv_no;
     }
 
 
@@ -304,7 +305,7 @@ bind_param(sth, param, value, attribs=Nullsv)
         }
     }
     ST(0) = dbd_bind_ph(sth, imp_sth, param, value, sql_type, attribs, FALSE, 0)
-                ? &sv_yes : &sv_no;
+                ? &PL_sv_yes : &PL_sv_no;
     }
 
 
@@ -338,7 +339,7 @@ bind_param_inout(sth, param, value_ref, maxlen, attribs=Nullsv)
         }
     }
     ST(0) = dbd_bind_ph(sth, imp_sth, param, value, sql_type, attribs, TRUE, maxlen)
-                ? &sv_yes : &sv_no;
+                ? &PL_sv_yes : &PL_sv_no;
     }
 
 
@@ -397,7 +398,7 @@ fetchrow_arrayref(sth)
     CODE:
     D_imp_sth(sth);
     AV *av = dbd_st_fetch(sth, imp_sth);
-    ST(0) = (av) ? sv_2mortal(newRV((SV *)av)) : &sv_undef;
+    ST(0) = (av) ? sv_2mortal(newRV((SV *)av)) : &PL_sv_undef;
 
 
 void
@@ -423,7 +424,7 @@ cancel(sth)
     SV *        sth
     CODE:
     D_imp_sth(sth);
-    ST(0) = dbd_st_cancel(sth,imp_sth) ? &sv_yes : &sv_no;
+    ST(0) = dbd_st_cancel(sth,imp_sth) ? &PL_sv_yes : &PL_sv_no;
 
 
 void
@@ -442,7 +443,7 @@ finish(sth)
         DBIc_ACTIVE_off(imp_sth);
         XSRETURN_YES;
     }
-    ST(0) = dbd_st_finish(sth, imp_sth) ? &sv_yes : &sv_no;
+    ST(0) = dbd_st_finish(sth, imp_sth) ? &PL_sv_yes : &PL_sv_no;
 
 
 void
@@ -460,7 +461,7 @@ blob_read(sth, field, offset, len, destrv=Nullsv, destoffset=0)
         destrv = sv_2mortal(newRV(sv_2mortal(newSV(0))));
     if (dbd_st_blob_read(sth, imp_sth, field, offset, len, destrv, destoffset))
          ST(0) = SvRV(destrv);
-    else ST(0) = &sv_undef;
+    else ST(0) = &PL_sv_undef;
     }
 
 
@@ -473,10 +474,10 @@ STORE(sth, keysv, valuesv)
     D_imp_sth(sth);
     if (SvGMAGICAL(valuesv))
         mg_get(valuesv);
-    ST(0) = &sv_yes;
+    ST(0) = &PL_sv_yes;
     if (!dbd_st_STORE_attrib(sth, imp_sth, keysv, valuesv))
         if (!DBIS->set_attr(sth, keysv, valuesv))
-            ST(0) = &sv_no;
+            ST(0) = &PL_sv_no;
 
 
 void
@@ -496,10 +497,10 @@ DESTROY(sth)
     SV *        sth
     PPCODE:
     D_imp_sth(sth);
-    ST(0) = &sv_yes;
+    ST(0) = &PL_sv_yes;
     if (!DBIc_IMPSET(imp_sth)) {        /* was never fully set up       */
         STRLEN lna;
-        if (DBIc_WARN(imp_sth) && !dirty && DBIS->debug >= 2)
+        if (DBIc_WARN(imp_sth) && !PL_dirty && DBIS->debug >= 2)
              PerlIO_printf(DBILOGFP,
                 "Statement handle %s DESTROY ignored - never set up\n",
                     SvPV(sth,lna));
@@ -530,7 +531,7 @@ _table_info( sth, attribs=Nullsv  )
       D_imp_sth(sth);                                            
       DBD_ATTRIBS_CHECK( "_table_info", sth, attribs );          
       ST(0) = dbd_st_table_info( sth, imp_sth, attribs )         
-                ? &sv_yes : &sv_no;                             
+                ? &PL_sv_yes : &PL_sv_no;                             
     }
 
 
@@ -548,7 +549,7 @@ _primary_key_info( sth, catalog=NULL, schema=NULL, table=NULL )
                                        catalog,
                                        schema,
                                        table )                   
-                 ? &sv_yes : &sv_no;
+                 ? &PL_sv_yes : &PL_sv_no;
    }
 
 
@@ -567,7 +568,7 @@ _foreign_key_info( sth, pkCat=NULL, pkSchema=NULL, pkTable=NULL, fkCat=NULL, fkS
       ST(0) = dbd_st_foreign_key_info( sth, imp_sth,
                                        pkCat, pkSchema, pkTable,
                                        fkCat, fkSchema, fkTable) 
-                 ? &sv_yes : &sv_no;
+                 ? &PL_sv_yes : &PL_sv_no;
    }
 
 
@@ -582,7 +583,7 @@ _column_info( sth, cat=NULL, schema=NULL, table=NULL, column=NULL )
    {
       D_imp_sth(sth);
       ST(0) = dbd_st_column_info( sth, imp_sth, cat, schema, table, column )
-                 ? &sv_yes : &sv_no;                             
+                 ? &PL_sv_yes : &PL_sv_no;                             
    }
 
 void
@@ -592,7 +593,7 @@ _type_info_all( sth )
    {
       D_imp_sth(sth);
       ST(0) = dbd_st_type_info_all( sth, imp_sth )
-                 ? &sv_yes : &sv_no;                             
+                 ? &PL_sv_yes : &PL_sv_no;                             
    }
 
 

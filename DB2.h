@@ -17,6 +17,8 @@
 
 #include <DBIXS.h>              /* installed by the DBI module  */
 
+#include "ppport.h"		/*Header file generated using Devel-PPPort module*/
+
 /* read in our implementation details */
 
 #include "dbdimp.h"

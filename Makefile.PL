@@ -8,7 +8,7 @@
 use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose );
 use Getopt::Std;
 use Config;
-require 'flush.pl';
+#require 'flush.pl';
 
 use DBI;        # The DBI must be installed before we can build a DBD
 

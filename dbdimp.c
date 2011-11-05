@@ -611,8 +611,8 @@ exit:
 			/* ping should not throw an error when it detects a dead  */
 			/* connection so reset error code and message but keep    */
 			/* connection state                                       */
-			sv_setsv( DBIc_ERRSTR(imp_dbh), &sv_undef );
-			sv_setsv( DBIc_ERR(imp_dbh), &sv_undef );
+			sv_setsv( DBIc_ERRSTR(imp_dbh), &PL_sv_undef );
+			sv_setsv( DBIc_ERR(imp_dbh), &PL_sv_undef );
 			return FALSE; /* Connection is dead */
 	  	}
     	}
@@ -990,9 +990,9 @@ SV *dbd_db_FETCH_attrib( SV *dbh,
 		  	case SQL_ATTR_LONGDATA_COMPAT:
 #endif
 				if( *(SQLINTEGER*)ValuePtr )
-			      		retsv = &sv_yes;
+			      		retsv = &PL_sv_yes;
 				else
-			      		retsv = &sv_no;
+			      		retsv = &PL_sv_no;
 				break;
       				/* Strings */
 #ifndef AS400
@@ -2207,7 +2207,7 @@ int dbd_bind_ph( SV *sth,
 	  	PerlIO_printf( DBILOGFP,
 	   			"bind %s <== '%s' (attribs: %s)\n",
 	   			name,
-	   			SvPV(value,na), attribs ? SvPV(attribs,na) : "<no attribs>" );
+	   			SvPV(value,PL_na), attribs ? SvPV(attribs,PL_na) : "<no attribs>" );
 	
     	svp = hv_fetch(imp_sth->bind_names, (char *)name, name_len, 0);
     	if (svp == NULL)
@@ -2551,10 +2551,10 @@ int dbd_st_execute( SV *sth,     /* error : <=(-2), ok row count : >=0, unknown 
 				  		SQL_PARAM_INPUT != phs->paramType ) /* is it out or in/out? */
 		      		{
 			    		if( SQL_NULL_DATA == phs->indp )
-				  		sv_setsv( phs->sv, &sv_undef ); /* undefine variable */
+				  		sv_setsv( phs->sv, &PL_sv_undef ); /* undefine variable */
 #ifndef AS400
 			    		else if( SQL_NO_TOTAL == phs->indp ) {
-				  		sv_setsv( phs->sv, &sv_undef ); /* undefine variable */
+				  		sv_setsv( phs->sv, &PL_sv_undef ); /* undefine variable */
 				  		warn( "Number of bytes available to return "
 					    			"cannot be determined for parameter '%s'", key );
 			    		}
@@ -2921,7 +2921,7 @@ AV *dbd_st_fetch( SV *sth,
 		
 	  	if( DBIS->debug >= 2 )
 			PerlIO_printf( DBILOGFP,
-		 			"\t%d: rc=%d '%s'\n", i, ret, SvPV(sv,na) );
+		 			"\t%d: rc=%d '%s'\n", i, ret, SvPV(sv,PL_na) );
     	}
     	return av;
 }
@@ -3060,7 +3060,7 @@ void dbd_st_destroy( SV *sth,
 		
 	  	hv_iterinit(hv);
 	  	while( (sv = hv_iternextsv(hv, &key, &retlen)) != NULL ) {
-			if (sv != &sv_undef) {
+			if (sv != &PL_sv_undef) {
 		      		phs = (phs_t*)SvPVX(sv);
 		      		SvREFCNT_dec( phs->sv );
 		      		if( phs->buffer != NULL && phs->bufferSize > 0 )
@@ -3257,20 +3257,20 @@ SV *dbd_st_FETCH_attrib( SV *sth,
 	    	/* We can't return Nullsv here because the xs code will */
 	    	/* then just pass the attribute name to DBI for FETCH.  */
 	    	croak("Describe failed during %s->FETCH(%s)",
-		     		SvPV(sth,na), key);
+		     		SvPV(sth,PL_na), key);
       	}
 	
       	i = DBIc_NUM_FIELDS(imp_sth);
 	
       	if( kl == 7 && strEQ( key, "lengths" ) ) {
 	    	av = newAV();
-	    	retsv = sv_2mortal( newRV( (SV*)av ) );
+	    	retsv = sv_2mortal( newRV_inc( (SV*)av ) );
 	    	while(--i >= 0)
 			av_store(av, i, newSViv((IV)imp_sth->fbh[i].dsize));
       	}
       	else if( kl == 5 && strEQ( key, "types" ) ) {
 	    	av = newAV();
-	    	retsv = sv_2mortal( newRV( (SV*)av ) );
+	    	retsv = sv_2mortal( newRV_inc( (SV*)av ) );
 	    	while(--i >= 0)
 			av_store(av, i, newSViv(imp_sth->fbh[i].dbtype));
       	}
@@ -3280,16 +3280,16 @@ SV *dbd_st_FETCH_attrib( SV *sth,
       	}
       	else if( kl == 4 && strEQ( key, "NAME" ) ) {
 	    	av = newAV();
-	    	retsv = sv_2mortal( newRV( sv_2mortal((SV*)av) ) );
+	    	retsv = sv_2mortal( newRV_inc( sv_2mortal((SV*)av) ) );
 	    	while(--i >= 0)
 			av_store(av, i, newSVpv((char *)imp_sth->fbh[i].cbuf,0));
       	}
       	else if( kl == 8 && strEQ( key, "NULLABLE" ) ) {
 	    	av = newAV();
-	    	retsv = sv_2mortal( newRV( sv_2mortal((SV*)av) ) );
+	    	retsv = sv_2mortal( newRV_inc( sv_2mortal((SV*)av) ) );
 	    	while(--i >= 0)
 			av_store(av, i,
-		       			(imp_sth->fbh[i].nullok == 1) ? &sv_yes : &sv_no);
+		       			(imp_sth->fbh[i].nullok == 1) ? &PL_sv_yes : &PL_sv_no);
       	}
       	else if( kl == 10 && strEQ( key, "CursorName" ) ) {
 	    	char cursor_name[256];
@@ -3304,45 +3304,45 @@ SV *dbd_st_FETCH_attrib( SV *sth,
       	}
       	else if( kl == 4 && strEQ( key, "TYPE" ) ) {
 	    	av = newAV();
-	    	retsv = sv_2mortal( newRV( sv_2mortal( (SV*)av ) ) );
+	    	retsv = sv_2mortal( newRV_inc( sv_2mortal( (SV*)av ) ) );
 	    	while(--i >= 0)
 			av_store(av, i, newSViv(imp_sth->fbh[i].dbtype));
       	}
       	else if( kl == 9 && strEQ( key, "PRECISION" ) ) {
 	    	av = newAV();
-	    	retsv = sv_2mortal( newRV( sv_2mortal( (SV*)av ) ) );
+	    	retsv = sv_2mortal( newRV_inc( sv_2mortal( (SV*)av ) ) );
 	    	while(--i >= 0)
 			av_store(av, i, newSViv(imp_sth->fbh[i].prec));
       	}
       	else if( kl == 5 && strEQ( key, "SCALE" ) ) {
 	    	av = newAV();
-	    	retsv = sv_2mortal( newRV( sv_2mortal( (SV*)av ) ) );
+	    	retsv = sv_2mortal( newRV_inc( sv_2mortal( (SV*)av ) ) );
 	    	while(--i >= 0)
 			av_store(av, i, newSViv(imp_sth->fbh[i].scale));
       	}
       	else if( 16 == kl && strEQ( key, "db2_more_results" ) ) {
 	    	if( !DBIc_ACTIVE(imp_sth) ) {
 		  	/* Statement has been finished, no more results available */
-		  	retsv = &sv_no;
+		  	retsv = &PL_sv_no;
 	    	}
 	    	else if( imp_sth->bMoreResults ) {
 		  	/* Already know that there are more result sets */
-		  	retsv = &sv_yes;
+		  	retsv = &PL_sv_yes;
 	    	}
 	    	else {
 		  	ret = SQLMoreResults( imp_sth->phstmt );
 			CHECK_ERROR(sth, SQL_HANDLE_STMT, imp_sth->phstmt, ret, "Error Getting More Results");
 		  	if( SQL_SUCCESS == ret ) {
-				retsv = &sv_yes;
+				retsv = &PL_sv_yes;
 		  	}
 		  	else {
 				/* No more results, finish statement */
 				dbd_st_finish(sth, imp_sth);
-				retsv = &sv_no;
+				retsv = &PL_sv_no;
 		  	}
 	    	}
 		
-	    	if( &sv_yes == retsv ) {
+	    	if( &PL_sv_yes == retsv ) {
 		  	/* describe and allocate storage for results        */
 		  	imp_sth->done_desc = FALSE;
 			
@@ -3416,9 +3416,9 @@ SV *dbd_st_FETCH_attrib( SV *sth,
 				case SQL_ATTR_RETRIEVE_DATA:
 #endif
 			      		if( *(SQLINTEGER*)ValuePtr )
-				    		retsv = &sv_yes;
+				    		retsv = &PL_sv_yes;
 			      		else
-				    		retsv = &sv_no;
+				    		retsv = &PL_sv_no;
 			      		break;
 					
 				/* Integers */

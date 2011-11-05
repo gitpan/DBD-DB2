@@ -44,7 +44,14 @@ perl/5.8.0/i386-linux-thread-multi/auto/DBI"
 
 The headers files are located under /home/inst1/sqllib/include.
 
-
+Known Test Case issues:
+-----------------------
+1) perld020_stmtWithHostVars: Due to error code changes from version V95 to V97 of DB2 you will see this test case failing against V97. 
+	This can be safely ignored as it does not impact any functionality.
+2) perld071_connIncorrectPortRemote: This test case checks that a proper connection failure message is thrown when passed wrong port information.
+	Given that the protocol specific codes is different on different platforms you might see this case failing on some platforms due to mismatch
+	in the protocol code.
+	
 Special Notes re: Linux
 -----------------------
 Some versions of gcc have problems with optimization.  This

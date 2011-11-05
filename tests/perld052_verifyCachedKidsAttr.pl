@@ -28,7 +28,13 @@ $sth1 = $dbh->prepare_cached($stmt1);
 check_error("PREPARE_CACHED 1");
 $numCachedKids = scalar(keys(%{$dbh->{CachedKids}}));
 check_value("PREPARE_CACHED 1", "numCachedKids", 1);
-check_value("PREPARE_CACHED 1", "dbh->{CachedKids}->{\"$stmt1\"}", $sth1);
+
+$stmt1a = "INSERT INTO staff (id, name, dept) VALUES (?, ?, ?)";
+$sth1a = $dbh->prepare_cached($stmt1a);
+check_error("PREPARE_CACHED 1a");
+$numCachedKids = scalar(keys(%{$dbh->{CachedKids}}));
+check_value("PREPARE_CACHED 1", "numCachedKids", 1);
+check_value("PREPARE_CACHED 1", "sth1", $sth1a);
 
 $sth1->bind_param(1, 999,       $attrib_int);
 print %$attrib_int;
@@ -48,8 +54,13 @@ $sth2 = $dbh->prepare_cached($stmt2);
 check_error("PREPARE_CACHED 2");
 $numCachedKids = scalar(keys(%{$dbh->{CachedKids}}));
 check_value("PREPARE_CACHED 2", "numCachedKids", 2);
-check_value("PREPARE_CACHED 2", "dbh->{CachedKids}->{\"$stmt1\"}", $sth1);
-check_value("PREPARE_CACHED 2", "dbh->{CachedKids}->{\"$stmt2\"}", $sth2);
+
+$stmt2a = "SELECT id, name, dept FROM staff WHERE id = ?";
+$sth2a = $dbh->prepare_cached($stmt2a);
+check_error("PREPARE_CACHED 2a");
+$numCachedKids = scalar(keys(%{$dbh->{CachedKids}}));
+check_value("PREPARE_CACHED 2a", "numCachedKids", 2);
+check_value("PREPARE_CACHED 2", "sth2", $sth2a);
 
 $sth2->bind_param(1, 999, $attrib_int);
 check_error("BIND_PARAM 21");
@@ -63,8 +74,6 @@ $sth3 = $dbh->prepare($stmt3);
 check_error("PREPARE 3");
 $numCachedKids = scalar(keys(%{$dbh->{CachedKids}}));
 check_value("PREPARE 3", "numCachedKids", 2);
-check_value("PREPARE 3", "dbh->{CachedKids}->{\"$stmt1\"}", $sth1);
-check_value("PREPARE 3", "dbh->{CachedKids}->{\"$stmt2\"}", $sth2);
 
 $sth3->bind_param(1, 999, $attrib_int);
 check_error("BIND_PARAM 31");
@@ -79,8 +88,6 @@ $sth4 = $dbh->prepare_cached($stmt4);
 check_error("PREPARE_CACHED 4");
 $numCachedKids = scalar(keys(%{$dbh->{CachedKids}}));
 check_value("PREPARE_CACHED 4", "numCachedKids", 2);
-check_value("PREPARE_CACHED 4", "dbh->{CachedKids}->{\"$stmt1\"}", $sth1);
-check_value("PREPARE_CACHED 4", "dbh->{CachedKids}->{\"$stmt2\"}", $sth2);
 check_value("PREPARE_CACHED 4", "sth4", $sth2);
 
 #
@@ -92,6 +99,13 @@ $sth4->bind_param(1, 999, $attrib_int);
 check_error("BIND_PARAM 41");
 $sth4->execute();
 check_error("EXECUTE 4");
+
+$stmt1b = "INSERT INTO staff (id, name, dept) VALUES (?, ?, ?)";
+$sth1b = $dbh->prepare_cached($stmt1);
+check_error("PREPARE_CACHED 1b");
+$numCachedKids = scalar(keys(%{$dbh->{CachedKids}}));
+check_value("PREPARE_CACHED 1b", "numCachedKids", 2);
+check_value("PREPARE_CACHED 1b", "sth1", $sth1b);
 
 $sth2->finish();
 check_error("FINISH 2");
