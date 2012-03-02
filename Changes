@@ -4,6 +4,9 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.83, Mar 02, 2012
+  Fixed Data truncated error returned while fetching XML documents.
+  
 =head2 Changes in DBD::DB2 1.82, Nov 05, 2011
   Compatibility with Perl version 5.14 - Cpan - 68933
   

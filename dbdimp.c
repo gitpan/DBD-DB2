@@ -2638,6 +2638,12 @@ static SQLRETURN get_lob_length( imp_fbh_t *fbh, SQLINTEGER col_num, SQLHANDLE h
                        NULL,
                        0,
                        &fbh->rlen );
+
+      /*SQL_SUCCESS_WITH_INFO is expected as we are not providing buffer size here. Hence set rc to SQL_SUCCESS so that there is no error flag set when checked for error*/
+      if(rc == SQL_SUCCESS_WITH_INFO || rc == SQL_SUCCESS) {
+         rc = SQL_SUCCESS;
+      }
+
       return rc;
   }
 
