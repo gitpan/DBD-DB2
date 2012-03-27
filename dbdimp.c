@@ -224,49 +224,41 @@ AV* dbd_data_sources( SV *drh ) {
   	struct sqlca sqlca;
   	struct sqledinfo *dbBuffer;
   	const int prefixLen = 8;  /* length of 'dbi:DB2:' */
-  	char buffer[ 8 + sizeof( dbBuffer->alias ) + 1 ] = "dbi:DB2:";
+  	char buffer[ 8 + SQL_MAX_DSN_LENGTH + 1 ] = "dbi:DB2:";
+	char description[255];
   	char *const pAlias = buffer + prefixLen;
-  	int cbLen;
+  	SQLSMALLINT cbLen, desl;
+    	SQLHANDLE henv;
   	SQLRETURN ret;
-  
-	sqledosd( NULL, &dbHandle, &dbCount, &sqlca );
-  
-  	/* Convert following two return codes to SQL_NO_DATA so the state */
-  	/* gets set correctly in do_error */
-  	if( SQLE_RC_NODBDIR == sqlca.sqlcode ||
-  			SQLE_RC_NODENTRY == sqlca.sqlcode ) {
-  		sqlca.sqlcode = SQL_NO_DATA;
-		ret = sqlca.sqlcode;
-	} else {
-		ret = sqlca.sqlcode;
-	}
-		
-	CHECK_ERROR(drh, 0, SQL_NULL_HANDLE, ret, "sqledosd Failed");
-  	if( SQL_SUCCESS != ret )
-  		goto exit;
-  
-  	for( ; dbCount > 0; dbCount-- ) {
-  		sqledgne( dbHandle, &dbBuffer, &sqlca );
-		ret = sqlca.sqlcode;
-		CHECK_ERROR(drh, 0, SQL_NULL_HANDLE, ret, "sqledgne Failed");
-  		if( SQL_SUCCESS != ret )
-  			goto exit;
-  
-		/* alias is blank padded, determine actual length of alias */
-  		for( cbLen = sizeof( dbBuffer->alias );
-  				cbLen > 0 && dbBuffer->alias[cbLen-1] == ' ';
-  				cbLen-- );
-  
-  		strncpy( pAlias,
-  				dbBuffer->alias,
-  				cbLen );
-  		av_push( ds, newSVpv( buffer, prefixLen + cbLen ) );
-  	}
-	
-exit:
-  	if( 0 != dbHandle )
-  		sqledcls( dbHandle, &sqlca );
-  
+
+    ret = SQLAllocHandle( SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv ) ;
+	if(ret != SQL_SUCCESS) {
+      ret = -5; /*Set to a undefined value*/
+      CHECK_ERROR(drh, 0, SQL_NULL_HANDLE, ret, "SQLAllocHandle failed while trying to retrieve list of datasources");
+    }
+
+    memset( pAlias, '\0', SQL_MAX_DSN_LENGTH + 1 );
+
+    while ( 1 ) {
+      ret = SQLDataSources( henv,
+                                   SQL_FETCH_NEXT,
+                                   pAlias,
+                                   SQL_MAX_DSN_LENGTH + 1,
+                                   &cbLen,
+                                   description,
+                                   255,
+                                   &desl
+                                 );
+      if( ret == SQL_NO_DATA_FOUND) {
+        break;
+      }
+
+      if(ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+        CHECK_ERROR(drh, 0, SQL_NULL_HANDLE, ret, "Datasources Fetch failed");
+        break;
+      }
+      av_push( ds, newSVpv( buffer, prefixLen + cbLen ) );
+    }
   	return ds;
 }
 #endif

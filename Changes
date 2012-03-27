@@ -4,6 +4,9 @@ DBD::DB2 - List of changes
 
 =cut
 
+=head2 Changes in DBD::DB2 1.84, Mar 21, 2012
+  Implemented usage of SQLDataSources ODBC API in dbd_data_sources to remove dependency of instance based DB2 client.
+  
 =head2 Changes in DBD::DB2 1.83, Mar 02, 2012
   Fixed Data truncated error returned while fetching XML documents.
   
