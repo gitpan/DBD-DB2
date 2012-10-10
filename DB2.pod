@@ -465,9 +465,7 @@ returns false and sets the state to 02000.
 
 Both $dbh->tables and $dbh->table_info are supported.  The table
 names returned by $dbh->tables are qualified, i.e. they are in the
-form <schema>.<table>. If no
-attributes are specified, information for all tables, views,
-aliases etc. is returned. With DBI 1.14 or later, the following
+form <schema>.<table>. With DBI 1.14 or later, the following
 attributes can be used to narrow down the list:
 
   TABLE_SCHEM  Schema name pattern, default is all schemas
@@ -493,20 +491,23 @@ For example, to get a list of all tables and views for the schema
 'CHOMSKY':
 
   @tables = $dbh->tables( { 'TABLE_SCHEM' => 'CHOMSKY',
-                            'TABLE_TYPE'  => 'TABLE,VIEW' } );
+                            'TABLE_TYPE'  => 'TABLE,VIEW',
+                            'TABLE_NAME'  => '%'} );
+			or
+  @tables = $dbh->tables(undef, 'CHOMSKY', '%', 'TABLE,VIEW');
 
 =head2 Getting a List of Schemas
 
 To obtain a list of all schemas, the following special
 semantics can be used:
 
-  @schemas = $dbh->tables( { 'TABLE_SCHEM' => '%',
-                             'TABLE_TYPE'  => '' } );
+  @schemas = $dbh->tables( {'TABLE_SCHEM' => '%',
+                           'TABLE_TYPE' => '',
+                           'TABLE_NAME' => ''} );
 
 or
 
-  $sth = $dbh->table_info( { 'TABLE_SCHEM' => '%',
-                             'TABLE_TYPE'  => '' } );
+  $sth = $dbh->table_info( undef, '%', '', '');
 
 The result contains all the valid schemas in the data source.
 DBI 1.14 or later is required.

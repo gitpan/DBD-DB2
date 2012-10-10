@@ -23,7 +23,7 @@
                      $attrib_clobfile
                      $attrib_dbclobfile );
 
-    $VERSION = '1.84';
+    $VERSION = '1.85';
     require_version DBI 1.41;
 
     bootstrap DBD::DB2;
@@ -210,7 +210,17 @@
     }
 
     sub table_info {
-        my( $dbh, $attr ) = @_;
+        my( $dbh, $ctlg, $schema, $table, $type ) = @_;
+        my $attr = {};
+
+        if(ref($ctlg) eq "HASH") {
+          $attr = $ctlg;
+        } else {
+          $attr = {'TABLE_SCHEM' => $schema,
+                   'TABLE_TYPE' => $type,
+                   'TABLE_NAME' => $table};
+        }
+
         my $sth = DBI::_new_sth($dbh, {});
         DBD::DB2::st::_table_info( $sth, $attr )
            or return undef;

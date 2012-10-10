@@ -1444,7 +1444,7 @@ static void dbd_preparse( imp_sth_t *imp_sth,
 			break;
 		}                                                         
 		if (*src == '\'') {
-			in_literal = ~in_literal;
+			in_literal = !in_literal;
 		}
 		if ((*src != ':' && *src != '?') || in_literal) {
 			*dest++ = *src++;
@@ -1487,8 +1487,8 @@ int dbd_st_table_info( SV *sth,
 
       	D_imp_dbh_from_sth;
       	SQLRETURN ret;
-      	const SQLCHAR *pszSchema = "%";
-      	const SQLCHAR *pszTable = "%";
+      	const SQLCHAR *pszSchema = "";
+      	const SQLCHAR *pszTable = "";
 	SQLCHAR *pszTableType = NULL;
       	SQLINTEGER cbSchemaLength = 1;
       	SQLINTEGER cbTableLength = 1;
